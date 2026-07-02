@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
-  ArrowRight,
+  Activity,
   BadgeCheck,
+  BellRing,
   ChevronRight,
+  CheckCircle2,
   CircleDot,
   Clock3,
   Eye,
@@ -15,12 +17,16 @@ import {
   Monitor,
   Redo2,
   RotateCcw,
+  ShieldCheck,
   Smartphone,
   Sparkles,
+  Upload,
   WandSparkles,
 } from "lucide-react";
 import { HeroScene } from "@/components/hero-scene";
+import { LivingTemplatePage } from "@/components/living-templates";
 import { useLocale } from "@/components/locale-provider";
+import { PricingSection } from "@/components/pricing-section";
 import {
   icons,
   localeMeta,
@@ -192,225 +198,305 @@ function Hero() {
   const { t } = useLocale();
 
   return (
-    <section className="relative min-h-[92svh] overflow-hidden bg-[#05070d] pt-24">
-      <div className="absolute inset-0 surface-line opacity-50" />
+    <section className="pf-hero-v2 relative min-h-[92svh] overflow-hidden bg-[#070B14] pt-24">
+      <div className="absolute inset-0 pf-grid-v2 opacity-70" aria-hidden="true" />
+      <div className="pf-hero-light pf-hero-light-a" aria-hidden="true" />
+      <div className="pf-hero-light pf-hero-light-b" aria-hidden="true" />
       <HeroScene />
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,7,13,.94),rgba(5,7,13,.66)_42%,rgba(5,7,13,.34)_100%)]" />
-      <div className="pf-container relative z-10 grid min-h-[calc(92svh-96px)] items-center gap-10 py-16 lg:grid-cols-[.92fr_1.08fr]">
-        <div className="soft-reveal max-w-4xl">
-          <p className="text-xs font-black uppercase tracking-[0.28em] text-[#9ed0ff]">{t.hero.eyebrow}</p>
-          <h1 className="mt-5 text-5xl font-black tracking-tight text-white sm:text-7xl lg:text-8xl">
-            {t.hero.title}
-          </h1>
-          <p className="mt-5 max-w-3xl text-2xl font-black leading-tight text-[#dfeaff] sm:text-4xl">
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,11,20,.98),rgba(7,11,20,.82)_45%,rgba(7,11,20,.56)_100%)]" />
+      <div className="pf-container relative z-10 grid min-h-[calc(92svh-96px)] items-center gap-10 py-16 lg:grid-cols-[.88fr_1.12fr]">
+        <div className="soft-reveal max-w-3xl">
+          <p className="text-xs font-black uppercase tracking-[0.28em] text-[#2DD4BF]">{t.hero.eyebrow}</p>
+          <h1 className="mt-5 text-5xl font-black leading-[0.95] tracking-tight text-[#F8FAFC] sm:text-7xl">
             {t.hero.emphasis}
-          </p>
-          <p className="mt-6 max-w-2xl text-base leading-8 text-white/68 sm:text-lg">{t.hero.value}</p>
+          </h1>
+          <p className="mt-6 max-w-2xl text-base leading-8 text-[#94A3B8] sm:text-lg">{t.hero.value}</p>
           <div className="mt-8">
             <PrimaryCtas />
           </div>
-          <div className="mt-8 flex flex-wrap gap-2">
-            {t.hero.trust.map((item) => (
-              <span
-                key={item}
-                className="rounded-md border border-white/12 bg-white/7 px-3 py-2 text-xs font-bold text-white/72"
-              >
+          <div className="mt-7 flex flex-wrap items-center gap-2 text-sm font-bold text-[#94A3B8]">
+            {t.hero.trust.map((item, index) => (
+              <span key={item} className="inline-flex items-center gap-2">
+                {index > 0 ? <span className="h-1 w-1 rounded-[2px] bg-[#4E8CFF]" /> : null}
                 {item}
               </span>
             ))}
           </div>
         </div>
-        <div className="relative min-h-[520px]">
-          <HeroOrbit />
+        <div className="relative min-h-[620px]">
+          <HeroProductPreview />
         </div>
-      </div>
-      <div className="pf-container relative z-10 -mt-8 pb-8">
-        <div className="h-px bg-gradient-to-r from-transparent via-[#4da3ff]/50 to-transparent" />
       </div>
     </section>
   );
 }
 
-function HeroOrbit() {
+function HeroProductPreview() {
   const { t } = useLocale();
-  const pipelineIcons = [FileText, FolderGit, BadgeCheck, Sparkles, Globe2];
+  const sourceIcons = [FileText, FolderGit, BadgeCheck];
+  const sourcePositions = ["left-0 top-20", "right-0 top-8", "left-8 bottom-16"];
 
   return (
     <div className="absolute inset-0 hidden lg:block" aria-label={t.hero.mockupTitle}>
-      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 620 520" role="img" aria-hidden="true">
-        <path className="flow-line" d="M88 260 C190 90 430 90 532 260 C430 430 190 430 88 260Z" fill="none" stroke="#4da3ff" strokeOpacity=".42" strokeWidth="1.4" />
-        <path className="flow-line" d="M120 154 C240 250 378 250 500 154" fill="none" stroke="#39e6dc" strokeOpacity=".32" strokeWidth="1.2" />
-        <path className="flow-line" d="M126 370 C250 282 376 282 494 370" fill="none" stroke="#67e8a5" strokeOpacity=".26" strokeWidth="1.2" />
+      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 680 620" role="img" aria-hidden="true">
+        <path className="flow-line" d="M86 172 C198 88 302 132 350 252 C392 356 476 430 606 358" fill="none" stroke="#7757FF" strokeOpacity=".34" strokeWidth="1.3" />
+        <path className="flow-line" d="M96 486 C214 402 280 454 342 356 C418 238 500 166 598 112" fill="none" stroke="#4E8CFF" strokeOpacity=".30" strokeWidth="1.2" />
+        <path className="flow-line" d="M112 304 C234 246 370 522 560 266" fill="none" stroke="#2DD4BF" strokeOpacity=".24" strokeWidth="1.1" />
       </svg>
-      <div className="absolute left-[37%] top-[34%] grid h-36 w-36 place-items-center rounded-lg border border-[#4da3ff]/40 bg-[#08142a]/88 shadow-[0_0_80px_rgba(77,163,255,.20)]">
-        <div className="text-center">
-          <Sparkles className="mx-auto text-[#9ed0ff]" size={28} />
-          <div className="mt-2 text-xs font-black uppercase tracking-[0.25em] text-white/78">ProofFolio</div>
+      <div className="pf-browser-preview absolute left-[8%] top-8 w-[560px] overflow-hidden rounded-lg border border-white/10 bg-[#0D1422] shadow-[0_45px_160px_rgba(0,0,0,.55)]">
+        <div className="flex items-center justify-between border-b border-white/8 bg-[#111A2B] px-4 py-3">
+          <div className="flex gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-md bg-[#FF6B5F]" />
+            <span className="h-2.5 w-2.5 rounded-md bg-[#F7C948]" />
+            <span className="h-2.5 w-2.5 rounded-md bg-[#2DD4BF]" />
+          </div>
+          <div className="text-[11px] font-black uppercase tracking-[0.22em] text-[#94A3B8]">prooffolio.ai/maya</div>
+        </div>
+        <div className="grid gap-4 p-5">
+          <div className="grid gap-4 rounded-lg border border-white/8 bg-[#070B14] p-5 md:grid-cols-[1fr_220px]">
+            <div>
+              <div className="flex items-center gap-3">
+                <div className="grid h-14 w-14 place-items-center rounded-lg bg-gradient-to-br from-[#7757FF] to-[#2DD4BF] text-lg font-black text-white">
+                  {t.portfolio.initials}
+                </div>
+                <div>
+                  <div className="text-2xl font-black text-[#F8FAFC]">{t.portfolio.name}</div>
+                  <div className="mt-1 text-sm font-bold text-[#94A3B8]">{t.portfolio.targetRole}</div>
+                </div>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {["React", "Next.js", "Python", "Data UX"].map((tech) => (
+                  <span key={tech} className="rounded-md border border-white/8 bg-white/[0.04] px-2.5 py-1.5 text-xs font-black text-[#CBD5E1]">
+                    {tech}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                {t.portfolio.projects.slice(0, 2).map((project) => (
+                  <div key={project.name} className="rounded-md border border-white/8 bg-[#111A2B] p-3">
+                    <div className="text-sm font-black text-[#F8FAFC]">{project.name}</div>
+                    <div className="mt-1 text-xs leading-5 text-[#94A3B8]">{project.impact}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-lg border border-[#2DD4BF]/18 bg-[#2DD4BF]/8 p-4">
+              <div className="text-xs font-black uppercase tracking-[0.2em] text-[#99F6E4]">{t.heroPreview.readinessTitle}</div>
+              <div className="mt-4 flex items-end gap-2">
+                <span className="text-5xl font-black text-[#F8FAFC]">82</span>
+                <span className="pb-2 text-lg font-black text-[#94A3B8]">%</span>
+              </div>
+              <div className="mt-4 h-2 rounded-md bg-white/10">
+                <div className="h-2 w-[82%] rounded-md bg-[#2DD4BF]" />
+              </div>
+              <div className="mt-5 space-y-2">
+                {t.heroPreview.readinessChecks.map((item) => (
+                  <div key={item} className="flex items-center gap-2 text-xs font-bold text-[#D1FAE5]">
+                    <CheckCircle2 size={14} />
+                    {item}
+                  </div>
+                ))}
+                <div className="flex items-center gap-2 text-xs font-bold text-[#C4B5FD]">
+                  <CircleDot size={14} />
+                  {t.heroPreview.aiSuggestions}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-[1fr_180px]">
+            <div className="rounded-lg border border-white/8 bg-[#111A2B] p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-xs font-black uppercase tracking-[0.2em] text-[#94A3B8]">{t.heroPreview.githubActivity}</span>
+                <Activity size={16} className="text-[#4E8CFF]" />
+              </div>
+              <div className="grid gap-1" style={{ gridTemplateColumns: "repeat(14, minmax(0, 1fr))" }}>
+                {Array.from({ length: 56 }, (_, index) => (
+                  <span
+                    key={index}
+                    className={cn(
+                      "h-3 rounded-[3px]",
+                      index % 9 === 0 ? "bg-[#2DD4BF]" : index % 5 === 0 ? "bg-[#4E8CFF]" : index % 3 === 0 ? "bg-[#7757FF]/70" : "bg-white/8",
+                    )}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="rounded-lg border border-white/8 bg-[#111A2B] p-4">
+              <div className="text-xs font-black uppercase tracking-[0.2em] text-[#94A3B8]">{t.heroPreview.certificates}</div>
+              <div className="mt-4 space-y-2">
+                {t.portfolio.certificates.slice(0, 3).map((certificate) => (
+                  <div key={certificate} className="rounded-md bg-white/[0.04] px-3 py-2 text-xs font-bold text-[#CBD5E1]">
+                    {certificate}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      {t.hero.pipeline.map((label, index) => {
-        const Icon = pipelineIcons[index];
-        const positions = [
-          "left-4 top-44",
-          "left-28 top-9",
-          "right-28 top-9",
-          "right-4 top-44",
-          "left-[31%] bottom-10",
-        ];
-
+      {t.hero.cards.map((card, index) => {
+        const Icon = sourceIcons[index] ?? FileText;
         return (
           <div
-            key={label}
+            key={card.label}
             className={cn(
-              "tilt-card absolute w-44 rounded-lg border border-white/12 bg-[#071021]/86 p-4 shadow-2xl backdrop-blur",
+              "pf-source-card absolute w-44 rounded-lg border border-white/10 bg-[#111A2B]/88 p-4 shadow-[0_22px_80px_rgba(0,0,0,.34)] backdrop-blur",
               index % 2 === 0 ? "float-a" : "float-b",
-              positions[index],
+              sourcePositions[index],
             )}
           >
-            <Icon size={20} className="text-[#9ed0ff]" />
-            <div className="mt-4 text-sm font-black text-white">{label}</div>
+            <Icon size={20} className="text-[#2DD4BF]" />
+            <div className="mt-4 text-sm font-black text-[#F8FAFC]">{card.label}</div>
+            <div className="mt-1 text-xs leading-5 text-[#94A3B8]">{card.value}</div>
           </div>
         );
       })}
-      <div className="absolute bottom-4 right-10 w-64 rounded-lg border border-white/12 bg-white/[0.08] p-4 shadow-2xl backdrop-blur">
-        <div className="text-sm font-black">{t.hero.mockupTitle}</div>
-        <div className="mt-1 text-xs text-white/55">{t.hero.mockupSubtitle}</div>
-        <div className="mt-4 space-y-3">
-          {t.hero.cards.map((card) => {
-            const Icon = icons[card.icon as keyof typeof icons];
+      <div className="absolute bottom-7 right-8 w-64 rounded-lg border border-[#7757FF]/22 bg-[#7757FF]/12 p-4 shadow-[0_30px_110px_rgba(0,0,0,.32)] backdrop-blur">
+        <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-[#DDD6FE]">
+          <BellRing size={15} />
+          {t.heroPreview.validationQueue}
+        </div>
+        <div className="mt-4 space-y-2">
+          {t.intelligence.approvals.map((item, index) => (
+            <div key={item} className="flex items-center gap-2 text-xs font-bold text-[#EDE9FE]">
+              <span className="grid h-5 w-5 place-items-center rounded-md bg-[#7757FF] text-[10px] text-white">{index + 1}</span>
+              {item}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ImportEvidenceSection() {
+  const { t } = useLocale();
+
+  return (
+    <section id="product" className="evidence-import-section bg-[#070B14] py-24">
+      <div className="pf-container">
+        <SectionIntro {...t.importEvidence} />
+        <div className="mt-14 grid gap-4 lg:grid-cols-5">
+          {t.importEvidence.sources.map((source, index) => {
+            const Icon = icons[source.icon as keyof typeof icons];
             return (
-              <div key={card.label} className="flex items-center gap-3 rounded-lg border border-white/10 bg-black/20 p-3">
-                <Icon size={18} className="text-[#39e6dc]" />
-                <div>
-                  <div className="text-xs font-bold text-white/55">{card.label}</div>
-                  <div className="text-sm font-black text-white">{card.value}</div>
+              <button
+                key={source.name}
+                type="button"
+                className="pf-focus evidence-source-card group rounded-lg border border-white/10 bg-[#0D1422] p-5 text-left transition hover:-translate-y-1 hover:border-[#4E8CFF]/40"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="grid h-11 w-11 place-items-center rounded-md border border-white/10 bg-[#111A2B] text-[#2DD4BF]">
+                    {Icon ? <Icon size={20} /> : <FileText size={20} />}
+                  </span>
+                  <span className="font-mono text-xs font-black text-[#475569]">0{index + 1}</span>
                 </div>
-              </div>
+                <h3 className="mt-6 text-lg font-black text-[#F8FAFC]">{source.name}</h3>
+                <p className="mt-3 text-sm leading-6 text-[#94A3B8]">{source.detail}</p>
+                <div className="mt-5 h-1 rounded-md bg-white/8">
+                  <div className="h-1 rounded-md bg-gradient-to-r from-[#7757FF] via-[#4E8CFF] to-[#2DD4BF] transition-all group-hover:w-full" style={{ width: `${32 + index * 12}%` }} />
+                </div>
+              </button>
             );
           })}
         </div>
-      </div>
-    </div>
-  );
-}
-
-function TransformationSection() {
-  const { t } = useLocale();
-
-  return (
-    <section id="product" className="bg-[#071021] py-24">
-      <div className="pf-container">
-        <SectionIntro {...t.transformation} />
-        <div className="mt-14 grid gap-5 lg:grid-cols-[1fr_auto_1fr]">
-          <EvidenceColumn title={t.transformation.beforeTitle} items={t.transformation.before} tone="muted" />
-          <div className="hidden items-center justify-center lg:flex">
-            <div className="grid h-16 w-16 place-items-center rounded-lg border border-[#4da3ff]/35 bg-[#4da3ff]/12">
-              <ArrowRight className="text-[#9ed0ff]" />
-            </div>
-          </div>
-          <EvidenceColumn title={t.transformation.afterTitle} items={t.transformation.after} tone="active" />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function EvidenceColumn({
-  title,
-  items,
-  tone,
-}: {
-  title: string;
-  items: readonly string[];
-  tone: "muted" | "active";
-}) {
-  return (
-    <div className="rounded-lg border border-white/12 bg-white/[0.045] p-5">
-      <h3 className="text-xl font-black">{title}</h3>
-      <div className="mt-5 space-y-3">
-        {items.map((item, index) => (
-          <div
-            key={item}
-            className={cn(
-              "flex items-start gap-3 rounded-lg border p-4",
-              tone === "active"
-                ? "border-[#39e6dc]/24 bg-[#39e6dc]/8 text-white"
-                : "border-white/10 bg-black/18 text-white/68",
-            )}
-          >
-            <span
-              className={cn(
-                "grid h-7 w-7 shrink-0 place-items-center rounded-md text-xs font-black",
-                tone === "active" ? "bg-[#39e6dc] text-[#04101f]" : "bg-white/9 text-white/56",
-              )}
-            >
-              {index + 1}
-            </span>
-            <span className="text-sm font-semibold leading-6">{item}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function IntelligenceSection() {
-  const { t } = useLocale();
-
-  return (
-    <section className="bg-[#f7fbff] py-24 text-[#101827]">
-      <div className="pf-container">
-        <SectionIntro {...t.intelligence} dark={false} />
-        <div className="mt-14 grid gap-6 lg:grid-cols-[.9fr_1.1fr_.9fr]">
-          <DataStack title={t.intelligence.inputTitle} items={t.intelligence.inputs} />
-          <div className="rounded-lg border border-[#d9e5f8] bg-white p-6 shadow-[0_24px_80px_rgba(17,31,52,.08)]">
-            <div className="grid min-h-80 place-items-center">
-              <div className="relative h-72 w-72">
-                {t.intelligence.labels.map((label, index) => (
-                  <div
-                    key={label}
-                    className="absolute rounded-lg border border-[#d9e5f8] bg-[#f7fbff] px-3 py-2 text-xs font-black text-[#315dff]"
-                    style={{
-                      top: `${index % 2 === 0 ? 4 + index * 52 : 42 + index * 42}px`,
-                      left: `${index % 2 === 0 ? 0 : 158}px`,
-                    }}
-                  >
-                    {label}
+        <div className="mt-10 rounded-lg border border-white/10 bg-[#0D1422] p-5 shadow-[0_30px_120px_rgba(0,0,0,.26)]">
+          <div className="grid gap-4 lg:grid-cols-[.85fr_1.15fr]">
+            <div className="rounded-lg border border-white/8 bg-[#070B14] p-5">
+              <div className="text-xs font-black uppercase tracking-[0.22em] text-[#94A3B8]">{t.evidenceBoard.queueTitle}</div>
+              <div className="mt-5 space-y-3">
+                {t.importEvidence.sources.slice(0, 4).map((source) => (
+                  <div key={source.name} className="flex items-center justify-between rounded-md border border-white/8 bg-white/[0.035] p-3">
+                    <span className="text-sm font-bold text-[#CBD5E1]">{source.name}</span>
+                    <CheckCircle2 size={16} className="text-[#2DD4BF]" />
                   </div>
                 ))}
-                <div className="absolute left-1/2 top-1/2 grid h-28 w-28 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-lg border border-[#4da3ff]/45 bg-[#071021] text-white shadow-[0_24px_70px_rgba(77,163,255,.18)]">
-                  <Sparkles size={30} className="text-[#9ed0ff]" />
-                </div>
-                <div className="absolute inset-10 rotate-12 border border-[#4da3ff]/25" />
-                <div className="absolute inset-4 -rotate-6 border border-[#39e6dc]/25" />
+              </div>
+            </div>
+            <div className="relative overflow-hidden rounded-lg border border-[#7757FF]/20 bg-[#111A2B] p-5">
+              <div className="absolute inset-0 premium-circuit opacity-35" aria-hidden="true" />
+              <div className="relative grid gap-4 md:grid-cols-3">
+                {t.evidenceBoard.columns.map((label, index) => (
+                  <div key={label} className="rounded-md border border-white/8 bg-[#070B14]/72 p-4">
+                    <div className="text-xs font-black uppercase tracking-[0.18em] text-[#4E8CFF]">{label}</div>
+                    <div className="mt-4 text-2xl font-black text-[#F8FAFC]">{[12, 7, 4][index]}</div>
+                    <p className="mt-2 text-xs leading-5 text-[#94A3B8]">
+                      {t.evidenceBoard.metrics[index] ?? ""}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
-          <DataStack title={t.intelligence.outputTitle} items={t.intelligence.outputs} active />
         </div>
       </div>
     </section>
   );
 }
 
-function DataStack({ title, items, active = false }: { title: string; items: readonly string[]; active?: boolean }) {
+function WorkflowSection() {
+  const { t } = useLocale();
+  const workflowIcons = [Upload, Sparkles, ShieldCheck, Globe2] as const;
+
   return (
-    <div className="rounded-lg border border-[#d9e5f8] bg-white p-5">
-      <div className="text-xs font-black uppercase tracking-[0.22em] text-[#64748b]">{title}</div>
-      <div className="mt-5 space-y-3">
-        {items.map((item) => (
-          <div
-            key={item}
-            className={cn(
-              "rounded-lg border px-4 py-3 text-sm font-bold",
-              active ? "border-[#39e6dc]/35 bg-[#e7fbf8] text-[#0f766e]" : "border-[#d9e5f8] bg-[#f8fafc] text-[#334155]",
-            )}
-          >
-            {item}
+    <section className="workflow-section bg-[#0D1422] py-24 text-[#F8FAFC]">
+      <div className="pf-container">
+        <SectionIntro {...t.workflow} />
+        <div className="mt-14 grid gap-4 lg:grid-cols-4">
+          {t.workflow.steps.map((step, index) => (
+            <div key={step.number} className="workflow-card rounded-lg border border-white/10 bg-[#111A2B] p-5">
+              <div className="mb-8 flex items-center justify-between">
+                <span className="font-mono text-4xl font-black text-[#7757FF]">{step.number}</span>
+                {(() => {
+                  const Icon = workflowIcons[index] ?? Globe2;
+                  return <Icon size={22} className="text-[#2DD4BF]" />;
+                })()}
+              </div>
+              <h3 className="text-xl font-black text-[#F8FAFC]">{step.title}</h3>
+              <p className="mt-3 text-sm leading-6 text-[#94A3B8]">{step.detail}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-10 grid gap-4 rounded-lg border border-white/10 bg-[#070B14] p-4 lg:grid-cols-[1fr_1.3fr_1fr]">
+          <div className="rounded-lg border border-white/8 bg-[#111A2B] p-5">
+            <div className="text-xs font-black uppercase tracking-[0.2em] text-[#94A3B8]">{t.workflow.steps[0].title}</div>
+            <div className="mt-5 space-y-3">
+              {t.importEvidence.sources.slice(0, 3).map((source) => (
+                <div key={source.name} className="rounded-md border border-white/8 bg-white/[0.035] p-3 text-sm font-bold text-[#CBD5E1]">
+                  {source.name}
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
+          <div className="relative overflow-hidden rounded-lg border border-[#4E8CFF]/18 bg-[#111A2B] p-5">
+            <div className="absolute inset-0 premium-circuit opacity-25" aria-hidden="true" />
+            <div className="relative">
+              <div className="text-xs font-black uppercase tracking-[0.2em] text-[#93C5FD]">{t.workflow.steps[1].title}</div>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                {t.intelligence.outputs.slice(0, 4).map((item) => (
+                  <div key={item} className="rounded-md border border-white/8 bg-[#070B14]/70 p-4 text-sm font-bold text-[#CBD5E1]">
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="rounded-lg border border-[#2DD4BF]/18 bg-[#2DD4BF]/8 p-5">
+            <div className="text-xs font-black uppercase tracking-[0.2em] text-[#99F6E4]">{t.workflow.steps[2].title}</div>
+            <div className="mt-5 space-y-3">
+              {t.intelligence.approvals.map((item, index) => (
+                <div key={item} className="rounded-md border border-[#2DD4BF]/18 bg-[#070B14]/58 p-3 text-xs font-bold text-[#D1FAE5]">
+                  <span className="mr-2 inline-grid h-5 w-5 place-items-center rounded-md bg-[#2DD4BF] text-[10px] font-black text-[#04101f]">
+                    {index + 1}
+                  </span>
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -419,11 +505,36 @@ function TemplateShowcase() {
   const [selected, setSelected] = useState<TemplateId>("dark-tech");
 
   return (
-    <section className="bg-[#05070d] py-24">
+    <section className="template-showcase-stage relative overflow-hidden bg-[#05070d] py-24">
+      <div className="absolute inset-0 premium-circuit opacity-25" aria-hidden="true" />
       <div className="pf-container">
         <SectionIntro {...t.templateShowcase} />
-        <div className="mt-14 grid gap-6 lg:grid-cols-[.85fr_1.15fr]">
-          <div className="space-y-3">
+        <div className="mt-10 grid gap-3 lg:grid-cols-3">
+          {t.templateShowcase.directions.map((direction) => (
+            <button
+              key={direction.name}
+              type="button"
+              onClick={() => setSelected(direction.template as TemplateId)}
+              className={cn(
+                "pf-focus rounded-lg border p-5 text-left transition",
+                selected === direction.template
+                  ? "border-[#7757FF]/55 bg-[#7757FF]/14 shadow-[0_18px_70px_rgba(119,87,255,.16)]"
+                  : "border-white/10 bg-white/[0.045] hover:border-[#4E8CFF]/35",
+              )}
+            >
+              <div className="text-xl font-black text-white">{direction.name}</div>
+              <p className="mt-3 text-sm leading-6 text-[#94A3B8]">{direction.detail}</p>
+              <div className="mt-5 h-1 rounded-md bg-white/8">
+                <div
+                  className="h-1 rounded-md bg-gradient-to-r from-[#7757FF] via-[#4E8CFF] to-[#2DD4BF]"
+                  style={{ width: selected === direction.template ? "100%" : "42%" }}
+                />
+              </div>
+            </button>
+          ))}
+        </div>
+        <div className="mt-8 grid gap-6 lg:grid-cols-[.85fr_1.15fr]">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
             {templateIds.map((id) => {
               const template = t.templates[id];
               const Icon = templateMeta[id].icon;
@@ -433,17 +544,25 @@ function TemplateShowcase() {
                   type="button"
                   onClick={() => setSelected(id)}
                   className={cn(
-                    "pf-focus w-full rounded-lg border p-4 text-left transition",
+                    "pf-focus group w-full rounded-lg border p-4 text-left transition",
                     selected === id
-                      ? "border-[#4da3ff]/55 bg-[#4da3ff]/12"
+                      ? "border-[#4da3ff]/55 bg-[#4da3ff]/12 shadow-[0_18px_60px_rgba(77,163,255,.12)]"
                       : "border-white/10 bg-white/[0.045] hover:border-white/24",
                   )}
                 >
                   <div className="flex items-start gap-3">
-                    <Icon size={20} className="mt-1 text-[#9ed0ff]" />
+                    <span className="grid h-10 w-10 place-items-center rounded-md border border-white/10 bg-white/[0.055] transition group-hover:border-[#4da3ff]/35">
+                      <Icon size={20} className="text-[#9ed0ff]" />
+                    </span>
                     <div>
                       <div className="font-black text-white">{template.name}</div>
                       <div className="mt-1 text-sm leading-6 text-white/58">{template.tag}</div>
+                      <div className="mt-3 h-1 rounded-md bg-white/8">
+                        <div
+                          className="h-1 rounded-md"
+                          style={{ width: selected === id ? "100%" : "36%", backgroundColor: templateMeta[id].accent }}
+                        />
+                      </div>
                     </div>
                   </div>
                 </button>
@@ -462,7 +581,9 @@ function TemplateBrowserMockup({ templateId }: { templateId: TemplateId }) {
   const template = t.templates[templateId];
 
   return (
-    <div className="rounded-lg border border-white/12 bg-white/[0.06] p-3 shadow-2xl">
+    <div className="template-mockup-shell relative rounded-lg border border-white/12 bg-white/[0.06] p-3 shadow-2xl">
+      <div className="absolute -left-5 top-14 h-40 w-32 rounded-lg border border-white/10 bg-white/[0.045] blur-[0.2px]" aria-hidden="true" />
+      <div className="absolute -right-6 bottom-24 h-48 w-36 rounded-lg border border-white/10 bg-white/[0.04]" aria-hidden="true" />
       <div className="flex items-center justify-between rounded-md border border-white/10 bg-black/30 px-3 py-2">
         <div className="flex gap-1.5">
           <span className="h-2.5 w-2.5 rounded-md bg-[#ff7a66]" />
@@ -471,8 +592,14 @@ function TemplateBrowserMockup({ templateId }: { templateId: TemplateId }) {
         </div>
         <div className="text-xs font-semibold text-white/45">prooffolio.ai/{templateId}</div>
       </div>
-      <div className={cn("mt-3 min-h-[460px] rounded-lg p-6", templateMeta[templateId].className)}>
-        <PortfolioPreview templateId={templateId} compact={false} />
+      <div className="relative mt-3 overflow-hidden rounded-lg border border-white/10">
+        <div
+          className="absolute inset-x-0 top-0 h-1"
+          style={{ background: `linear-gradient(90deg, transparent, ${templateMeta[templateId].accent}, transparent)` }}
+        />
+        <div className={cn("min-h-[460px] p-6", templateMeta[templateId].className)}>
+          <PortfolioPreview templateId={templateId} compact={false} />
+        </div>
       </div>
       <div className="mt-4 flex flex-col gap-3 sm:flex-row">
         <Link
@@ -581,52 +708,35 @@ function CareerSection() {
   );
 }
 
-function RecruiterAndPlans() {
+function RecruiterSnapshotSection() {
   const { t } = useLocale();
 
   return (
-    <section id="plans" className="bg-[#05070d] py-24">
-      <div className="pf-container grid gap-6 lg:grid-cols-[.95fr_1.05fr]">
-        <div className="rounded-lg border border-white/12 bg-white/[0.06] p-6">
+    <section className="bg-[#05070d] py-24">
+      <div className="pf-container grid gap-8 lg:grid-cols-[.82fr_1.18fr] lg:items-center">
+        <div>
           <p className="text-xs font-black uppercase tracking-[0.24em] text-[#9ed0ff]">{t.recruiter.kicker}</p>
-          <h2 className="mt-4 text-3xl font-black tracking-tight text-white">{t.recruiter.title}</h2>
-          <p className="mt-4 text-base leading-7 text-white/64">{t.recruiter.summary}</p>
-          <div className="mt-6 rounded-lg border border-[#39e6dc]/22 bg-[#39e6dc]/8 p-4">
+          <h2 className="mt-4 text-3xl font-black tracking-tight text-white sm:text-5xl">{t.recruiter.title}</h2>
+          <p className="mt-5 text-lg leading-8 text-white/64">{t.recruiter.summary}</p>
+        </div>
+        <div className="rounded-lg border border-white/12 bg-white/[0.06] p-6 shadow-[0_30px_100px_rgba(0,0,0,.28)]">
+          <div className="rounded-lg border border-[#39e6dc]/22 bg-[#39e6dc]/8 p-5">
             <div className="text-xs font-black uppercase tracking-[0.2em] text-[#9ff6ef]">{t.recruiter.target}</div>
-            <div className="mt-2 text-xl font-black text-white">{t.recruiter.role}</div>
+            <div className="mt-2 text-2xl font-black text-white">{t.recruiter.role}</div>
             <div className="mt-2 text-sm text-white/58">{t.recruiter.availability}</div>
           </div>
-          <div className="mt-5 flex flex-wrap gap-2">
-            {t.recruiter.skills.map((skill) => (
-              <span key={skill} className="rounded-md border border-white/12 bg-white/7 px-3 py-2 text-sm font-bold text-white/76">
-                {skill}
-              </span>
-            ))}
-          </div>
-          <button className="pf-focus mt-6 inline-flex items-center gap-2 rounded-md bg-[#f7fbff] px-4 py-3 text-sm font-black text-[#071021]">
-            {t.recruiter.contact}
-            <ChevronRight size={17} />
-          </button>
-        </div>
-        <div className="rounded-lg border border-white/12 bg-white/[0.045] p-6">
-          <p className="text-xs font-black uppercase tracking-[0.24em] text-[#9ed0ff]">{t.plans.kicker}</p>
-          <h2 className="mt-4 text-3xl font-black tracking-tight text-white">{t.plans.title}</h2>
-          <p className="mt-3 text-sm leading-6 text-white/54">{t.plans.note}</p>
-          <div className="mt-6 grid gap-3 md:grid-cols-3">
-            {t.plans.tiers.map((tier, index) => (
-              <div
-                key={tier.name}
-                className={cn(
-                  "rounded-lg border p-4",
-                  index === 1 ? "border-[#4da3ff]/45 bg-[#4da3ff]/12" : "border-white/10 bg-black/18",
-                )}
-              >
-                <div className="text-lg font-black text-white">{tier.name}</div>
-                <div className="mt-3 text-3xl font-black text-[#9ed0ff]">{tier.price}</div>
-                <p className="mt-3 text-sm leading-6 text-white/60">{tier.description}</p>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            {t.portfolio.scanSteps.map((step, index) => (
+              <div key={step} className="rounded-lg border border-white/10 bg-black/18 p-4">
+                <div className="text-xs font-black uppercase tracking-[0.18em] text-white/38">0{index + 1}</div>
+                <div className="mt-2 text-sm font-black text-white">{step}</div>
               </div>
             ))}
           </div>
+          <button type="button" className="pf-focus mt-6 inline-flex items-center gap-2 rounded-md bg-[#f7fbff] px-4 py-3 text-sm font-black text-[#071021]">
+            {t.recruiter.contact}
+            <ChevronRight size={17} />
+          </button>
         </div>
       </div>
     </section>
@@ -637,17 +747,18 @@ function FinalCta() {
   const { t } = useLocale();
 
   return (
-    <section className="bg-[#f7fbff] py-24 text-[#101827]">
-      <div className="pf-container text-center">
+    <section className="final-proof-cta relative overflow-hidden bg-[#070B14] py-24 text-[#F8FAFC]">
+      <div className="absolute inset-0 pf-grid-v2 opacity-40" aria-hidden="true" />
+      <div className="pf-container relative z-10 text-center">
         <h2 className="mx-auto max-w-4xl text-4xl font-black tracking-tight sm:text-6xl">{t.finalCta.title}</h2>
-        <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-[#475569]">{t.finalCta.body}</p>
+        <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-[#94A3B8]">{t.finalCta.body}</p>
         <div className="mt-8 flex justify-center">
           <Link
             href="/editor"
-            className="pf-focus inline-flex items-center justify-center gap-2 rounded-md bg-[#071021] px-5 py-3 text-sm font-black text-white hover:bg-[#0f2144]"
+            className="pf-focus inline-flex items-center justify-center gap-2 rounded-md bg-[#F8FAFC] px-5 py-3 text-sm font-black text-[#070B14] hover:bg-[#BFDBFE]"
           >
             <Monitor size={18} />
-            {t.common.openEditor}
+            {t.finalCta.cta}
           </Link>
         </div>
       </div>
@@ -660,12 +771,13 @@ export function LandingPage() {
     <AppShell>
       <main>
         <Hero />
-        <TransformationSection />
-        <IntelligenceSection />
+        <ImportEvidenceSection />
+        <WorkflowSection />
         <TemplateShowcase />
         <ProofSection />
         <CareerSection />
-        <RecruiterAndPlans />
+        <RecruiterSnapshotSection />
+        <PricingSection />
         <FinalCta />
       </main>
     </AppShell>
@@ -787,44 +899,9 @@ export function TemplatesPage() {
 }
 
 export function TemplatePageView({ templateId }: { templateId: TemplateId }) {
-  const { t } = useLocale();
-  const template = t.templates[templateId];
-  const Icon = templateMeta[templateId].icon;
-
   return (
     <AppShell>
-      <main className={cn("min-h-screen pt-28", templateMeta[templateId].className)}>
-        <section className="pf-container py-12">
-          <Link href="/templates" className="pf-focus inline-flex items-center gap-2 rounded-md text-sm font-black opacity-70 hover:opacity-100">
-            <ChevronRight size={16} className="rotate-180" />
-            {t.nav.templates}
-          </Link>
-          <div className="mt-8 grid gap-8 lg:grid-cols-[.72fr_1.28fr] lg:items-start">
-            <div>
-              <Icon size={30} />
-              <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-6xl">{template.name}</h1>
-              <p className="mt-4 text-xl font-bold opacity-76">{template.tag}</p>
-              <p className="mt-5 text-base leading-8 opacity-70">{template.profile}</p>
-              <div className="mt-6 rounded-lg border border-current/15 bg-white/12 p-4 text-sm font-semibold leading-6">
-                {template.motion}
-              </div>
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                <Link href={`/editor?template=${templateId}`} className="pf-focus inline-flex items-center justify-center gap-2 rounded-md bg-[#071021] px-4 py-3 text-sm font-black text-white">
-                  <Sparkles size={17} />
-                  {t.common.useTemplate}
-                </Link>
-                <Link href="/demo" className="pf-focus inline-flex items-center justify-center gap-2 rounded-md border border-current/16 px-4 py-3 text-sm font-black">
-                  <Eye size={17} />
-                  {t.common.demo}
-                </Link>
-              </div>
-            </div>
-            <div className="rounded-lg border border-current/14 bg-white/18 p-4 shadow-2xl">
-              <PortfolioPreview templateId={templateId} compact={false} />
-            </div>
-          </div>
-        </section>
-      </main>
+      <LivingTemplatePage templateId={templateId} />
     </AppShell>
   );
 }
@@ -944,16 +1021,22 @@ export function EditorPage() {
       <main className="bg-[#05070d] pt-28">
         <section className="pf-container py-12">
           <div className="grid gap-8 xl:grid-cols-[360px_1fr]">
-            <aside className="rounded-lg border border-white/12 bg-white/[0.055] p-5">
+            <aside className="editor-sidebar rounded-lg border border-white/12 bg-white/[0.055] p-5">
               <p className="text-xs font-black uppercase tracking-[0.24em] text-[#9ed0ff]">{t.editor.kicker}</p>
               <h1 className="mt-4 text-3xl font-black tracking-tight text-white">{t.editor.title}</h1>
               <p className="mt-4 text-sm leading-6 text-white/58">{t.editor.body}</p>
-              <div className="mt-6 flex items-center justify-between rounded-lg border border-[#39e6dc]/22 bg-[#39e6dc]/8 p-3">
-                <span className="flex items-center gap-2 text-sm font-bold text-white/72">
-                  <CircleDot size={15} className="text-[#67e8a5]" />
-                  {t.common.draft}
-                </span>
-                <span className="text-sm font-black text-[#9ff6ef]">{t.editor.status}</span>
+              <div className="mt-6 grid gap-3 rounded-lg border border-[#39e6dc]/22 bg-[#39e6dc]/8 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="flex items-center gap-2 text-sm font-bold text-white/72">
+                    <CircleDot size={15} className="text-[#67e8a5]" />
+                    {t.common.draft}
+                  </span>
+                  <span className="text-sm font-black text-[#9ff6ef]">{t.editor.status}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3 rounded-md border border-white/10 bg-black/18 px-3 py-2">
+                  <span className="text-sm font-bold text-white/60">{t.common.published}</span>
+                  <span className="text-xs font-black uppercase tracking-[0.16em] text-white/42">{t.editor.publishState}</span>
+                </div>
               </div>
               <div className="mt-5 flex gap-2">
                 <button
@@ -1019,8 +1102,8 @@ export function EditorPage() {
                 <SegmentGroup label={t.editor.controls.animation} options={t.editor.options.animation} selected={animation} setSelected={setAnimation} />
               </div>
             </aside>
-            <div className="space-y-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="editor-shell space-y-5 rounded-lg border border-white/10 bg-[#0D1422] p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-white/8 bg-[#070B14] px-4 py-3">
                 <div className="flex items-center gap-2 text-sm font-bold text-white/58">
                   <Clock3 size={16} />
                   {t.editor.loading}
@@ -1035,7 +1118,7 @@ export function EditorPage() {
                 </div>
               </div>
               <div className="grid gap-5 lg:grid-cols-[1fr_300px]">
-                <div className="rounded-lg border border-white/12 bg-white/[0.055] p-4">
+                <div className="editor-preview-card rounded-lg border border-white/12 bg-white/[0.055] p-4">
                   <div className="mb-3 flex items-center gap-2 text-sm font-black text-white/62">
                     <Monitor size={16} />
                     {t.editor.desktopPreview}
@@ -1044,7 +1127,7 @@ export function EditorPage() {
                     <PortfolioPreview templateId={templateId} compact={false} />
                   </div>
                 </div>
-                <div className="rounded-lg border border-white/12 bg-white/[0.055] p-4">
+                <div className="editor-preview-card rounded-lg border border-white/12 bg-white/[0.055] p-4">
                   <div className="mb-3 flex items-center gap-2 text-sm font-black text-white/62">
                     <Smartphone size={16} />
                     {t.editor.mobilePreview}

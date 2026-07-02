@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ProofFolio AI
 
-## Getting Started
+ProofFolio AI is a bilingual premium UI demo for turning CV material, GitHub repositories, certificates, and professional profile data into a hosted portfolio experience.
 
-First, run the development server:
+This repository is intentionally frontend-only for the current sprint. The visible product language follows the core product principle: AI analyzes and proposes, while the user reviews, edits, approves, and publishes intentionally.
+
+## Current Routes
+
+- `/`
+- `/demo`
+- `/templates`
+- `/templates/minimal-executive`
+- `/templates/dark-tech`
+- `/templates/creative-grid`
+- `/templates/story-journey`
+- `/templates/recruiter-focus`
+- `/editor`
+
+## Current Scope
+
+- Next.js App Router, TypeScript, Tailwind CSS
+- English and French UI
+- RTL-ready locale metadata for a future Arabic locale
+- Local mock data only
+- Premium landing page and optional isolated hero WebGL enhancement
+- Correct Free / Student / VIP pricing preview
+- Five distinct living portfolio template demos
+- Local-state editor preview with desktop and mobile views
+
+No production auth, backend, database, payment, GitHub OAuth, CV parser, AI service, analytics persistence, moderation, or admin system is implemented yet.
+
+## Product Alignment
+
+The UI demo reflects Aya's product workflow through visible states and terminology:
+
+- account and onboarding as future product flow
+- CV, GitHub, and certificate evidence gathering
+- AI proposal panels
+- user review and approval before publishing
+- template selection and customization
+- public portfolio URL and recruiter snapshot framing
+- analytics, notifications, subscriptions, moderation, and administration as future phases
+
+## Commands
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run lint
+npm run build
+npm run test:e2e
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Known Limitations
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Pricing is a product preview only. Payments and billing are not enabled.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+All demo profiles, repositories, certificates, analytics, AI insights, readiness scores, public URLs, and recruiter signals are fictional local mock data.
