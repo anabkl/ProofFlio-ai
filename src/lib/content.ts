@@ -34,6 +34,8 @@ export const templateIds = [
   "creative-grid",
   "story-journey",
   "recruiter-focus",
+  "developer-signature",
+  "career-chronicle",
 ] as const;
 
 export type TemplateId = (typeof templateIds)[number];
@@ -77,6 +79,18 @@ export const templateMeta: Record<
     accent: "#0f766e",
     previewClass: "bg-[#f7f9fc] text-[#172033]",
   },
+  "developer-signature": {
+    icon: FolderGit,
+    className: "template-developer",
+    accent: "#00d5ff",
+    previewClass: "bg-[#040813] text-white",
+  },
+  "career-chronicle": {
+    icon: FileText,
+    className: "template-chronicle",
+    accent: "#6c7cff",
+    previewClass: "bg-[#f4f7fb] text-[#172033]",
+  },
 };
 
 export const icons = {
@@ -107,7 +121,7 @@ export const copy = {
     common: {
       preview: "Preview template",
       useTemplate: "Use this template",
-      create: "Create your portfolio",
+      create: "Create my portfolio",
       demo: "Explore a live demo",
       openEditor: "Open editor",
       viewTemplates: "View templates",
@@ -126,7 +140,7 @@ export const copy = {
     hero: {
       eyebrow: "PORTFOLIOS BUILT FROM REAL EVIDENCE",
       title: "ProofFolio AI",
-      emphasis: "Turn your projects into proof that opens doors.",
+      emphasis: "Turn your projects\ninto proof that opens doors.",
       value:
         "ProofFolio AI brings together your CV, GitHub and certificates to create a professional, verifiable portfolio that you validate before it goes public.",
       trust: ["Bilingual", "Controlled by you", "Hosted", "Shareable"],
@@ -139,6 +153,32 @@ export const copy = {
         { label: "GitHub", value: "Projects linked to proof", icon: "github" },
         { label: "Certificates", value: "Evidence attached", icon: "award" },
       ],
+    },
+    productStage: {
+      principle: "AI proposes. You validate. Recruiters trust the proof.",
+      tabs: ["Portfolio", "Evidence", "Recruiter"],
+      portfolio: {
+        label: "Portfolio view",
+        title: "Maya Chen",
+        subtitle: "Frontend Engineer · AI/Data Products",
+        availability: "Available for internships and junior roles",
+        stack: ["React", "Next.js", "Python", "Data UX"],
+        certificates: "4 certificates attached",
+      },
+      evidence: {
+        label: "Evidence view",
+        title: "Approved evidence queue",
+        sources: ["GitHub repositories", "CV extraction", "Certificates", "Proof links"],
+        status: "User approved",
+        repository: "38 repositories mapped",
+      },
+      recruiter: {
+        label: "Recruiter view",
+        title: "60-second recruiter snapshot",
+        target: "Target role",
+        cv: "Download CV simulation",
+        contact: "Contact candidate",
+      },
     },
     heroPreview: {
       readinessTitle: "Portfolio readiness",
@@ -216,12 +256,12 @@ export const copy = {
     },
     templateShowcase: {
       kicker: "Template showcase",
-      title: "Five templates, five different professional stories.",
+      title: "Seven templates, seven different professional stories.",
       body:
         "Each template changes layout rhythm, typography, motion and mood so the portfolio fits the candidate rather than forcing everyone into one skin.",
       directions: [
-        { name: "Developer", detail: "Proof-heavy portfolios for builders, repositories and shipped systems.", template: "dark-tech" },
-        { name: "Data / AI", detail: "Structured evidence for models, notebooks, dashboards and learning curves.", template: "story-journey" },
+        { name: "Developer", detail: "Proof-heavy portfolios for builders, repositories and shipped systems.", template: "developer-signature" },
+        { name: "Data / AI", detail: "Structured evidence for models, notebooks, dashboards and learning curves.", template: "career-chronicle" },
         { name: "Creative", detail: "Visual case studies for interface designers and creative technologists.", template: "creative-grid" },
       ],
     },
@@ -308,7 +348,7 @@ export const copy = {
         },
       ],
       comparison: [
-        ["Templates", "1", "3", "5"],
+        ["Templates", "1", "3", "7"],
         ["Projects", "3", "10", "Unlimited"],
         ["Public portfolio URL", "Included", "Included", "Included"],
         ["GitHub import", "Manual only", "Basic sync", "Full sync"],
@@ -321,6 +361,8 @@ export const copy = {
         ["Remove ProofFolio branding", "Not included", "Not included", "Included"],
         ["Custom domain", "Not included", "Not included", "VIP feature coming soon"],
         ["Recruiter Focus template", "Not included", "Not included", "Included"],
+        ["Developer Signature template", "Not included", "Student preview", "Included"],
+        ["Career Chronicle template", "Not included", "Not included", "Included"],
       ],
     },
     finalCta: {
@@ -498,6 +540,18 @@ export const copy = {
         motion: "Restrained scoring, clear actions and quick evidence access.",
         profile: "A concise portfolio for recruiters who need fit, proof and contact paths quickly.",
       },
+      "developer-signature": {
+        name: "Developer Signature",
+        tag: "Technical identity with serious proof.",
+        motion: "Typewriter roles, filtered project motion, hover depth and toolkit clustering.",
+        profile: "A developer-first portfolio for AI engineers, full-stack builders and data creators.",
+      },
+      "career-chronicle": {
+        name: "Career Chronicle",
+        tag: "A premium chronological career story.",
+        motion: "Scroll-reactive chapters, project detail modal and measured toolkit progress.",
+        profile: "A career narrative for students and junior professionals who need to explain growth credibly.",
+      },
     },
     templateUi: {
       nav: {
@@ -515,6 +569,14 @@ export const copy = {
         summary: "Summary",
         scan: "Scan",
         cv: "CV",
+        home: "Home",
+        work: "Work",
+        toolkit: "Toolkit",
+        journey: "Journey",
+        proofLab: "Proof lab",
+        portrait: "Portrait",
+        chronology: "Chronology",
+        chapters: "Chapters",
       },
       minimal: {
         selectedWork: "Selected work",
@@ -538,10 +600,34 @@ export const copy = {
       },
       recruiter: {
         contactPath: "Contact path",
+        recruiterOnly: "Recruiter-only demo view",
         scanTitle: "Recruiter scan in 60 seconds",
         topProof: "Top proof",
         skillClusters: "Skill clusters",
         cvPreview: "CV preview",
+        downloadNote: "Demo CV action",
+      },
+      developer: {
+        roles: ["AI Engineer", "Full-stack Developer", "Data Builder", "ML Product Student"],
+        eyebrow: "Developer Signature",
+        command: "$ prooffolio prove --github --certificates --user-approved",
+        featured: "Featured proof-of-work",
+        filterLabel: "Project filter",
+        proofStates: ["GitHub linked", "Demo ready", "Certificate attached"],
+        toolkitTitle: "Technical toolkit",
+        timelineTitle: "Build history",
+      },
+      chronicle: {
+        badge: "Career Chronicle",
+        title: "A career story with proof attached to each chapter.",
+        projectDrawer: "Project evidence drawer",
+        openProject: "Open project detail",
+        closeProject: "Close project detail",
+        chapterProgress: "Chapter progress",
+        toolkit: "Toolkit progression",
+        summary: "Summary",
+        purpose: "Why this matters",
+        evidence: "Evidence attached",
       },
     },
   },
@@ -558,7 +644,7 @@ export const copy = {
     common: {
       preview: "Prévisualiser le modèle",
       useTemplate: "Utiliser ce modèle",
-      create: "Créer votre portfolio",
+      create: "Créer mon portfolio",
       demo: "Explorer une démo live",
       openEditor: "Ouvrir l’éditeur",
       viewTemplates: "Voir les modèles",
@@ -577,7 +663,7 @@ export const copy = {
     hero: {
       eyebrow: "PORTFOLIOS CONSTRUITS À PARTIR DE VRAIES PREUVES",
       title: "ProofFolio AI",
-      emphasis: "Transformez vos projets en preuves qui ouvrent des portes.",
+      emphasis: "Transformez vos projets\nen preuves qui ouvrent des portes.",
       value:
         "ProofFolio AI rassemble votre CV, GitHub et vos certificats pour créer un portfolio professionnel, vérifiable et validé par vous.",
       trust: ["Bilingue", "Contrôlé par vous", "Hébergé", "Partageable"],
@@ -590,6 +676,32 @@ export const copy = {
         { label: "GitHub", value: "Projets liés aux preuves", icon: "github" },
         { label: "Certificats", value: "Preuves attachées", icon: "award" },
       ],
+    },
+    productStage: {
+      principle: "L’IA propose. Vous validez. Les recruteurs font confiance aux preuves.",
+      tabs: ["Portfolio", "Preuves", "Recruteur"],
+      portfolio: {
+        label: "Vue portfolio",
+        title: "Maya Chen",
+        subtitle: "Ingénieure Frontend · Produits IA/Data",
+        availability: "Disponible pour stages et premiers postes",
+        stack: ["React", "Next.js", "Python", "Data UX"],
+        certificates: "4 certificats attachés",
+      },
+      evidence: {
+        label: "Vue preuves",
+        title: "File de preuves approuvées",
+        sources: ["Repositories GitHub", "Extraction CV", "Certificats", "Liens de preuve"],
+        status: "Validé par vous",
+        repository: "38 repositories cartographiés",
+      },
+      recruiter: {
+        label: "Vue recruteur",
+        title: "Snapshot recruteur en 60 secondes",
+        target: "Rôle cible",
+        cv: "Simulation téléchargement CV",
+        contact: "Contacter la candidate",
+      },
     },
     heroPreview: {
       readinessTitle: "Préparation du portfolio",
@@ -667,12 +779,12 @@ export const copy = {
     },
     templateShowcase: {
       kicker: "Galerie de modèles",
-      title: "Cinq modèles, cinq façons de raconter un parcours.",
+      title: "Sept modèles, sept façons de raconter un parcours.",
       body:
         "Chaque modèle change le rythme de mise en page, la typographie, le mouvement et l’ambiance pour s’adapter au candidat.",
       directions: [
-        { name: "Développeur", detail: "Portfolios riches en preuves pour builders, repositories et systèmes livrés.", template: "dark-tech" },
-        { name: "Data / IA", detail: "Preuves structurées pour modèles, notebooks, dashboards et progression.", template: "story-journey" },
+        { name: "Développeur", detail: "Portfolios riches en preuves pour builders, repositories et systèmes livrés.", template: "developer-signature" },
+        { name: "Data / IA", detail: "Preuves structurées pour modèles, notebooks, dashboards et progression.", template: "career-chronicle" },
         { name: "Créatif", detail: "Cas d’étude visuels pour designers d’interface et creative technologists.", template: "creative-grid" },
       ],
     },
@@ -759,7 +871,7 @@ export const copy = {
         },
       ],
       comparison: [
-        ["Modèles", "1", "3", "5"],
+        ["Modèles", "1", "3", "7"],
         ["Projets", "3", "10", "Illimité"],
         ["URL publique du portfolio", "Inclus", "Inclus", "Inclus"],
         ["Import GitHub", "Manuel seulement", "Synchronisation basique", "Synchronisation complète"],
@@ -772,6 +884,8 @@ export const copy = {
         ["Retirer la marque ProofFolio", "Non inclus", "Non inclus", "Inclus"],
         ["Domaine personnalisé", "Non inclus", "Non inclus", "Fonction VIP bientôt disponible"],
         ["Modèle Recruiter Focus", "Non inclus", "Non inclus", "Inclus"],
+        ["Modèle Developer Signature", "Non inclus", "Aperçu Student", "Inclus"],
+        ["Modèle Career Chronicle", "Non inclus", "Non inclus", "Inclus"],
       ],
     },
     finalCta: {
@@ -949,6 +1063,18 @@ export const copy = {
         motion: "Score retenu, actions nettes et accès rapide aux preuves.",
         profile: "Un portfolio concis pour recruteurs qui veulent fit, preuve et contact vite.",
       },
+      "developer-signature": {
+        name: "Developer Signature",
+        tag: "Identité technique et preuves solides.",
+        motion: "Rôles typewriter, filtres projet, profondeur au survol et clusters toolkit.",
+        profile: "Un portfolio développeur pour ingénieurs IA, builders full-stack et profils data.",
+      },
+      "career-chronicle": {
+        name: "Career Chronicle",
+        tag: "Un récit de carrière chronologique premium.",
+        motion: "Chapitres liés au scroll, modal projet et progression toolkit mesurée.",
+        profile: "Un récit professionnel pour étudiants et juniors qui doivent expliquer leur progression.",
+      },
     },
     templateUi: {
       nav: {
@@ -966,6 +1092,14 @@ export const copy = {
         summary: "Résumé",
         scan: "Scan",
         cv: "CV",
+        home: "Accueil",
+        work: "Travail",
+        toolkit: "Toolkit",
+        journey: "Parcours",
+        proofLab: "Lab preuves",
+        portrait: "Portrait",
+        chronology: "Chronologie",
+        chapters: "Chapitres",
       },
       minimal: {
         selectedWork: "Travaux sélectionnés",
@@ -989,10 +1123,34 @@ export const copy = {
       },
       recruiter: {
         contactPath: "Chemin de contact",
+        recruiterOnly: "Vue démo réservée recruteur",
         scanTitle: "Scan recruteur en 60 secondes",
         topProof: "Preuves clés",
         skillClusters: "Groupes de compétences",
         cvPreview: "Aperçu CV",
+        downloadNote: "Action CV simulée",
+      },
+      developer: {
+        roles: ["Ingénieure IA", "Développeuse full-stack", "Builder data", "Étudiante produit ML"],
+        eyebrow: "Developer Signature",
+        command: "$ prooffolio prove --github --certificats --validation-utilisateur",
+        featured: "Preuve de travail mise en avant",
+        filterLabel: "Filtre projet",
+        proofStates: ["GitHub lié", "Démo prête", "Certificat attaché"],
+        toolkitTitle: "Toolkit technique",
+        timelineTitle: "Historique de construction",
+      },
+      chronicle: {
+        badge: "Career Chronicle",
+        title: "Un récit de carrière avec une preuve attachée à chaque chapitre.",
+        projectDrawer: "Panneau de preuves projet",
+        openProject: "Ouvrir le détail projet",
+        closeProject: "Fermer le détail projet",
+        chapterProgress: "Progression des chapitres",
+        toolkit: "Progression toolkit",
+        summary: "Résumé",
+        purpose: "Pourquoi c’est important",
+        evidence: "Preuve attachée",
       },
     },
   },

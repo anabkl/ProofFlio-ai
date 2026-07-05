@@ -24,24 +24,32 @@ function isLocale(value: string | null): value is Locale {
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("en");
+  const [localeLoaded, setLocaleLoaded] = useState(false);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
       const stored = window.localStorage.getItem("prooffolio-locale");
+
       if (isLocale(stored)) {
         setLocaleState(stored);
       }
+
+      setLocaleLoaded(true);
     });
 
     return () => window.cancelAnimationFrame(frame);
   }, []);
 
   useEffect(() => {
+    if (!localeLoaded) {
+      return;
+    }
+
     const meta = localeMeta[locale];
     document.documentElement.lang = locale;
     document.documentElement.dir = meta.dir;
     window.localStorage.setItem("prooffolio-locale", locale);
-  }, [locale]);
+  }, [locale, localeLoaded]);
 
   const value = useMemo(
     () => ({

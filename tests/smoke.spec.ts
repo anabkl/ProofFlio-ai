@@ -9,6 +9,8 @@ const routes = [
   "/templates/creative-grid",
   "/templates/story-journey",
   "/templates/recruiter-focus",
+  "/templates/developer-signature",
+  "/templates/career-chronicle",
   "/editor",
 ];
 
@@ -59,6 +61,7 @@ test.describe("ProofFolio AI UI demo", () => {
 
     await page.getByTestId("billing-yearly").click();
     await expect(page.getByTestId("pricing-plan-student")).toContainText("$48 / year");
+    await expect(page.locator("tbody tr").filter({ hasText: "Templates" })).toContainText("7");
     await expect(page.getByText("Pricing is a product preview")).toBeVisible();
   });
 
@@ -83,6 +86,16 @@ test.describe("ProofFolio AI UI demo", () => {
     await page.waitForLoadState("load");
     await expect(page.getByText("Atlas UI Systems").first()).toBeVisible();
     await page.getByTestId("creative-project-0").click({ force: true });
+    await expect(page.getByRole("dialog")).toBeVisible();
+
+    await page.goto("/templates/developer-signature", { waitUntil: "domcontentloaded" });
+    await expect(page.getByText("Developer Signature").first()).toBeVisible();
+    await page.getByRole("button", { name: "AI", exact: true }).click({ force: true });
+    await expect(page.getByText("ModelOps Notes").first()).toBeVisible();
+
+    await page.goto("/templates/career-chronicle", { waitUntil: "domcontentloaded" });
+    await expect(page.getByText("Career Chronicle").first()).toBeVisible();
+    await page.getByRole("button", { name: /Open project detail/i }).first().click({ force: true });
     await expect(page.getByRole("dialog")).toBeVisible();
   });
 });

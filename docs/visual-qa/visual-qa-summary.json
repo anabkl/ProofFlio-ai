@@ -1,0 +1,365 @@
+{
+  "createdAt": "2026-07-05T00:30:08.727Z",
+  "base": "http://127.0.0.1:3211",
+  "screenshots": [
+    "developer-signature-hero-desktop.png",
+    "developer-signature-mobile.png",
+    "developer-signature-projects-desktop.png",
+    "landing-evidence-workflow-desktop.png",
+    "landing-hero-desktop.png",
+    "landing-hero-fr-mobile.png",
+    "landing-hero-mobile.png"
+  ],
+  "audits": [
+    {
+      "route": "/",
+      "locale": "en",
+      "viewport": "1440x900",
+      "lang": "en",
+      "dir": "ltr",
+      "overflowX": 0,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "offenders": []
+    },
+    {
+      "route": "/templates/developer-signature",
+      "locale": "en",
+      "viewport": "1440x900",
+      "lang": "en",
+      "dir": "ltr",
+      "overflowX": 0,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "offenders": []
+    },
+    {
+      "route": "/",
+      "locale": "en",
+      "viewport": "1280x800",
+      "lang": "en",
+      "dir": "ltr",
+      "overflowX": 0,
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "offenders": []
+    },
+    {
+      "route": "/templates/developer-signature",
+      "locale": "en",
+      "viewport": "1280x800",
+      "lang": "en",
+      "dir": "ltr",
+      "overflowX": 0,
+      "scrollWidth": 1280,
+      "clientWidth": 1280,
+      "offenders": []
+    },
+    {
+      "route": "/",
+      "locale": "en",
+      "viewport": "390x844",
+      "lang": "en",
+      "dir": "ltr",
+      "overflowX": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "offenders": [
+        {
+          "tag": "div",
+          "cls": "pf-hero-v3-plane pf-hero-v3-plane-a",
+          "text": "",
+          "left": -97,
+          "right": 344,
+          "width": 441
+        },
+        {
+          "tag": "div",
+          "cls": "pf-hero-v3-plane pf-hero-v3-plane-b",
+          "text": "",
+          "left": -138,
+          "right": 383,
+          "width": 521
+        },
+        {
+          "tag": "div",
+          "cls": "absolute -left-5 top-14 h-40 w-32 rounded-lg border border-white/10 bg-white/[0.045] blur-[0.2px]",
+          "text": "",
+          "left": -7,
+          "right": 121,
+          "width": 128
+        },
+        {
+          "tag": "div",
+          "cls": "absolute -right-6 bottom-24 h-48 w-36 rounded-lg border border-white/10 bg-white/[0.04]",
+          "text": "",
+          "left": 257,
+          "right": 401,
+          "width": 144
+        },
+        {
+          "tag": "table",
+          "cls": "min-w-[820px] w-full border-separate border-spacing-0 text-sm",
+          "text": "FeatureFreeStudentVIPTemplates137Projects310UnlimitedPublic portfolio URLInclude",
+          "left": 25,
+          "right": 845,
+          "width": 820
+        },
+        {
+          "tag": "thead",
+          "cls": "",
+          "text": "FeatureFreeStudentVIP",
+          "left": 25,
+          "right": 845,
+          "width": 820
+        },
+        {
+          "tag": "tr",
+          "cls": "text-left text-white",
+          "text": "FeatureFreeStudentVIP",
+          "left": 25,
+          "right": 845,
+          "width": 820
+        },
+        {
+          "tag": "th",
+          "cls": "border-y border-white/10 px-4 py-4 text-right font-black bg-white/8",
+          "text": "Free",
+          "left": 278,
+          "right": 405,
+          "width": 127
+        }
+      ]
+    },
+    {
+      "route": "/templates/developer-signature",
+      "locale": "en",
+      "viewport": "390x844",
+      "lang": "en",
+      "dir": "ltr",
+      "overflowX": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "offenders": [
+        {
+          "tag": "a",
+          "cls": "pf-focus shrink-0 rounded-xl px-3 py-2 text-xs font-black uppercase tracking-[0.14em] transition opacity-60 hover:opacit",
+          "text": "Journey",
+          "left": 309,
+          "right": 400,
+          "width": 91
+        },
+        {
+          "tag": "a",
+          "cls": "pf-focus shrink-0 rounded-xl px-3 py-2 text-xs font-black uppercase tracking-[0.14em] transition opacity-60 hover:opacit",
+          "text": "Proof lab",
+          "left": 408,
+          "right": 513,
+          "width": 104
+        },
+        {
+          "tag": "a",
+          "cls": "pf-focus ml-auto inline-flex shrink-0 items-center gap-2 rounded-xl bg-[#f7fbff] px-3 py-2 text-xs font-black text-[#071",
+          "text": "Use this template",
+          "left": 521,
+          "right": 671,
+          "width": 151
+        },
+        {
+          "tag": "svg",
+          "cls": "lucide lucide-sparkles",
+          "text": "",
+          "left": 533,
+          "right": 548,
+          "width": 15
+        },
+        {
+          "tag": "path",
+          "cls": "",
+          "text": "",
+          "left": 534,
+          "right": 546,
+          "width": 13
+        },
+        {
+          "tag": "path",
+          "cls": "",
+          "text": "",
+          "left": 544,
+          "right": 546,
+          "width": 3
+        },
+        {
+          "tag": "circle",
+          "cls": "",
+          "text": "",
+          "left": 534,
+          "right": 536,
+          "width": 3
+        },
+        {
+          "tag": "div",
+          "cls": "developer-work-copy",
+          "text": "Featured proof-of-workAtlas UI SystemsBuilt a token-led component library for st",
+          "left": 12,
+          "right": 727,
+          "width": 715
+        }
+      ]
+    },
+    {
+      "route": "/",
+      "locale": "fr",
+      "viewport": "390x844",
+      "lang": "fr",
+      "dir": "ltr",
+      "overflowX": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "offenders": [
+        {
+          "tag": "div",
+          "cls": "pf-hero-v3-plane pf-hero-v3-plane-a",
+          "text": "",
+          "left": -97,
+          "right": 344,
+          "width": 441
+        },
+        {
+          "tag": "div",
+          "cls": "pf-hero-v3-plane pf-hero-v3-plane-b",
+          "text": "",
+          "left": -138,
+          "right": 383,
+          "width": 521
+        },
+        {
+          "tag": "div",
+          "cls": "absolute -left-5 top-14 h-40 w-32 rounded-lg border border-white/10 bg-white/[0.045] blur-[0.2px]",
+          "text": "",
+          "left": -7,
+          "right": 121,
+          "width": 128
+        },
+        {
+          "tag": "div",
+          "cls": "absolute -right-6 bottom-24 h-48 w-36 rounded-lg border border-white/10 bg-white/[0.04]",
+          "text": "",
+          "left": 257,
+          "right": 401,
+          "width": 144
+        },
+        {
+          "tag": "table",
+          "cls": "min-w-[820px] w-full border-separate border-spacing-0 text-sm",
+          "text": "FonctionnalitéFreeStudentVIPModèles137Projets310IllimitéURL publique du portfoli",
+          "left": 25,
+          "right": 845,
+          "width": 820
+        },
+        {
+          "tag": "thead",
+          "cls": "",
+          "text": "FonctionnalitéFreeStudentVIP",
+          "left": 25,
+          "right": 845,
+          "width": 820
+        },
+        {
+          "tag": "tr",
+          "cls": "text-left text-white",
+          "text": "FonctionnalitéFreeStudentVIP",
+          "left": 25,
+          "right": 845,
+          "width": 820
+        },
+        {
+          "tag": "th",
+          "cls": "border-y border-white/10 px-4 py-4 text-right font-black bg-[#4da3ff]/14 text-[#d8ecff]",
+          "text": "Student",
+          "left": 382,
+          "right": 562,
+          "width": 180
+        }
+      ]
+    },
+    {
+      "route": "/templates/developer-signature",
+      "locale": "fr",
+      "viewport": "390x844",
+      "lang": "fr",
+      "dir": "ltr",
+      "overflowX": 0,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "offenders": [
+        {
+          "tag": "a",
+          "cls": "pf-focus shrink-0 rounded-xl px-3 py-2 text-xs font-black uppercase tracking-[0.14em] transition opacity-60 hover:opacit",
+          "text": "Parcours",
+          "left": 347,
+          "right": 450,
+          "width": 103
+        },
+        {
+          "tag": "a",
+          "cls": "pf-focus shrink-0 rounded-xl px-3 py-2 text-xs font-black uppercase tracking-[0.14em] transition opacity-60 hover:opacit",
+          "text": "Lab preuves",
+          "left": 458,
+          "right": 580,
+          "width": 122
+        },
+        {
+          "tag": "a",
+          "cls": "pf-focus ml-auto inline-flex shrink-0 items-center gap-2 rounded-xl bg-[#f7fbff] px-3 py-2 text-xs font-black text-[#071",
+          "text": "Utiliser ce modèle",
+          "left": 588,
+          "right": 741,
+          "width": 153
+        },
+        {
+          "tag": "svg",
+          "cls": "lucide lucide-sparkles",
+          "text": "",
+          "left": 600,
+          "right": 615,
+          "width": 15
+        },
+        {
+          "tag": "path",
+          "cls": "",
+          "text": "",
+          "left": 601,
+          "right": 614,
+          "width": 13
+        },
+        {
+          "tag": "path",
+          "cls": "",
+          "text": "",
+          "left": 611,
+          "right": 614,
+          "width": 3
+        },
+        {
+          "tag": "circle",
+          "cls": "",
+          "text": "",
+          "left": 601,
+          "right": 604,
+          "width": 3
+        },
+        {
+          "tag": "div",
+          "cls": "developer-work-copy",
+          "text": "Preuve de travail mise en avantAtlas UI SystemsConstruction d’une bibliothèque d",
+          "left": 12,
+          "right": 752,
+          "width": 740
+        }
+      ]
+    }
+  ],
+  "overflowIssues": [],
+  "consoleErrors": []
+}

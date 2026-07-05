@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Activity,
   BadgeCheck,
-  BellRing,
   ChevronRight,
   CheckCircle2,
   CircleDot,
@@ -23,7 +23,6 @@ import {
   Upload,
   WandSparkles,
 } from "lucide-react";
-import { HeroScene } from "@/components/hero-scene";
 import { LivingTemplatePage } from "@/components/living-templates";
 import { useLocale } from "@/components/locale-provider";
 import { PricingSection } from "@/components/pricing-section";
@@ -33,6 +32,7 @@ import {
   locales,
   templateIds,
   templateMeta,
+  type Copy,
   type TemplateId,
 } from "@/lib/content";
 
@@ -175,7 +175,7 @@ function PrimaryCtas() {
   const { t } = useLocale();
 
   return (
-    <div className="flex flex-col gap-3 sm:flex-row">
+    <div className="hero-ctas flex flex-col gap-3 sm:flex-row">
       <Link
         href="/editor"
         className="pf-focus inline-flex items-center justify-center gap-2 rounded-md bg-[#f7fbff] px-5 py-3 text-sm font-black text-[#071021] transition hover:bg-[#9ed0ff]"
@@ -198,32 +198,35 @@ function Hero() {
   const { t } = useLocale();
 
   return (
-    <section className="pf-hero-v2 relative min-h-[92svh] overflow-hidden bg-[#070B14] pt-24">
-      <div className="absolute inset-0 pf-grid-v2 opacity-70" aria-hidden="true" />
-      <div className="pf-hero-light pf-hero-light-a" aria-hidden="true" />
-      <div className="pf-hero-light pf-hero-light-b" aria-hidden="true" />
-      <HeroScene />
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,11,20,.98),rgba(7,11,20,.82)_45%,rgba(7,11,20,.56)_100%)]" />
-      <div className="pf-container relative z-10 grid min-h-[calc(92svh-96px)] items-center gap-10 py-16 lg:grid-cols-[.88fr_1.12fr]">
+    <section className="pf-hero-v3 relative min-h-screen overflow-hidden bg-[#040712] pt-24">
+      <div className="absolute inset-0 pf-grid-v3" aria-hidden="true" />
+      <div className="pf-hero-v3-plane pf-hero-v3-plane-a" aria-hidden="true" />
+      <div className="pf-hero-v3-plane pf-hero-v3-plane-b" aria-hidden="true" />
+      <div className="pf-container relative z-10 grid min-h-[calc(100svh-96px)] items-center gap-12 py-12 lg:grid-cols-[.82fr_1.18fr] lg:py-0">
         <div className="soft-reveal max-w-3xl">
-          <p className="text-xs font-black uppercase tracking-[0.28em] text-[#2DD4BF]">{t.hero.eyebrow}</p>
-          <h1 className="mt-5 text-5xl font-black leading-[0.95] tracking-tight text-[#F8FAFC] sm:text-7xl">
+          <p className="text-[11px] font-black uppercase tracking-[0.34em] text-[#2DD4BF]">{t.hero.eyebrow}</p>
+          <h1 className="mt-6 whitespace-pre-line text-5xl font-black leading-[0.9] tracking-tight text-[#F8FAFC] sm:text-6xl">
             {t.hero.emphasis}
           </h1>
-          <p className="mt-6 max-w-2xl text-base leading-8 text-[#94A3B8] sm:text-lg">{t.hero.value}</p>
+          <p className="mt-7 max-w-xl text-base leading-8 text-[#A8B3C7] sm:text-lg">{t.hero.value}</p>
           <div className="mt-8">
             <PrimaryCtas />
           </div>
-          <div className="mt-7 flex flex-wrap items-center gap-2 text-sm font-bold text-[#94A3B8]">
+          <div className="mt-7 flex flex-wrap items-center gap-2 text-sm font-bold text-[#A8B3C7]">
             {t.hero.trust.map((item, index) => (
               <span key={item} className="inline-flex items-center gap-2">
-                {index > 0 ? <span className="h-1 w-1 rounded-[2px] bg-[#4E8CFF]" /> : null}
+                {index > 0 ? <span className="h-1 w-1 rounded-[2px] bg-[#7757FF]" /> : null}
                 {item}
               </span>
             ))}
           </div>
+          <div className="mt-10 grid max-w-xl grid-cols-3 border-y border-white/10 py-4 text-xs font-black uppercase tracking-[0.16em] text-white/54">
+            {t.hero.highlights.map((item) => (
+              <span key={item} className="leading-5">{item}</span>
+            ))}
+          </div>
         </div>
-        <div className="relative min-h-[620px]">
+        <div className="relative min-h-[620px] lg:min-h-[720px]">
           <HeroProductPreview />
         </div>
       </div>
@@ -233,116 +236,109 @@ function Hero() {
 
 function HeroProductPreview() {
   const { t } = useLocale();
-  const sourceIcons = [FileText, FolderGit, BadgeCheck];
-  const sourcePositions = ["left-0 top-20", "right-0 top-8", "left-8 bottom-16"];
+  const [activeView, setActiveView] = useState(0);
+  const [pointer, setPointer] = useState({ x: 0, y: 0 });
+  const sourceIcons = [FileText, FolderGit, BadgeCheck] as const;
+  const activeLabel = t.productStage.tabs[activeView] ?? t.productStage.tabs[0];
+
+  function handlePointerMove(event: React.PointerEvent<HTMLDivElement>) {
+    if (event.pointerType === "touch") {
+      return;
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    setPointer({
+      x: ((event.clientX - rect.left) / rect.width - 0.5) * 2,
+      y: ((event.clientY - rect.top) / rect.height - 0.5) * 2,
+    });
+  }
 
   return (
-    <div className="absolute inset-0 hidden lg:block" aria-label={t.hero.mockupTitle}>
-      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 680 620" role="img" aria-hidden="true">
-        <path className="flow-line" d="M86 172 C198 88 302 132 350 252 C392 356 476 430 606 358" fill="none" stroke="#7757FF" strokeOpacity=".34" strokeWidth="1.3" />
-        <path className="flow-line" d="M96 486 C214 402 280 454 342 356 C418 238 500 166 598 112" fill="none" stroke="#4E8CFF" strokeOpacity=".30" strokeWidth="1.2" />
-        <path className="flow-line" d="M112 304 C234 246 370 522 560 266" fill="none" stroke="#2DD4BF" strokeOpacity=".24" strokeWidth="1.1" />
+    <div
+      className="product-stage evidence-os-stage relative mx-auto min-h-[560px] w-full max-w-[720px] lg:min-h-[690px]"
+      aria-label={t.hero.mockupTitle}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={() => setPointer({ x: 0, y: 0 })}
+      style={{ ["--stage-x" as string]: pointer.x, ["--stage-y" as string]: pointer.y }}
+    >
+      <div className="evidence-stage-backdrop evidence-stage-backdrop-a" aria-hidden="true" />
+      <div className="evidence-stage-backdrop evidence-stage-backdrop-b" aria-hidden="true" />
+      <svg className="evidence-stage-lines absolute inset-0 h-full w-full" viewBox="0 0 720 690" role="img" aria-hidden="true">
+        <path className="flow-line" d="M102 182 C226 188 268 255 343 332 C421 412 520 423 630 354" fill="none" />
+        <path className="flow-line" d="M112 512 C230 462 286 421 354 346 C428 265 505 184 616 154" fill="none" />
+        <path className="flow-line flow-line-proof" d="M112 346 C224 312 296 344 356 346 C458 350 534 301 624 247" fill="none" />
       </svg>
-      <div className="pf-browser-preview absolute left-[8%] top-8 w-[560px] overflow-hidden rounded-lg border border-white/10 bg-[#0D1422] shadow-[0_45px_160px_rgba(0,0,0,.55)]">
-        <div className="flex items-center justify-between border-b border-white/8 bg-[#111A2B] px-4 py-3">
-          <div className="flex gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-md bg-[#FF6B5F]" />
-            <span className="h-2.5 w-2.5 rounded-md bg-[#F7C948]" />
-            <span className="h-2.5 w-2.5 rounded-md bg-[#2DD4BF]" />
+
+      <div className="stage-controls absolute left-1/2 top-0 z-40 flex rounded-xl border border-white/12 bg-[#060b17]/90 p-1 shadow-[0_20px_80px_rgba(0,0,0,.32)] backdrop-blur">
+        {t.productStage.tabs.map((label, index) => (
+          <button
+            key={label}
+            type="button"
+            onClick={() => setActiveView(index)}
+            className={cn(
+              "pf-focus min-w-24 rounded-lg px-3 py-2 text-xs font-black uppercase tracking-[0.16em] transition",
+              activeView === index ? "bg-[#EAF5FF] text-[#071021]" : "text-[#94A3B8] hover:bg-white/8 hover:text-white",
+            )}
+            aria-pressed={activeView === index}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <div className="stage-backplate absolute left-[7%] top-[82px] h-[500px] w-[84%] rounded-[34px] border border-[#7757FF]/20 bg-[#080d1b]/68" aria-hidden="true" />
+
+      <div className="stage-window absolute left-[4%] top-[92px] z-20 w-[92%] overflow-hidden rounded-[28px] border border-white/12 bg-[#08101f] shadow-[0_42px_160px_rgba(0,0,0,.52)]">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/8 bg-[#11182a] px-4 py-3">
+          <div className="flex items-center gap-3">
+            <div className="flex gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-[4px] bg-[#FF6B5F]" />
+              <span className="h-2.5 w-2.5 rounded-[4px] bg-[#F7C948]" />
+              <span className="h-2.5 w-2.5 rounded-[4px] bg-[#2DD4BF]" />
+            </div>
+            <span className="hidden text-[10px] font-black uppercase tracking-[0.22em] text-[#7DD3FC] sm:inline">
+              Evidence-first portfolio OS
+            </span>
           </div>
-          <div className="text-[11px] font-black uppercase tracking-[0.22em] text-[#94A3B8]">prooffolio.ai/maya</div>
+          <div className="text-[10px] font-black uppercase tracking-[0.22em] text-[#94A3B8]">prooffolio.ai/maya</div>
         </div>
-        <div className="grid gap-4 p-5">
-          <div className="grid gap-4 rounded-lg border border-white/8 bg-[#070B14] p-5 md:grid-cols-[1fr_220px]">
+        <div className="stage-window-body min-h-[430px] p-4 sm:p-5">
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-white/8 bg-white/[0.035] p-3">
             <div>
-              <div className="flex items-center gap-3">
-                <div className="grid h-14 w-14 place-items-center rounded-lg bg-gradient-to-br from-[#7757FF] to-[#2DD4BF] text-lg font-black text-white">
-                  {t.portfolio.initials}
-                </div>
-                <div>
-                  <div className="text-2xl font-black text-[#F8FAFC]">{t.portfolio.name}</div>
-                  <div className="mt-1 text-sm font-bold text-[#94A3B8]">{t.portfolio.targetRole}</div>
-                </div>
-              </div>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {["React", "Next.js", "Python", "Data UX"].map((tech) => (
-                  <span key={tech} className="rounded-md border border-white/8 bg-white/[0.04] px-2.5 py-1.5 text-xs font-black text-[#CBD5E1]">
-                    {tech}
-                  </span>
-                ))}
-              </div>
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                {t.portfolio.projects.slice(0, 2).map((project) => (
-                  <div key={project.name} className="rounded-md border border-white/8 bg-[#111A2B] p-3">
-                    <div className="text-sm font-black text-[#F8FAFC]">{project.name}</div>
-                    <div className="mt-1 text-xs leading-5 text-[#94A3B8]">{project.impact}</div>
-                  </div>
-                ))}
-              </div>
+              <div className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2DD4BF]">{activeLabel}</div>
+              <p className="mt-1 text-xs font-bold text-[#A8B3C7]">{t.productStage.principle}</p>
             </div>
-            <div className="rounded-lg border border-[#2DD4BF]/18 bg-[#2DD4BF]/8 p-4">
-              <div className="text-xs font-black uppercase tracking-[0.2em] text-[#99F6E4]">{t.heroPreview.readinessTitle}</div>
-              <div className="mt-4 flex items-end gap-2">
-                <span className="text-5xl font-black text-[#F8FAFC]">82</span>
-                <span className="pb-2 text-lg font-black text-[#94A3B8]">%</span>
-              </div>
-              <div className="mt-4 h-2 rounded-md bg-white/10">
-                <div className="h-2 w-[82%] rounded-md bg-[#2DD4BF]" />
-              </div>
-              <div className="mt-5 space-y-2">
-                {t.heroPreview.readinessChecks.map((item) => (
-                  <div key={item} className="flex items-center gap-2 text-xs font-bold text-[#D1FAE5]">
-                    <CheckCircle2 size={14} />
-                    {item}
-                  </div>
-                ))}
-                <div className="flex items-center gap-2 text-xs font-bold text-[#C4B5FD]">
-                  <CircleDot size={14} />
-                  {t.heroPreview.aiSuggestions}
-                </div>
-              </div>
+            <div className="hidden grid-cols-3 gap-1 text-center text-[10px] font-black uppercase tracking-[0.12em] text-white/52 sm:grid">
+              {t.heroPreview.readinessChecks.map((item) => (
+                <span key={item} className="rounded-lg border border-white/8 px-2 py-2">{item}</span>
+              ))}
             </div>
           </div>
-          <div className="grid gap-4 md:grid-cols-[1fr_180px]">
-            <div className="rounded-lg border border-white/8 bg-[#111A2B] p-4">
-              <div className="mb-3 flex items-center justify-between">
-                <span className="text-xs font-black uppercase tracking-[0.2em] text-[#94A3B8]">{t.heroPreview.githubActivity}</span>
-                <Activity size={16} className="text-[#4E8CFF]" />
-              </div>
-              <div className="grid gap-1" style={{ gridTemplateColumns: "repeat(14, minmax(0, 1fr))" }}>
-                {Array.from({ length: 56 }, (_, index) => (
-                  <span
-                    key={index}
-                    className={cn(
-                      "h-3 rounded-[3px]",
-                      index % 9 === 0 ? "bg-[#2DD4BF]" : index % 5 === 0 ? "bg-[#4E8CFF]" : index % 3 === 0 ? "bg-[#7757FF]/70" : "bg-white/8",
-                    )}
-                  />
-                ))}
-              </div>
-            </div>
-            <div className="rounded-lg border border-white/8 bg-[#111A2B] p-4">
-              <div className="text-xs font-black uppercase tracking-[0.2em] text-[#94A3B8]">{t.heroPreview.certificates}</div>
-              <div className="mt-4 space-y-2">
-                {t.portfolio.certificates.slice(0, 3).map((certificate) => (
-                  <div key={certificate} className="rounded-md bg-white/[0.04] px-3 py-2 text-xs font-bold text-[#CBD5E1]">
-                    {certificate}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeView}
+              initial={{ opacity: 0, y: 14, scale: 0.985 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -12, scale: 0.985 }}
+              transition={{ duration: 0.24, ease: "easeOut" }}
+            >
+              {activeView === 0 ? <StagePortfolioView /> : null}
+              {activeView === 1 ? <StageEvidenceView /> : null}
+              {activeView === 2 ? <StageRecruiterView /> : null}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
+
       {t.hero.cards.map((card, index) => {
         const Icon = sourceIcons[index] ?? FileText;
+        const position = ["source-card-cv left-0 top-[148px]", "source-card-github right-0 top-[88px]", "source-card-certificates left-[5%] bottom-[42px]"][index];
         return (
           <div
             key={card.label}
             className={cn(
-              "pf-source-card absolute w-44 rounded-lg border border-white/10 bg-[#111A2B]/88 p-4 shadow-[0_22px_80px_rgba(0,0,0,.34)] backdrop-blur",
-              index % 2 === 0 ? "float-a" : "float-b",
-              sourcePositions[index],
+              "stage-source-card absolute z-30 hidden w-40 rounded-2xl border border-white/10 bg-[#111A2B]/94 p-4 shadow-[0_22px_80px_rgba(0,0,0,.34)] backdrop-blur sm:block sm:w-44",
+              position,
             )}
           >
             <Icon size={20} className="text-[#2DD4BF]" />
@@ -351,18 +347,151 @@ function HeroProductPreview() {
           </div>
         );
       })}
-      <div className="absolute bottom-7 right-8 w-64 rounded-lg border border-[#7757FF]/22 bg-[#7757FF]/12 p-4 shadow-[0_30px_110px_rgba(0,0,0,.32)] backdrop-blur">
-        <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-[#DDD6FE]">
-          <BellRing size={15} />
-          {t.heroPreview.validationQueue}
+    </div>
+  );
+}
+
+function StagePortfolioView() {
+  const { t } = useLocale();
+
+  return (
+    <div className="evidence-stage-layout">
+      <div className="evidence-profile-pane">
+        <div className="flex items-center gap-4">
+          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-[#4E8CFF] to-[#2DD4BF] text-xl font-black text-white shadow-[0_18px_45px_rgba(45,212,191,.18)]">
+            {t.portfolio.initials}
+          </div>
+          <div className="min-w-0">
+            <div className="text-3xl font-black leading-none text-[#F8FAFC]">{t.productStage.portfolio.title}</div>
+            <div className="mt-2 text-sm font-bold text-[#A8B3C7]">{t.productStage.portfolio.subtitle}</div>
+          </div>
         </div>
-        <div className="mt-4 space-y-2">
-          {t.intelligence.approvals.map((item, index) => (
-            <div key={item} className="flex items-center gap-2 text-xs font-bold text-[#EDE9FE]">
-              <span className="grid h-5 w-5 place-items-center rounded-md bg-[#7757FF] text-[10px] text-white">{index + 1}</span>
-              {item}
+        <div className="mt-5 flex flex-wrap gap-2">
+          {t.productStage.portfolio.stack.map((tech) => (
+            <span key={tech} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-black text-[#CBD5E1]">
+              {tech}
+            </span>
+          ))}
+        </div>
+        <div className="mt-6 rounded-2xl border border-[#2DD4BF]/20 bg-[#2DD4BF]/8 p-4">
+          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-[#99F6E4]">{t.productStage.portfolio.label}</div>
+          <div className="mt-3 text-sm font-bold leading-6 text-[#D1FAE5]">{t.productStage.portfolio.availability}</div>
+          <div className="mt-3 text-xs font-bold text-[#A8B3C7]">{t.productStage.portfolio.certificates}</div>
+        </div>
+      </div>
+
+      <div className="evidence-publish-pane">
+        <div className="flex items-center justify-between gap-3">
+          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-[#7DD3FC]">{t.common.hosted}</div>
+          <ShieldCheck size={19} className="text-[#2DD4BF]" />
+        </div>
+        <div className="mt-5 space-y-3">
+          {t.portfolio.projects.slice(0, 3).map((project, index) => (
+            <div key={project.name} className="evidence-project-row">
+              <span className="font-mono text-xs font-black text-[#2DD4BF]">0{index + 1}</span>
+              <div>
+                <div className="text-sm font-black text-white">{project.name}</div>
+                <div className="mt-1 text-xs leading-5 text-[#94A3B8]">{project.impact}</div>
+              </div>
             </div>
           ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StageEvidenceView() {
+  const { t } = useLocale();
+
+  return (
+    <div className="evidence-stage-layout">
+      <div className="evidence-profile-pane">
+        <div className="text-xs font-black uppercase tracking-[0.2em] text-[#2DD4BF]">{t.productStage.evidence.label}</div>
+        <h3 className="mt-3 text-3xl font-black leading-tight text-white">{t.productStage.evidence.title}</h3>
+        <div className="mt-6 space-y-3">
+          {t.productStage.evidence.sources.map((source, index) => (
+            <div key={source} className="flex items-center justify-between gap-3 rounded-2xl border border-white/8 bg-white/[0.04] p-3">
+              <span className="text-sm font-bold text-[#CBD5E1]">{source}</span>
+              <span className="rounded-md bg-[#2DD4BF]/14 px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#99F6E4]">
+                {index === 0 ? t.productStage.evidence.repository : t.productStage.evidence.status}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="evidence-publish-pane">
+        <div className="mb-3 flex items-center justify-between">
+          <span className="text-xs font-black uppercase tracking-[0.2em] text-[#94A3B8]">{t.heroPreview.githubActivity}</span>
+          <Activity size={16} className="text-[#4E8CFF]" />
+        </div>
+        <div className="grid gap-1" style={{ gridTemplateColumns: "repeat(14, minmax(0, 1fr))" }}>
+          {Array.from({ length: 70 }, (_, index) => (
+            <span
+              key={index}
+              className={cn(
+                "h-3 rounded-[3px] transition hover:scale-125",
+                index % 9 === 0 ? "bg-[#2DD4BF]" : index % 5 === 0 ? "bg-[#4E8CFF]" : index % 3 === 0 ? "bg-[#7757FF]/70" : "bg-white/8",
+              )}
+            />
+          ))}
+        </div>
+        <div className="mt-5 space-y-2">
+          {t.portfolio.certificates.slice(0, 3).map((certificate) => (
+            <div key={certificate} className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/[0.04] px-3 py-2 text-xs font-bold text-[#CBD5E1]">
+              <CheckCircle2 size={14} className="text-[#2DD4BF]" />
+              <span>{certificate}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StageRecruiterView() {
+  const { t } = useLocale();
+
+  return (
+    <div className="evidence-stage-layout">
+      <div className="evidence-profile-pane">
+        <div className="text-xs font-black uppercase tracking-[0.2em] text-[#93C5FD]">{t.productStage.recruiter.label}</div>
+        <h3 className="mt-3 text-2xl font-black leading-tight text-white">{t.productStage.recruiter.title}</h3>
+        <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+          <div className="text-[10px] font-black uppercase tracking-[0.18em] text-[#94A3B8]">{t.productStage.recruiter.target}</div>
+          <div className="mt-1 text-sm font-black text-[#F8FAFC]">{t.portfolio.targetRole}</div>
+        </div>
+        <div className="mt-3 grid gap-2 text-xs font-bold text-[#CBD5E1]">
+          <span className="rounded-xl border border-white/8 bg-white/[0.035] px-3 py-2">{t.portfolio.location}</span>
+          <span className="rounded-xl border border-white/8 bg-white/[0.035] px-3 py-2">{t.portfolio.availability}</span>
+        </div>
+      </div>
+      <div className="evidence-publish-pane">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="text-lg font-black text-white">{t.portfolio.name}</div>
+            <div className="mt-1 text-sm font-bold text-[#94A3B8]">{t.portfolio.availability}</div>
+          </div>
+          <ShieldCheck className="text-[#2DD4BF]" size={24} />
+        </div>
+        <div className="mt-5 space-y-3">
+          {t.portfolio.projects.slice(0, 3).map((project, index) => (
+            <div key={project.name} className="rounded-xl border border-white/8 bg-[#07101f]/74 p-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="text-sm font-black text-white">{project.name}</div>
+                <span className="font-mono text-xs font-black text-[#2DD4BF]">0{index + 1}</span>
+              </div>
+              <div className="mt-1 text-xs leading-5 text-[#94A3B8]">{project.impact}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          <button type="button" className="pf-focus rounded-xl bg-[#EAF5FF] px-4 py-3 text-xs font-black text-[#071021]">
+            {t.productStage.recruiter.cv}
+          </button>
+          <button type="button" className="pf-focus rounded-xl border border-[#2DD4BF]/28 bg-[#2DD4BF]/10 px-4 py-3 text-xs font-black text-[#D1FAE5]">
+            {t.productStage.recruiter.contact}
+          </button>
         </div>
       </div>
     </div>
@@ -598,7 +727,7 @@ function TemplateBrowserMockup({ templateId }: { templateId: TemplateId }) {
           style={{ background: `linear-gradient(90deg, transparent, ${templateMeta[templateId].accent}, transparent)` }}
         />
         <div className={cn("min-h-[460px] p-6", templateMeta[templateId].className)}>
-          <PortfolioPreview templateId={templateId} compact={false} />
+          <TemplatePreview templateId={templateId} compact={false} />
         </div>
       </div>
       <div className="mt-4 flex flex-col gap-3 sm:flex-row">
@@ -871,7 +1000,7 @@ export function TemplatesPage() {
               return (
                 <article key={id} className="tilt-card rounded-lg border border-white/12 bg-white/[0.055] p-4">
                   <div className={cn("min-h-64 rounded-lg p-5", templateMeta[id].className)}>
-                    <PortfolioPreview templateId={id} compact />
+                    <TemplatePreview templateId={id} compact />
                   </div>
                   <div className="mt-5 flex items-start gap-3">
                     <Icon size={21} className="mt-1 text-[#9ed0ff]" />
@@ -906,65 +1035,302 @@ export function TemplatePageView({ templateId }: { templateId: TemplateId }) {
   );
 }
 
-function PortfolioPreview({ templateId, compact }: { templateId: TemplateId; compact: boolean }) {
+function TemplatePreview({ templateId, compact }: { templateId: TemplateId; compact: boolean }) {
   const { t } = useLocale();
-  const template = t.templates[templateId];
-  const isDark = templateId === "dark-tech" || templateId === "story-journey";
 
+  if (templateId === "minimal-executive") {
+    return <MinimalPreview t={t} compact={compact} />;
+  }
+
+  if (templateId === "dark-tech") {
+    return <DarkTechPreview t={t} compact={compact} />;
+  }
+
+  if (templateId === "creative-grid") {
+    return <CreativeGridPreview t={t} compact={compact} />;
+  }
+
+  if (templateId === "story-journey") {
+    return <StoryJourneyPreview t={t} compact={compact} />;
+  }
+
+  if (templateId === "recruiter-focus") {
+    return <RecruiterFocusPreview t={t} compact={compact} />;
+  }
+
+  if (templateId === "developer-signature") {
+    return <DeveloperSignaturePreview t={t} compact={compact} />;
+  }
+
+  return <CareerChroniclePreview t={t} compact={compact} />;
+}
+
+function MinimalPreview({ t, compact }: { t: Copy; compact: boolean }) {
   return (
     <div className={cn("mx-auto w-full max-w-4xl", compact ? "text-xs" : "text-sm")}>
-      <div className="flex items-center justify-between gap-4">
+      <div className="grid gap-5 md:grid-cols-[1.05fr_.95fr]">
         <div>
-          <div className={cn("font-black uppercase tracking-[0.22em]", isDark ? "text-[#9ed0ff]" : "text-[#315dff]")}>
-            {t.common.hosted}
-          </div>
-          <h3 className={cn("mt-2 font-black tracking-tight", compact ? "text-2xl" : "text-4xl")}>{t.demo.candidate}</h3>
-          <p className="mt-2 max-w-xl leading-6 opacity-70">{t.demo.headline}</p>
+          <p className="font-black uppercase tracking-[0.22em] text-[#315dff]">{t.common.hosted}</p>
+          <h3 className={cn("mt-3 font-black leading-none tracking-tight text-[#172033]", compact ? "text-3xl" : "text-5xl")}>{t.portfolio.name}</h3>
+          <p className="mt-4 max-w-xl font-semibold leading-7 text-[#475569]">{t.portfolio.targetRole}</p>
         </div>
-        <div className="hidden rounded-lg border border-current/14 px-4 py-3 text-center sm:block">
-          <div className="text-3xl font-black">91</div>
-          <div className="text-[10px] font-black uppercase tracking-[0.2em] opacity-62">{t.common.score}</div>
+        <div className="grid grid-cols-2 gap-2">
+          {t.portfolio.metrics.slice(0, 4).map(([value, label]) => (
+            <div key={label} className="rounded-md border border-[#dbe4f0] bg-white p-3 text-[#172033]">
+              <div className="text-2xl font-black">{value}</div>
+              <div className="mt-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#64748b]">{label}</div>
+            </div>
+          ))}
         </div>
       </div>
-      <div
-        className={cn(
-          "mt-8 grid gap-3",
-          templateId === "creative-grid" ? "grid-cols-2 md:grid-cols-4" : "md:grid-cols-3",
-          compact && "mt-5",
-        )}
-      >
-        {t.proof.projects.map((project, index) => (
-          <div
-            key={project.name}
-            className={cn(
-              "rounded-lg border border-current/14 bg-white/14 p-4",
-              templateId === "story-journey" && index === 0 && "md:col-span-2",
-              templateId === "recruiter-focus" && "bg-white/70",
-            )}
-          >
+      <div className="mt-6 grid gap-2 md:grid-cols-3">
+        {t.portfolio.projects.slice(0, compact ? 2 : 3).map((project) => (
+          <div key={project.name} className="rounded-md border border-[#dbe4f0] bg-white p-4 text-[#172033]">
             <div className="font-black">{project.name}</div>
-            <p className="mt-2 leading-6 opacity-68">{project.signal}</p>
+            <p className="mt-2 leading-6 text-[#64748b]">{project.impact}</p>
           </div>
-        ))}
-      </div>
-      <div className="mt-8 flex flex-wrap gap-2">
-        {t.recruiter.skills.slice(0, compact ? 4 : 5).map((skill) => (
-          <span key={skill} className="rounded-md border border-current/15 px-3 py-2 font-bold opacity-78">
-            {skill}
-          </span>
         ))}
       </div>
       {!compact ? (
-        <div className="mt-8 grid gap-3 md:grid-cols-5">
-          {t.career.skills.map(([skill, value]) => (
-            <div key={skill} className="rounded-lg border border-current/12 bg-white/10 p-3">
-              <div className="text-xs font-black opacity-60">{skill}</div>
-              <div className="mt-2 text-2xl font-black">{value}</div>
+        <div className="mt-6 space-y-3">
+          {t.portfolio.skills.slice(0, 4).map(([skill, value]) => (
+            <div key={skill}>
+              <div className="mb-1 flex justify-between font-black text-[#172033]">
+                <span>{skill}</span>
+                <span>{value}%</span>
+              </div>
+              <div className="h-2 rounded-md bg-[#e2e8f0]">
+                <div className="h-2 rounded-md bg-[#315dff]" style={{ width: `${value}%` }} />
+              </div>
             </div>
           ))}
         </div>
       ) : null}
-      <p className="mt-6 leading-6 opacity-64">{template.motion}</p>
+    </div>
+  );
+}
+
+function DarkTechPreview({ t, compact }: { t: Copy; compact: boolean }) {
+  return (
+    <div className={cn("mx-auto w-full max-w-4xl text-white", compact ? "text-xs" : "text-sm")}>
+      <div className="grid gap-5 md:grid-cols-[.92fr_1.08fr]">
+        <div>
+          <p className="font-black uppercase tracking-[0.22em] text-[#9ed0ff]">{t.templateUi.dark.flagship}</p>
+          <h3 className={cn("mt-3 font-black tracking-tight", compact ? "text-3xl" : "text-5xl")}>{t.portfolio.name}</h3>
+          <p className="mt-3 leading-7 text-white/62">{t.templateUi.dark.command}</p>
+        </div>
+        <div className="rounded-md border border-[#4da3ff]/22 bg-[#06101f]/82 p-3 shadow-[0_0_70px_rgba(77,163,255,.13)]">
+          <div className="grid grid-cols-10 gap-1">
+            {Array.from({ length: compact ? 40 : 70 }, (_, index) => (
+              <span
+                key={index}
+                className={cn("h-3 rounded-[3px]", index % 7 === 0 ? "bg-[#67e8a5]" : index % 5 === 0 ? "bg-[#4da3ff]" : index % 3 === 0 ? "bg-[#315dff]/70" : "bg-white/8")}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="mt-6 grid gap-3 md:grid-cols-3">
+        {t.portfolio.projects.slice(0, 3).map((project, index) => (
+          <div key={project.name} className="rounded-md border border-white/10 bg-white/[0.055] p-4">
+            <div className="font-mono text-[10px] font-black text-[#67e8a5]">0{index + 1}</div>
+            <div className="mt-2 font-black">{project.name}</div>
+            <p className="mt-2 leading-6 text-white/58">{project.proof}</p>
+          </div>
+        ))}
+      </div>
+      {!compact ? (
+        <div className="mt-6 flex flex-wrap gap-2">
+          {t.portfolio.skills.map(([skill, value]) => (
+            <span key={skill} className="rounded-md border border-[#4da3ff]/22 bg-[#4da3ff]/10 px-3 py-2 font-black text-[#d8ecff]">
+              {skill} · {value}
+            </span>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function CreativeGridPreview({ t, compact }: { t: Copy; compact: boolean }) {
+  return (
+    <div className={cn("mx-auto w-full max-w-4xl text-[#151926]", compact ? "text-xs" : "text-sm")}>
+      <p className="font-black uppercase tracking-[0.22em] text-[#b4533f]">{t.templates["creative-grid"].name}</p>
+      <h3 className={cn("mt-3 max-w-xl font-black leading-tight tracking-tight", compact ? "text-3xl" : "text-5xl")}>{t.portfolio.name}</h3>
+      <div className="mt-6 grid auto-rows-[92px] grid-cols-4 gap-3">
+        {t.portfolio.projects.slice(0, 4).map((project, index) => (
+          <div
+            key={project.name}
+            className={cn(
+              "media-sheen rounded-md border border-[#e6d7d0] p-4 text-white",
+              index === 0 ? "col-span-2 row-span-2" : "col-span-2",
+              compact && index > 2 && "hidden md:block",
+            )}
+          >
+            <div className="relative z-10 font-black">{project.name}</div>
+            <p className="relative z-10 mt-2 max-w-xs leading-6 text-white/78">{project.category}</p>
+          </div>
+        ))}
+      </div>
+      {!compact ? (
+        <div className="mt-6 grid gap-2 sm:grid-cols-4">
+          {t.templateUi.creative.processSteps.map((step, index) => (
+            <div key={step} className="rounded-md border border-[#e6d7d0] bg-white p-3">
+              <div className="font-mono text-xs font-black text-[#ff7a66]">0{index + 1}</div>
+              <div className="mt-2 font-black">{step}</div>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function StoryJourneyPreview({ t, compact }: { t: Copy; compact: boolean }) {
+  return (
+    <div className={cn("mx-auto w-full max-w-4xl text-white", compact ? "text-xs" : "text-sm")}>
+      <p className="font-black uppercase tracking-[0.22em] text-[#67e8a5]">{t.templates["story-journey"].name}</p>
+      <h3 className={cn("mt-3 max-w-2xl font-black tracking-tight", compact ? "text-3xl" : "text-5xl")}>{t.portfolio.name}</h3>
+      <div className="mt-6 grid gap-4 md:grid-cols-[160px_1fr]">
+        <div className="hidden border-l border-[#67e8a5]/35 pl-4 md:block">
+          <div className="text-3xl font-black text-[#67e8a5]">{t.portfolio.timeline.length}</div>
+          <div className="mt-1 text-xs font-black uppercase tracking-[0.18em] text-white/48">{t.templateUi.nav.timeline}</div>
+        </div>
+        <div className="space-y-3">
+          {t.portfolio.timeline.slice(0, compact ? 3 : 4).map((item, index) => (
+            <div key={item.chapter} className="relative rounded-md border border-white/10 bg-white/[0.055] p-4 pl-12">
+              <span className="absolute left-3 top-4 grid h-7 w-7 place-items-center rounded-md bg-[#67e8a5] text-xs font-black text-[#101010]">{index + 1}</span>
+              <div className="font-black">{item.chapter}</div>
+              <p className="mt-1 leading-6 text-white/58">{item.title}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+      {!compact ? (
+        <div className="mt-6 grid grid-cols-5 items-end gap-2">
+          {t.career.skills.map(([skill, value]) => (
+            <div key={skill} className="text-center">
+              <div className="mx-auto w-full rounded-md bg-[#67e8a5]" style={{ height: `${Number(value) * 1.15}px` }} />
+              <div className="mt-2 text-xs font-bold text-white/54">{skill}</div>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function RecruiterFocusPreview({ t, compact }: { t: Copy; compact: boolean }) {
+  return (
+    <div className={cn("mx-auto w-full max-w-4xl text-[#172033]", compact ? "text-xs" : "text-sm")}>
+      <div className="grid gap-4 md:grid-cols-[1.1fr_.9fr]">
+        <div>
+          <p className="font-black uppercase tracking-[0.22em] text-[#0f766e]">{t.templateUi.recruiter.recruiterOnly}</p>
+          <h3 className={cn("mt-3 font-black tracking-tight", compact ? "text-3xl" : "text-5xl")}>{t.portfolio.name}</h3>
+          <p className="mt-3 max-w-xl font-semibold leading-7 text-[#475569]">{t.portfolio.targetRole}</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {[t.portfolio.location, t.portfolio.availability].map((item) => (
+              <span key={item} className="rounded-md border border-[#dbe4f0] bg-white px-3 py-2 font-black text-[#475569]">
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div className="rounded-md border border-[#dbe4f0] bg-white p-4">
+          <div className="text-4xl font-black text-[#0f766e]">60s</div>
+          <div className="mt-2 font-black">{t.templateUi.recruiter.scanTitle}</div>
+          <div className="mt-4 space-y-2">
+            {t.portfolio.scanSteps.slice(0, compact ? 3 : 5).map((step, index) => (
+              <div key={step} className="flex items-center justify-between rounded-md bg-[#f8fafc] px-3 py-2">
+                <span className="font-bold">{step}</span>
+                <span className="font-mono text-xs font-black text-[#0f766e]">0{index + 1}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      {!compact ? (
+        <div className="mt-6 grid gap-3 md:grid-cols-3">
+          {t.portfolio.projects.slice(0, 3).map((project) => (
+            <div key={project.name} className="rounded-md border border-[#dbe4f0] bg-white p-4">
+              <div className="font-black">{project.name}</div>
+              <p className="mt-2 leading-6 text-[#64748b]">{project.impact}</p>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function DeveloperSignaturePreview({ t, compact }: { t: Copy; compact: boolean }) {
+  return (
+    <div className={cn("mx-auto w-full max-w-4xl text-white", compact ? "text-xs" : "text-sm")}>
+      <div className="grid gap-5 md:grid-cols-[.88fr_1.12fr]">
+        <div>
+          <p className="font-black uppercase tracking-[0.22em] text-[#39e6dc]">{t.templateUi.developer.eyebrow}</p>
+          <h3 className={cn("mt-3 font-black tracking-tight", compact ? "text-3xl" : "text-5xl")}>{t.portfolio.name}</h3>
+          <p className="mt-3 font-mono leading-7 text-[#9ff6ef]">{t.templateUi.developer.roles[0]} |</p>
+          <p className="mt-4 leading-7 text-white/58">{t.templateUi.developer.command}</p>
+        </div>
+        <div className="rounded-md border border-[#39e6dc]/22 bg-[#06101f] p-4">
+          <div className="grid gap-2">
+            {t.portfolio.projects.slice(0, compact ? 3 : 4).map((project, index) => (
+              <div key={project.name} className="grid grid-cols-[34px_1fr] items-center gap-3 rounded-md border border-white/8 bg-white/[0.045] p-3">
+                <span className="font-mono text-xs font-black text-[#39e6dc]">0{index + 1}</span>
+                <div>
+                  <div className="font-black">{project.name}</div>
+                  <div className="mt-1 text-xs text-white/46">{project.category}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      {!compact ? (
+        <div className="mt-6 grid gap-3 md:grid-cols-3">
+          {["AI & Data", "Frontend", "Systems"].map((group) => (
+            <div key={group} className="rounded-md border border-white/10 bg-white/[0.055] p-4">
+              <div className="font-black text-[#9ed0ff]">{group}</div>
+              <p className="mt-2 leading-6 text-white/56">{t.common.proof}</p>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function CareerChroniclePreview({ t, compact }: { t: Copy; compact: boolean }) {
+  return (
+    <div className={cn("mx-auto w-full max-w-4xl text-[#172033]", compact ? "text-xs" : "text-sm")}>
+      <div className="grid gap-5 md:grid-cols-[.78fr_1.22fr]">
+        <div>
+          <p className="font-black uppercase tracking-[0.22em] text-[#6c7cff]">{t.templateUi.chronicle.badge}</p>
+          <h3 className={cn("mt-3 font-black tracking-tight", compact ? "text-3xl" : "text-5xl")}>{t.portfolio.name}</h3>
+          <p className="mt-3 max-w-xl font-semibold leading-7 text-[#475569]">{t.templateUi.chronicle.title}</p>
+        </div>
+        <div className="relative space-y-3 border-l-2 border-[#6c7cff]/25 pl-5">
+          {t.portfolio.timeline.slice(0, compact ? 3 : 4).map((item) => (
+            <div key={item.chapter} className="relative rounded-md border border-[#dbe4f0] bg-white p-3">
+              <span className="absolute -left-[30px] top-4 h-3 w-3 rounded-[5px] bg-[#6c7cff]" />
+              <div className="text-xs font-black uppercase tracking-[0.14em] text-[#6c7cff]">{item.date}</div>
+              <div className="mt-1 font-black">{item.chapter}</div>
+              <p className="mt-1 leading-6 text-[#64748b]">{item.title}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+      {!compact ? (
+        <div className="mt-6 grid gap-2 md:grid-cols-3">
+          {t.portfolio.projects.slice(0, 3).map((project) => (
+            <div key={project.name} className="rounded-md border border-[#dbe4f0] bg-white p-4">
+              <div className="font-black">{project.name}</div>
+              <p className="mt-2 leading-6 text-[#64748b]">{project.impact}</p>
+            </div>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -1124,7 +1490,7 @@ export function EditorPage() {
                     {t.editor.desktopPreview}
                   </div>
                   <div className={cn("rounded-lg p-6", templateMeta[templateId].className)} style={{ ["--accent" as string]: accent }}>
-                    <PortfolioPreview templateId={templateId} compact={false} />
+                    <TemplatePreview templateId={templateId} compact={false} />
                   </div>
                 </div>
                 <div className="editor-preview-card rounded-lg border border-white/12 bg-white/[0.055] p-4">
@@ -1134,7 +1500,7 @@ export function EditorPage() {
                   </div>
                   <div className="mx-auto w-[250px] rounded-lg border border-white/16 bg-black p-2">
                     <div className={cn("min-h-[520px] rounded-lg p-4", templateMeta[templateId].className)}>
-                      <PortfolioPreview templateId={templateId} compact />
+                      <TemplatePreview templateId={templateId} compact />
                     </div>
                   </div>
                 </div>
