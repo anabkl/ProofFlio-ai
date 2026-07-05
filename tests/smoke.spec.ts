@@ -9,6 +9,8 @@ const routes = [
   "/templates/creative-grid",
   "/templates/story-journey",
   "/templates/recruiter-focus",
+  "/templates/developer-signature",
+  "/templates/career-chronicle",
   "/editor",
 ];
 
@@ -22,7 +24,7 @@ test.describe("ProofFolio AI UI demo", () => {
         }
       });
 
-      await page.goto(route);
+      await page.goto(route, { waitUntil: "domcontentloaded" });
       await expect(page.getByText("ProofFolio AI").first()).toBeVisible();
       await expect(page.locator("body")).toBeVisible();
 
@@ -36,21 +38,64 @@ test.describe("ProofFolio AI UI demo", () => {
   }
 
   test("switches between English and French copy", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await page.waitForLoadState("load");
+    await expect(page.getByText("Turn your projects into proof").first()).toBeVisible();
 
-    await page.getByRole("button", { name: "FR", exact: true }).click();
-    await expect(page.getByText("Transformez votre CV, GitHub et vos réalisations").first()).toBeVisible();
+    await page.getByRole("button", { name: "FR", exact: true }).click({ force: true });
+    await expect(page.getByText("Transformez vos projets en preuves").first()).toBeVisible();
+    await expect(page.getByText("Choisir Student").first()).toBeVisible();
 
-    await page.getByRole("button", { name: "EN", exact: true }).click();
-    await expect(page.getByText("Turn your CV, GitHub and achievements").first()).toBeVisible();
+    await page.getByRole("button", { name: "EN", exact: true }).click({ force: true });
+    await expect(page.getByText("Turn your projects into proof").first()).toBeVisible();
+    await expect(page.getByText("Choose Student").first()).toBeVisible();
+  });
+
+  test("pricing uses Free Student VIP with a yearly toggle", async ({ page }) => {
+    await page.goto("/#plans", { waitUntil: "domcontentloaded" });
+
+    await expect(page.getByTestId("pricing-plan-free")).toContainText("Free");
+    await expect(page.getByTestId("pricing-plan-student")).toContainText("Student");
+    await expect(page.getByTestId("pricing-plan-vip")).toContainText("VIP");
+    await expect(page.getByTestId("pricing-plan-student")).toContainText("$5 / month");
+
+    await page.getByTestId("billing-yearly").click();
+    await expect(page.getByTestId("pricing-plan-student")).toContainText("$48 / year");
+    await expect(page.locator("tbody tr").filter({ hasText: "Templates" })).toContainText("7");
+    await expect(page.getByText("Pricing is a product preview")).toBeVisible();
   });
 
   test("editor opens from a template selection", async ({ page }) => {
-    await page.goto("/editor?template=creative-grid");
+    await page.goto("/editor?template=creative-grid", { waitUntil: "domcontentloaded" });
 
     await expect(page.getByRole("button", { name: "Creative Grid" }).first()).toBeVisible();
     await expect(page.getByText("Desktop preview")).toBeVisible();
-    await page.getByRole("button", { name: "FR" }).click();
+    await page.waitForLoadState("load");
+    await page.getByRole("button", { name: "FR" }).click({ force: true });
     await expect(page.getByText("Aperçu desktop")).toBeVisible();
+  });
+
+  test("template pages expose living navigation and interactions", async ({ page }) => {
+    await page.goto("/templates/dark-tech", { waitUntil: "domcontentloaded" });
+
+    await expect(page.getByTestId("template-nav")).toBeVisible();
+    await expect(page.getByText("Skill constellation")).toBeVisible();
+    await expect(page.locator("canvas")).toHaveCount(0);
+
+    await page.goto("/templates/creative-grid", { waitUntil: "domcontentloaded" });
+    await page.waitForLoadState("load");
+    await expect(page.getByText("Atlas UI Systems").first()).toBeVisible();
+    await page.getByTestId("creative-project-0").click({ force: true });
+    await expect(page.getByRole("dialog")).toBeVisible();
+
+    await page.goto("/templates/developer-signature", { waitUntil: "domcontentloaded" });
+    await expect(page.getByText("Developer Signature").first()).toBeVisible();
+    await page.getByRole("button", { name: "AI", exact: true }).click({ force: true });
+    await expect(page.getByText("ModelOps Notes").first()).toBeVisible();
+
+    await page.goto("/templates/career-chronicle", { waitUntil: "domcontentloaded" });
+    await expect(page.getByText("Career Chronicle").first()).toBeVisible();
+    await page.getByRole("button", { name: /Open project detail/i }).first().click({ force: true });
+    await expect(page.getByRole("dialog")).toBeVisible();
   });
 });
