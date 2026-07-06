@@ -31,7 +31,7 @@ export function MinimalExecutiveTemplate() {
               <Eye size={16} />
               {t.common.demo}
             </Link>
-            <Link href="/editor" className="pf-focus inline-flex items-center justify-center gap-2 rounded-xl border border-[#dbe4f0] px-4 py-3 text-sm font-black text-[#172033]">
+            <Link href={`mailto:${t.portfolio.email}`} className="pf-focus inline-flex items-center justify-center gap-2 rounded-xl border border-[#dbe4f0] px-4 py-3 text-sm font-black text-[#172033]">
               <Mail size={16} />
               {t.common.contact}
             </Link>

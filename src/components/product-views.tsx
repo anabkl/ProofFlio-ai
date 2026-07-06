@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Activity,
@@ -14,6 +14,7 @@ import {
   FileText,
   FolderGit,
   Globe2,
+  Menu,
   Monitor,
   Redo2,
   RotateCcw,
@@ -22,10 +23,13 @@ import {
   Sparkles,
   Upload,
   WandSparkles,
+  X,
 } from "lucide-react";
+import { AuthNavStatus } from "@/components/auth/auth-nav-status";
 import { LivingTemplatePage } from "@/components/living-templates";
 import { useLocale } from "@/components/locale-provider";
 import { PricingSection } from "@/components/pricing-section";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
   icons,
   localeMeta,
@@ -53,69 +57,156 @@ function AppShell({ children }: { children: React.ReactNode }) {
 }
 
 function Navigation() {
-  const { locale, setLocale, t } = useLocale();
+  const { locale, localeReady, setLocale, t } = useLocale();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const links = [
     { href: "/#product", label: t.nav.product },
     { href: "/templates", label: t.nav.templates },
     { href: "/demo", label: t.nav.demo },
     { href: "/#plans", label: t.nav.pricing },
   ];
+  const mobileLinks = [
+    { href: "/", label: t.nav.home },
+    { href: "/templates", label: t.nav.templates },
+    { href: "/demo", label: t.nav.demo },
+    { href: "/#plans", label: t.nav.pricing },
+    { href: "/onboarding", label: t.nav.startShort },
+  ];
+
+  useEffect(() => {
+    if (!mobileOpen) {
+      return;
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMobileOpen(false);
+        window.requestAnimationFrame(() => menuButtonRef.current?.focus());
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [mobileOpen]);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#05070d]/82 backdrop-blur-xl">
-      <div className="pf-container flex min-h-16 items-center justify-between gap-4 py-3">
-        <Link href="/" className="pf-focus flex items-center gap-3" aria-label="ProofFolio AI">
-          <span className="grid h-9 w-9 place-items-center rounded-lg border border-[#4da3ff]/45 bg-[#08142a] text-sm font-black text-[#9ed0ff]">
-            PF
-          </span>
-          <span className="min-w-0">
-            <span className="block text-sm font-black tracking-[0.18em]">ProofFolio AI</span>
-            <span className="hidden text-[11px] uppercase tracking-[0.24em] text-white/45 sm:block">
-              {t.footer.product}
+    <>
+      <a href="#main-content" className="pf-focus sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-black focus:text-[#071021]">
+        {t.nav.skip}
+      </a>
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#05070d]/82 backdrop-blur-xl">
+        <div className="pf-container flex min-h-16 items-center justify-between gap-3 py-3">
+          <Link href="/" className="pf-focus flex min-w-0 items-center gap-3" aria-label="ProofFolio AI">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-[#4da3ff]/45 bg-[#08142a] text-sm font-black text-[#9ed0ff]">
+              PF
             </span>
-          </span>
-        </Link>
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary navigation">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="pf-focus rounded-md px-3 py-2 text-sm font-semibold text-white/72 transition hover:bg-white/8 hover:text-white"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="flex items-center gap-2">
-          <div
-            className="flex rounded-md border border-white/12 bg-white/6 p-1"
-            aria-label={t.nav.language}
-          >
-            {locales.map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => setLocale(item)}
-                className={cn(
-                  "pf-focus rounded-md px-2.5 py-1.5 text-xs font-black transition",
-                  locale === item
-                    ? "bg-white text-[#071021]"
-                    : "text-white/62 hover:bg-white/8 hover:text-white",
-                )}
-              >
-                {localeMeta[item].label}
-              </button>
-            ))}
-          </div>
-          <Link
-            href="/editor"
-            className="pf-focus hidden rounded-md bg-[#f7fbff] px-4 py-2 text-sm font-black text-[#071021] transition hover:bg-[#9ed0ff] sm:inline-flex"
-          >
-            {t.nav.create}
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-black tracking-[0.18em]">ProofFolio AI</span>
+              <span className="hidden text-[11px] uppercase tracking-[0.24em] text-white/45 sm:block">
+                {t.footer.product}
+              </span>
+            </span>
           </Link>
+          <nav className="hidden items-center gap-1 lg:flex" aria-label={t.nav.primary}>
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="pf-focus rounded-md px-3 py-2 text-sm font-semibold text-white/72 transition hover:bg-white/8 hover:text-white"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+          <div className="flex items-center gap-2">
+            <div
+              className="flex rounded-md border border-white/12 bg-white/6 p-1"
+              aria-label={t.nav.language}
+            >
+              {locales.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  disabled={!localeReady}
+                  onClick={() => setLocale(item)}
+                  className={cn(
+                    "pf-focus rounded-md px-2.5 py-1.5 text-xs font-black transition",
+                    locale === item
+                      ? "bg-white text-[#071021]"
+                      : "text-white/62 hover:bg-white/8 hover:text-white",
+                  )}
+                >
+                  {localeMeta[item].label}
+                </button>
+              ))}
+            </div>
+            <AuthNavStatus />
+            <Link
+              href="/onboarding"
+              aria-label={t.nav.startLabel}
+              className="pf-focus inline-flex rounded-md bg-[#f7fbff] px-3 py-2 text-sm font-black text-[#071021] transition hover:bg-[#9ed0ff] sm:px-4"
+            >
+              <span className="hidden sm:inline">{t.nav.create}</span>
+              <span className="sm:hidden">{t.nav.startShort}</span>
+            </Link>
+            <button
+              ref={menuButtonRef}
+              type="button"
+              onClick={() => setMobileOpen((current) => !current)}
+              className="pf-focus inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/12 bg-white/6 text-white lg:hidden"
+              aria-label={mobileOpen ? t.nav.closeMenu : t.nav.openMenu}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-navigation"
+            >
+              {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
+          </div>
         </div>
-      </div>
-    </header>
+        <AnimatePresence>
+          {mobileOpen ? (
+            <motion.nav
+              id="mobile-navigation"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.16 }}
+              className="border-t border-white/10 bg-[#05070d]/96 px-4 pb-4 pt-2 shadow-[0_22px_80px_rgba(0,0,0,.34)] lg:hidden"
+              aria-label={t.nav.menu}
+            >
+              <div className="mx-auto grid max-w-[1180px] gap-2">
+                <div className="mb-1 flex w-fit rounded-md border border-white/12 bg-white/6 p-1" aria-label={t.nav.language}>
+                  {locales.map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      disabled={!localeReady}
+                      onClick={() => setLocale(item)}
+                      className={cn(
+                        "pf-focus rounded-md px-2.5 py-1.5 text-xs font-black transition",
+                        locale === item ? "bg-white text-[#071021]" : "text-white/62 hover:bg-white/8 hover:text-white",
+                      )}
+                    >
+                      {localeMeta[item].label}
+                    </button>
+                  ))}
+                </div>
+                {mobileLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="pf-focus rounded-lg border border-white/10 bg-white/[0.045] px-4 py-3 text-sm font-black text-white/78 hover:bg-white/8 hover:text-white"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </motion.nav>
+          ) : null}
+        </AnimatePresence>
+      </header>
+    </>
   );
 }
 
@@ -177,7 +268,7 @@ function PrimaryCtas() {
   return (
     <div className="hero-ctas flex flex-col gap-3 sm:flex-row">
       <Link
-        href="/editor"
+        href="/onboarding"
         className="pf-focus inline-flex items-center justify-center gap-2 rounded-md bg-[#f7fbff] px-5 py-3 text-sm font-black text-[#071021] transition hover:bg-[#9ed0ff]"
       >
         <WandSparkles size={18} />
@@ -739,7 +830,7 @@ function TemplateBrowserMockup({ templateId }: { templateId: TemplateId }) {
           {t.common.preview}
         </Link>
         <Link
-          href={`/editor?template=${templateId}`}
+          href={`/onboarding?template=${templateId}`}
           className="pf-focus inline-flex flex-1 items-center justify-center gap-2 rounded-md bg-[#f7fbff] px-4 py-3 text-sm font-black text-[#071021] hover:bg-[#9ed0ff]"
         >
           <Sparkles size={17} />
@@ -883,7 +974,7 @@ function FinalCta() {
         <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-[#94A3B8]">{t.finalCta.body}</p>
         <div className="mt-8 flex justify-center">
           <Link
-            href="/editor"
+            href="/onboarding"
             className="pf-focus inline-flex items-center justify-center gap-2 rounded-md bg-[#F8FAFC] px-5 py-3 text-sm font-black text-[#070B14] hover:bg-[#BFDBFE]"
           >
             <Monitor size={18} />
@@ -898,7 +989,7 @@ function FinalCta() {
 export function LandingPage() {
   return (
     <AppShell>
-      <main>
+      <main id="main-content">
         <Hero />
         <ImportEvidenceSection />
         <WorkflowSection />
@@ -919,7 +1010,7 @@ export function DemoPage() {
 
   return (
     <AppShell>
-      <main className="bg-[#05070d] pt-28">
+      <main id="main-content" className="bg-[#05070d] pt-28">
         <section className="pf-container pb-20 pt-10">
           <div className="grid gap-8 lg:grid-cols-[.9fr_1.1fr] lg:items-center">
             <div>
@@ -990,7 +1081,7 @@ export function TemplatesPage() {
 
   return (
     <AppShell>
-      <main className="bg-[#05070d] pt-28">
+      <main id="main-content" className="bg-[#05070d] pt-28">
         <section className="pf-container py-14">
           <SectionIntro {...t.templateShowcase} />
           <div className="mt-14 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -1013,7 +1104,7 @@ export function TemplatesPage() {
                     <Link href={`/templates/${id}`} className="pf-focus inline-flex flex-1 items-center justify-center rounded-md border border-white/14 px-4 py-3 text-sm font-black text-white hover:bg-white/8">
                       {t.common.preview}
                     </Link>
-                    <Link href={`/editor?template=${id}`} className="pf-focus inline-flex flex-1 items-center justify-center rounded-md bg-[#f7fbff] px-4 py-3 text-sm font-black text-[#071021] hover:bg-[#9ed0ff]">
+                    <Link href={`/onboarding?template=${id}`} className="pf-focus inline-flex flex-1 items-center justify-center rounded-md bg-[#f7fbff] px-4 py-3 text-sm font-black text-[#071021] hover:bg-[#9ed0ff]">
                       {t.common.useTemplate}
                     </Link>
                   </div>
@@ -1346,18 +1437,67 @@ export function EditorPage() {
   const [animation, setAnimation] = useState(1);
   const [history, setHistory] = useState<TemplateId[]>(["dark-tech"]);
   const [historyIndex, setHistoryIndex] = useState(0);
+  const [evidenceHandoff, setEvidenceHandoff] = useState<{
+    ready: boolean;
+    portfolioId: string;
+    approvedCount: number | null;
+  }>({ ready: false, portfolioId: "", approvedCount: null });
 
   useEffect(() => {
+    let active = true;
     const frame = window.requestAnimationFrame(() => {
+      const params = new URLSearchParams(window.location.search);
       const initialTemplate = getInitialTemplate();
       if (initialTemplate !== "dark-tech") {
         setTemplateId(initialTemplate);
         setHistory([initialTemplate]);
         setHistoryIndex(0);
       }
+
+      const portfolioId = params.get("portfolio");
+      const onboardingReady = params.get("onboarding") === "ready";
+
+      if (!portfolioId || !onboardingReady) {
+        return;
+      }
+
+      setEvidenceHandoff({ ready: true, portfolioId, approvedCount: null });
+
+      const supabase = createSupabaseBrowserClient();
+
+      if (!supabase) {
+        return;
+      }
+
+      void (async () => {
+        const [{ data: portfolio }, { count }] = await Promise.all([
+          supabase.from("portfolios").select("selected_template_id").eq("id", portfolioId).maybeSingle(),
+          supabase
+            .from("proposal_reviews")
+            .select("id", { count: "exact", head: true })
+            .eq("portfolio_id", portfolioId)
+            .in("review_state", ["approved", "edited"]),
+        ]);
+
+        if (!active) {
+          return;
+        }
+
+        if (templateIds.includes(portfolio?.selected_template_id as TemplateId)) {
+          const nextTemplate = portfolio?.selected_template_id as TemplateId;
+          setTemplateId(nextTemplate);
+          setHistory([nextTemplate]);
+          setHistoryIndex(0);
+        }
+
+        setEvidenceHandoff({ ready: true, portfolioId, approvedCount: count ?? 0 });
+      })();
     });
 
-    return () => window.cancelAnimationFrame(frame);
+    return () => {
+      active = false;
+      window.cancelAnimationFrame(frame);
+    };
   }, []);
 
   function changeTemplate(next: TemplateId) {
@@ -1384,7 +1524,7 @@ export function EditorPage() {
 
   return (
     <AppShell>
-      <main className="bg-[#05070d] pt-28">
+      <main id="main-content" className="bg-[#05070d] pt-28">
         <section className="pf-container py-12">
           <div className="grid gap-8 xl:grid-cols-[360px_1fr]">
             <aside className="editor-sidebar rounded-lg border border-white/12 bg-white/[0.055] p-5">
@@ -1403,6 +1543,17 @@ export function EditorPage() {
                   <span className="text-sm font-bold text-white/60">{t.common.published}</span>
                   <span className="text-xs font-black uppercase tracking-[0.16em] text-white/42">{t.editor.publishState}</span>
                 </div>
+                {evidenceHandoff.ready ? (
+                  <div data-testid="editor-evidence-status" className="rounded-md border border-[#4E8CFF]/22 bg-[#4E8CFF]/10 px-3 py-2">
+                    <div className="text-sm font-black text-[#BFDBFE]">{t.editor.evidenceReady}</div>
+                    <div className="mt-1 text-xs font-bold leading-5 text-white/58">
+                      {(evidenceHandoff.approvedCount ?? 0).toString()} {t.editor.approvedEvidence}
+                    </div>
+                    <div className="mt-1 break-all text-[10px] font-black uppercase tracking-[0.14em] text-white/38">
+                      {t.editor.portfolioId}: {evidenceHandoff.portfolioId}
+                    </div>
+                  </div>
+                ) : null}
               </div>
               <div className="mt-5 flex gap-2">
                 <button

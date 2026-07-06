@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { BadgeCheck, CreditCard, Sparkles } from "lucide-react";
 import { useLocale } from "@/components/locale-provider";
@@ -15,6 +15,12 @@ type BillingMode = "monthly" | "yearly";
 export function PricingSection() {
   const { t } = useLocale();
   const [billing, setBilling] = useState<BillingMode>("monthly");
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => setHydrated(true));
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   return (
     <section id="plans" className="pricing-aurora relative overflow-hidden bg-[#02040a] py-24">
@@ -41,6 +47,7 @@ export function PricingSection() {
                 key={mode}
                 type="button"
                 data-testid={`billing-${mode}`}
+                disabled={!hydrated}
                 onClick={() => setBilling(mode)}
                 aria-pressed={billing === mode}
                 aria-label={mode === "monthly" ? t.plans.monthly : t.plans.yearly}
