@@ -32,9 +32,9 @@ import {
   saveEditorPresentationAction,
   saveEditorProjectAction,
 } from "@/app/editor/actions";
-import { AppShell } from "@/components/product-views";
 import { useLocale } from "@/components/locale-provider";
 import { EditorPreview } from "@/components/editor/editor-preview";
+import { WorkspaceHeader } from "@/components/workspace-header";
 import { templateIds, type Copy } from "@/lib/content";
 import {
   accentOptions,
@@ -352,8 +352,12 @@ function EditorWorkspace({ initialState }: { initialState: EditorInitialState })
   }
 
   return (
-    <AppShell>
-      <main id="main-content" className="min-w-0 bg-[#05070d] pt-24" data-testid="editor-workspace">
+    <div className="min-h-screen overflow-x-hidden bg-[#05070d] text-white">
+      <a href="#main-content" className="pf-focus sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-black focus:text-[#071021]">
+        {t.nav.skip}
+      </a>
+      <WorkspaceHeader contextLabel={t.editor.kicker} />
+      <main id="main-content" className="min-w-0 bg-[#05070d]" data-testid="editor-workspace">
         <section className="pf-container py-8 sm:py-12">
           <div className="mb-7 flex flex-col gap-5 border-b border-white/10 pb-7 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
@@ -541,7 +545,7 @@ function EditorWorkspace({ initialState }: { initialState: EditorInitialState })
           </div>
         </section>
       </main>
-    </AppShell>
+    </div>
   );
 }
 
@@ -549,8 +553,9 @@ function EditorUnavailable({ mode, t }: { mode: "setup_required" | "denied" | "e
   const state = t.editor.unavailable[mode];
 
   return (
-    <AppShell>
-      <main id="main-content" className="grid min-h-[76vh] place-items-center bg-[#05070d] px-4 pt-24">
+    <div className="min-h-screen bg-[#05070d] text-white">
+      <WorkspaceHeader contextLabel={t.editor.kicker} />
+      <main id="main-content" className="grid min-h-[calc(100vh-64px)] place-items-center bg-[#05070d] px-4 py-12">
         <section data-testid={`editor-${mode}`} className="w-full max-w-2xl rounded-lg border border-white/12 bg-[#0D1422] p-6 text-center sm:p-10">
           <span className="mx-auto grid h-12 w-12 place-items-center rounded-lg border border-[#FBBF24]/24 bg-[#FBBF24]/8 text-[#FCD34D]">
             <AlertTriangle size={21} aria-hidden="true" />
@@ -562,7 +567,7 @@ function EditorUnavailable({ mode, t }: { mode: "setup_required" | "denied" | "e
           </Link>
         </section>
       </main>
-    </AppShell>
+    </div>
   );
 }
 

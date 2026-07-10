@@ -6,7 +6,7 @@ import { useFormStatus } from "react-dom";
 import { ArrowRight, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
 import { signInAction, signUpAction, type AuthActionState } from "@/app/auth/actions";
 import { useLocale } from "@/components/locale-provider";
-import { localeMeta, locales } from "@/lib/content";
+import { WorkspaceHeader } from "@/components/workspace-header";
 
 type AuthFormProps = {
   mode: "sign-in" | "sign-up";
@@ -16,55 +16,42 @@ type AuthFormProps = {
 const initialState: AuthActionState = { message: "" };
 
 export function AuthForm({ mode, next }: AuthFormProps) {
-  const { locale, localeReady, setLocale, t } = useLocale();
+  const { locale, t } = useLocale();
   const action = mode === "sign-in" ? signInAction : signUpAction;
   const [state, formAction] = useActionState(action, initialState);
   const isSignIn = mode === "sign-in";
   const alternateHref = `${isSignIn ? "/auth/sign-up" : "/auth/sign-in"}?next=${encodeURIComponent(next)}`;
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#05070d] pt-24 text-white">
-      <div className="absolute inset-0 pf-grid-v3 opacity-40" aria-hidden="true" />
-      <section className="pf-container relative z-10 grid min-h-[calc(100svh-96px)] items-center gap-8 py-12 lg:grid-cols-[.9fr_1.1fr]">
-        <div className="max-w-xl">
-          <p className="text-xs font-black uppercase tracking-[0.28em] text-[#2DD4BF]">{t.auth.kicker}</p>
-          <h1 className="mt-5 text-4xl font-black tracking-tight text-white sm:text-6xl">
-            {isSignIn ? t.auth.signInTitle : t.auth.signUpTitle}
-          </h1>
-          <p className="mt-5 text-lg leading-8 text-[#A8B3C7]">
-            {isSignIn ? t.auth.signInBody : t.auth.signUpBody}
-          </p>
-          <div className="mt-8 grid gap-3 sm:grid-cols-3">
-            {t.auth.proofPoints.map((point) => (
-              <div key={point} className="rounded-lg border border-white/10 bg-white/[0.055] p-4 text-sm font-bold leading-6 text-white/72">
-                <ShieldCheck className="mb-3 text-[#2DD4BF]" size={18} />
-                {point}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="relative rounded-xl border border-white/12 bg-[#0D1422]/86 p-5 shadow-[0_34px_120px_rgba(0,0,0,.36)] backdrop-blur">
-          <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[#4E8CFF] to-transparent" aria-hidden="true" />
-          <div className="mb-5 flex justify-end">
-            <div className="flex rounded-md border border-white/12 bg-white/6 p-1" aria-label={t.nav.language}>
-              {locales.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  disabled={!localeReady}
-                  onClick={() => setLocale(item)}
-                  className={[
-                    "pf-focus rounded-md px-2.5 py-1.5 text-xs font-black transition",
-                    locale === item ? "bg-white text-[#071021]" : "text-white/62 hover:bg-white/8 hover:text-white",
-                  ].join(" ")}
-                >
-                  {localeMeta[item].label}
-                </button>
+    <div className="min-h-screen overflow-x-hidden bg-[#05070d] text-white">
+      <a href="#auth-main" className="pf-focus sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-black focus:text-[#071021]">
+        {t.nav.skip}
+      </a>
+      <WorkspaceHeader contextLabel={t.auth.kicker} />
+      <main id="auth-main" className="relative overflow-hidden">
+        <div className="absolute inset-0 pf-grid-v3 opacity-40" aria-hidden="true" />
+        <section className="pf-container relative z-10 grid min-h-[calc(100svh-64px)] items-center gap-8 py-10 lg:grid-cols-[.9fr_1.1fr] lg:py-12">
+          <div className="max-w-xl">
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-[#2DD4BF]">{t.auth.kicker}</p>
+            <h1 className="mt-4 text-3xl font-black tracking-tight text-white sm:mt-5 sm:text-6xl">
+              {isSignIn ? t.auth.signInTitle : t.auth.signUpTitle}
+            </h1>
+            <p className="mt-4 text-base leading-7 text-[#A8B3C7] sm:mt-5 sm:text-lg sm:leading-8">
+              {isSignIn ? t.auth.signInBody : t.auth.signUpBody}
+            </p>
+            <div className="mt-6 grid grid-cols-3 gap-2 sm:mt-8 sm:gap-3">
+              {t.auth.proofPoints.map((point) => (
+                <div key={point} className="rounded-lg border border-white/10 bg-white/[0.055] p-2.5 text-[11px] font-bold leading-4 text-white/72 sm:p-4 sm:text-sm sm:leading-6">
+                  <ShieldCheck className="mb-1.5 text-[#2DD4BF] sm:mb-3" size={16} />
+                  {point}
+                </div>
               ))}
             </div>
           </div>
-          <form action={formAction} className="space-y-5" noValidate>
+
+          <div className="relative rounded-xl border border-white/12 bg-[#0D1422]/86 p-5 shadow-[0_34px_120px_rgba(0,0,0,.36)] backdrop-blur">
+            <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-[#4E8CFF] to-transparent" aria-hidden="true" />
+            <form action={formAction} className="space-y-5" noValidate>
             <input type="hidden" name="locale" value={locale} />
             <input type="hidden" name="next" value={next} />
             <div>
@@ -124,8 +111,9 @@ export function AuthForm({ mode, next }: AuthFormProps) {
             </Link>
           </div>
         </div>
-      </section>
-    </main>
+        </section>
+      </main>
+    </div>
   );
 }
 

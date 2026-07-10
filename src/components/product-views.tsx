@@ -96,13 +96,13 @@ function Navigation() {
         {t.nav.skip}
       </a>
       <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#05070d]/82 backdrop-blur-xl">
-        <div className="pf-container flex min-h-16 items-center justify-between gap-3 py-3">
-          <Link href="/" className="pf-focus flex min-w-0 items-center gap-3" aria-label="ProofFolio AI">
+        <div className="pf-container flex min-h-16 items-center justify-between gap-2 py-3 sm:gap-3">
+          <Link href="/" className="pf-focus flex min-w-0 items-center gap-2 sm:gap-3" aria-label="ProofFolio AI">
             <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-[#4da3ff]/45 bg-[#08142a] text-sm font-black text-[#9ed0ff]">
               PF
             </span>
             <span className="min-w-0">
-              <span className="block truncate text-sm font-black tracking-[0.18em]">ProofFolio AI</span>
+              <span className="block truncate text-sm font-black tracking-tight sm:tracking-[0.18em]">ProofFolio AI</span>
               <span className="hidden text-[11px] uppercase tracking-[0.24em] text-white/45 sm:block">
                 {t.footer.product}
               </span>
@@ -119,9 +119,9 @@ function Navigation() {
               </Link>
             ))}
           </nav>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <div
-              className="flex rounded-md border border-white/12 bg-white/6 p-1"
+              className="flex shrink-0 rounded-md border border-white/12 bg-white/6 p-1"
               aria-label={t.nav.language}
             >
               {locales.map((item) => (
@@ -131,7 +131,7 @@ function Navigation() {
                   disabled={!localeReady}
                   onClick={() => setLocale(item)}
                   className={cn(
-                    "pf-focus rounded-md px-2.5 py-1.5 text-xs font-black transition",
+                    "pf-focus rounded-md px-1.5 py-1.5 text-[11px] font-black transition sm:px-2.5 sm:text-xs",
                     locale === item
                       ? "bg-white text-[#071021]"
                       : "text-white/62 hover:bg-white/8 hover:text-white",
@@ -145,7 +145,7 @@ function Navigation() {
             <Link
               href="/onboarding"
               aria-label={t.nav.startLabel}
-              className="pf-focus inline-flex rounded-md bg-[#f7fbff] px-3 py-2 text-sm font-black text-[#071021] transition hover:bg-[#9ed0ff] sm:px-4"
+              className="pf-focus inline-flex shrink-0 rounded-md bg-[#f7fbff] px-2.5 py-2 text-sm font-black text-[#071021] transition hover:bg-[#9ed0ff] sm:px-4"
             >
               <span className="hidden sm:inline">{t.nav.create}</span>
               <span className="sm:hidden">{t.nav.startShort}</span>
@@ -154,7 +154,7 @@ function Navigation() {
               ref={menuButtonRef}
               type="button"
               onClick={() => setMobileOpen((current) => !current)}
-              className="pf-focus inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/12 bg-white/6 text-white lg:hidden"
+              className="pf-focus inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-white/12 bg-white/6 text-white lg:hidden"
               aria-label={mobileOpen ? t.nav.closeMenu : t.nav.openMenu}
               aria-expanded={mobileOpen}
               aria-controls="mobile-navigation"
@@ -175,22 +175,6 @@ function Navigation() {
               aria-label={t.nav.menu}
             >
               <div className="mx-auto grid max-w-[1180px] gap-2">
-                <div className="mb-1 flex w-fit rounded-md border border-white/12 bg-white/6 p-1" aria-label={t.nav.language}>
-                  {locales.map((item) => (
-                    <button
-                      key={item}
-                      type="button"
-                      disabled={!localeReady}
-                      onClick={() => setLocale(item)}
-                      className={cn(
-                        "pf-focus rounded-md px-2.5 py-1.5 text-xs font-black transition",
-                        locale === item ? "bg-white text-[#071021]" : "text-white/62 hover:bg-white/8 hover:text-white",
-                      )}
-                    >
-                      {localeMeta[item].label}
-                    </button>
-                  ))}
-                </div>
                 {mobileLinks.map((link) => (
                   <Link
                     key={link.href}

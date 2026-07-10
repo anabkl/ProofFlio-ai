@@ -4,15 +4,14 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2, Database, FileText, ShieldCheck, Sparkles } from "lucide-react";
 import { startNewDraftAction } from "@/app/onboarding/actions";
-import { AuthNavStatus } from "@/components/auth/auth-nav-status";
 import { useLocale } from "@/components/locale-provider";
+import { WorkspaceHeader } from "@/components/workspace-header";
 import { EvidenceUploadStep } from "@/components/onboarding/evidence-upload-step";
 import { OnboardingProgress } from "@/components/onboarding/onboarding-progress";
 import { OnboardingSummary } from "@/components/onboarding/onboarding-summary";
 import { ProposalReviewStep } from "@/components/onboarding/proposal-review-step";
 import { SourceSelectionStep } from "@/components/onboarding/source-selection-step";
 import { TemplateRecommendationStep } from "@/components/onboarding/template-recommendation-step";
-import { localeMeta, locales } from "@/lib/content";
 import {
   type DraftProgress,
   type EvidenceSourceType,
@@ -22,7 +21,7 @@ import {
 } from "@/lib/onboarding/types";
 
 export function OnboardingFlow({ initialState }: { initialState: OnboardingInitialState }) {
-  const { locale, localeReady, setLocale, t } = useLocale();
+  const { locale, t } = useLocale();
   const [activeStep, setActiveStep] = useState<OnboardingStep>(initialState.step);
   const [selectedSource, setSelectedSource] = useState<EvidenceSourceType>(initialState.selectedSource);
   const stepPanelRef = useRef<HTMLElement>(null);
@@ -75,51 +74,7 @@ export function OnboardingFlow({ initialState }: { initialState: OnboardingIniti
       <a href="#main-content" className="pf-focus sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-black focus:text-[#071021]">
         {t.nav.skip}
       </a>
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#05070d]/86 backdrop-blur-xl">
-        <div className="pf-container flex min-h-16 items-center justify-between gap-4 py-3">
-          <Link href="/" className="pf-focus flex items-center gap-3" aria-label="ProofFolio AI">
-            <span className="grid h-9 w-9 place-items-center rounded-lg border border-[#4da3ff]/45 bg-[#08142a] text-sm font-black text-[#9ed0ff]">
-              PF
-            </span>
-            <span>
-              <span className="block text-sm font-black tracking-[0.18em]">ProofFolio AI</span>
-              <span className="hidden text-[11px] uppercase tracking-[0.24em] text-white/45 sm:block">
-                {t.onboarding.workspace}
-              </span>
-            </span>
-          </Link>
-          <nav className="hidden items-center gap-1 md:flex" aria-label={t.nav.primary}>
-            <Link className="pf-focus rounded-md px-3 py-2 text-sm font-semibold text-white/70 hover:bg-white/8 hover:text-white" href="/">
-              {t.nav.home}
-            </Link>
-            <Link className="pf-focus rounded-md px-3 py-2 text-sm font-semibold text-white/70 hover:bg-white/8 hover:text-white" href="/templates">
-              {t.nav.templates}
-            </Link>
-            <Link className="pf-focus rounded-md px-3 py-2 text-sm font-semibold text-white/70 hover:bg-white/8 hover:text-white" href="/demo">
-              {t.nav.demo}
-            </Link>
-          </nav>
-          <div className="flex items-center gap-2">
-            <div className="flex rounded-md border border-white/12 bg-white/6 p-1" aria-label={t.nav.language}>
-              {locales.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  disabled={!localeReady}
-                  onClick={() => setLocale(item)}
-                  className={[
-                    "pf-focus rounded-md px-2.5 py-1.5 text-xs font-black transition",
-                    locale === item ? "bg-white text-[#071021]" : "text-white/62 hover:bg-white/8 hover:text-white",
-                  ].join(" ")}
-                >
-                  {localeMeta[item].label}
-                </button>
-              ))}
-            </div>
-            <AuthNavStatus />
-          </div>
-        </div>
-      </header>
+      <WorkspaceHeader contextLabel={t.onboarding.workspace} />
 
       <main id="main-content" className="relative">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(78,140,255,.12),transparent_34%),linear-gradient(180deg,rgba(11,18,34,.92),rgba(5,7,13,1))]" aria-hidden="true" />
