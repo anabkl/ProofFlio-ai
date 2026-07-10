@@ -1,4 +1,5 @@
 export const EVIDENCE_BUCKET = "evidence";
+export const MAX_EVIDENCE_FILE_BYTES = 10 * 1024 * 1024;
 
 export type SupabasePublicConfig = {
   url: string;

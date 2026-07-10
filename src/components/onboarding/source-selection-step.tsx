@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Award, FileText, FolderGit, PenLine, ShieldCheck } from "lucide-react";
 import type { Copy, TemplateId } from "@/lib/content";
-import type { EvidenceItem, EvidenceSourceType } from "@/lib/onboarding/types";
+import type { EvidenceItem, EvidenceSourceStatus, EvidenceSourceType } from "@/lib/onboarding/types";
 
 const sourceIcons = {
   cv: FileText,
@@ -17,12 +17,16 @@ export function SourceSelectionStep({
   templateId,
   selectedSource,
   evidenceItems,
+  errorMessage,
+  canPersist,
   onSelect,
 }: {
   t: Copy;
   templateId: TemplateId;
   selectedSource: EvidenceSourceType;
   evidenceItems: EvidenceItem[];
+  errorMessage?: string;
+  canPersist: boolean;
   onSelect: (source: EvidenceSourceType) => void;
 }) {
   const sources = [
@@ -47,20 +51,31 @@ export function SourceSelectionStep({
         {t.onboarding.honestyNotice}
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid gap-3 md:grid-cols-2" data-testid="evidence-source-workspace">
         {sources.map((source) => {
           const Icon = sourceIcons[source.id];
           const count = evidenceItems.filter((item) => item.sourceType === source.id).length;
           const active = selectedSource === source.id;
+          const status = getSourceStatus(source.id, count, active, canPersist, errorMessage);
+          const statusLabel = localizeStatus(t, status, source.disabled);
 
           const cardContent = (
             <>
               <span className="flex items-start justify-between gap-3">
-                <span className="grid h-11 w-11 place-items-center rounded-lg border border-white/10 bg-[#071021] text-[#9ed0ff]">
+                <span className="grid h-11 w-11 place-items-center rounded-lg border border-white/10 bg-[#071021] text-[#B7C4FF]">
                   <Icon size={21} />
                 </span>
-                <span className="rounded-md border border-white/10 bg-white/[0.055] px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-white/56">
-                  {source.disabled ? t.onboarding.comingSoon : count > 0 ? `${count} ${t.onboarding.saved}` : t.onboarding.ready}
+                <span
+                  className={[
+                    "rounded-md border px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em]",
+                    status === "saved_privately"
+                      ? "border-[#2DD4BF]/24 bg-[#2DD4BF]/10 text-[#99F6E4]"
+                      : status === "needs_attention"
+                        ? "border-[#ff7a66]/26 bg-[#ff7a66]/10 text-[#ffd8d1]"
+                        : "border-white/10 bg-white/[0.055] text-white/56",
+                  ].join(" ")}
+                >
+                  {count > 0 && !source.disabled ? `${count} · ${statusLabel}` : statusLabel}
                 </span>
               </span>
               <span className="mt-5 block text-xl font-black text-white">{source.label}</span>
@@ -71,7 +86,7 @@ export function SourceSelectionStep({
           const cardClassName = [
             "pf-focus group min-h-44 rounded-xl border p-5 text-left transition",
             active
-              ? "border-[#4E8CFF]/60 bg-[#4E8CFF]/14 shadow-[0_18px_80px_rgba(78,140,255,.14)]"
+              ? "border-[#7C8CFF]/60 bg-[#7C8CFF]/12 shadow-[0_18px_70px_rgba(78,140,255,.12)]"
               : "border-white/10 bg-white/[0.05] hover:border-white/22",
             source.disabled ? "cursor-not-allowed opacity-60" : "",
           ].join(" ");
@@ -105,4 +120,46 @@ export function SourceSelectionStep({
       </div>
     </section>
   );
+}
+
+function getSourceStatus(
+  sourceId: EvidenceSourceType,
+  count: number,
+  active: boolean,
+  canPersist: boolean,
+  errorMessage?: string,
+): EvidenceSourceStatus {
+  if (sourceId === "github_placeholder") {
+    return "not_added";
+  }
+
+  if (!canPersist && count > 0) {
+    return "needs_attention";
+  }
+
+  if (active && errorMessage) {
+    return "needs_attention";
+  }
+
+  return count > 0 ? "saved_privately" : "not_added";
+}
+
+function localizeStatus(t: Copy, status: EvidenceSourceStatus, disabled: boolean) {
+  if (disabled) {
+    return t.onboarding.comingSoon;
+  }
+
+  if (status === "saved_privately") {
+    return t.onboarding.sourceStates.savedPrivately;
+  }
+
+  if (status === "needs_attention") {
+    return t.onboarding.sourceStates.needsAttention;
+  }
+
+  if (status === "uploading") {
+    return t.onboarding.sourceStates.uploading;
+  }
+
+  return t.onboarding.sourceStates.notAdded;
 }

@@ -4,12 +4,13 @@ import Link from "next/link";
 import { useFormStatus } from "react-dom";
 import { ArrowRight, CheckCircle2, Database, FileText } from "lucide-react";
 import { continueToEditorAction } from "@/app/onboarding/actions";
-import type { Copy, TemplateId } from "@/lib/content";
+import type { Copy, Locale, TemplateId } from "@/lib/content";
 
 export function OnboardingSummary({
   t,
   portfolioId,
   templateId,
+  locale,
   approvedCount,
   evidenceCount,
   canPersist,
@@ -17,6 +18,7 @@ export function OnboardingSummary({
   t: Copy;
   portfolioId: string;
   templateId: TemplateId;
+  locale: Locale;
   approvedCount: number;
   evidenceCount: number;
   canPersist: boolean;
@@ -44,6 +46,7 @@ export function OnboardingSummary({
           <form action={continueToEditorAction} className="mt-5">
             <input type="hidden" name="portfolioId" value={portfolioId} />
             <input type="hidden" name="templateId" value={templateId} />
+            <input type="hidden" name="locale" value={locale} />
             <ContinueButton label={t.onboarding.continueEditor} saving={t.onboarding.saving} />
           </form>
         ) : (

@@ -46,7 +46,7 @@ function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
-function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen overflow-hidden bg-[#05070d] text-white">
       <Navigation />

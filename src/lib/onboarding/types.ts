@@ -5,6 +5,7 @@ export type OnboardingStep = (typeof onboardingSteps)[number];
 
 export type EvidenceSourceType = "cv" | "certificate" | "manual_project" | "github_placeholder";
 export type ReviewState = "pending" | "approved" | "edited" | "rejected";
+export type EvidenceSourceStatus = "not_added" | "uploading" | "saved_privately" | "needs_attention";
 
 export type PortfolioDraft = {
   id: string;
@@ -37,17 +38,37 @@ export type ProposalSuggestion = {
   key: string;
   sourceEvidenceId: string;
   sourceType: EvidenceSourceType;
+  sourceTitle: string;
+  sourceDescription: string;
   label: string;
   proposedTitle: string;
   proposedSummary: string;
+  proofContext: string;
   proposalType: string;
   review: ProposalReview | null;
+};
+
+export type DraftProgress = {
+  sourcesAdded: number;
+  uploadsCompleted: number;
+  projectsAdded: number;
+  suggestionsApproved: number;
+  templateSelected: boolean;
+};
+
+export type DraftRecovery = {
+  available: boolean;
+  title: string;
+  recommendedStep: OnboardingStep;
+  progress: DraftProgress;
+  updatedAt: string | null;
 };
 
 export type OnboardingInitialState = {
   configured: boolean;
   authenticated: boolean;
   portfolio: PortfolioDraft;
+  draftRecovery: DraftRecovery;
   evidenceItems: EvidenceItem[];
   proposalReviews: ProposalReview[];
   suggestions: ProposalSuggestion[];

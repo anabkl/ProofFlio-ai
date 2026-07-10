@@ -1472,6 +1472,43 @@ select {
   background: linear-gradient(90deg, transparent, rgba(78, 140, 255, 0.7), transparent);
 }
 
+.editor-input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  background: rgba(2, 6, 15, 0.72);
+  padding: 0.7rem 0.8rem;
+  color: #f8fafc;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.editor-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.editor-input:focus-visible {
+  border-color: rgba(57, 230, 220, 0.7);
+  outline-color: rgba(57, 230, 220, 0.8);
+}
+
+.editor-input option {
+  background: #071021;
+  color: #f8fafc;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .editor-input {
+    transition: none;
+  }
+}
+
 @keyframes soft-reveal {
   from {
     opacity: 0;

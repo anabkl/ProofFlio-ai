@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { ArrowRight, FileUp, FolderGit, PenLine } from "lucide-react";
-import { saveManualProjectAction, uploadEvidenceAction } from "@/app/onboarding/actions";
-import type { Copy, TemplateId } from "@/lib/content";
+import { AlertTriangle, ArrowRight, CheckCircle2, FileUp, FolderGit, LockKeyhole, PenLine, Trash2 } from "lucide-react";
+import { removeEvidenceAction, saveManualProjectAction, uploadEvidenceAction } from "@/app/onboarding/actions";
+import type { Copy, Locale, TemplateId } from "@/lib/content";
 import type { EvidenceItem, EvidenceSourceType } from "@/lib/onboarding/types";
 
 export function EvidenceUploadStep({
@@ -12,6 +12,7 @@ export function EvidenceUploadStep({
   selectedSource,
   portfolioId,
   templateId,
+  locale,
   canPersist,
   evidenceItems,
 }: {
@@ -19,13 +20,16 @@ export function EvidenceUploadStep({
   selectedSource: EvidenceSourceType;
   portfolioId: string;
   templateId: TemplateId;
+  locale: Locale;
   canPersist: boolean;
   evidenceItems: EvidenceItem[];
 }) {
+  const selectedEvidence = evidenceItems.filter((item) => item.sourceType === selectedSource);
+
   return (
     <section className="space-y-6" aria-labelledby="upload-heading">
       <div>
-        <p className="text-xs font-black uppercase tracking-[0.22em] text-[#2DD4BF]">{t.onboarding.uploadEyebrow}</p>
+        <p className="text-xs font-black uppercase tracking-[0.22em] text-[#8EA7FF]">{t.onboarding.uploadEyebrow}</p>
         <h2 id="upload-heading" className="mt-3 text-3xl font-black tracking-tight text-white">
           {t.onboarding.uploadTitle}
         </h2>
@@ -38,64 +42,84 @@ export function EvidenceUploadStep({
         </div>
       ) : null}
 
-      <div className="grid gap-4 xl:grid-cols-[.9fr_1.1fr]">
-        <div className="grid gap-4">
-          <FileUploadCard
-            t={t}
-            sourceType="cv"
-            title={t.onboarding.uploadCv}
-            detail={t.onboarding.uploadCvDetail}
-            portfolioId={portfolioId}
-            templateId={templateId}
-            canPersist={canPersist}
-            highlighted={selectedSource === "cv"}
-          />
-          <FileUploadCard
-            t={t}
-            sourceType="certificate"
-            title={t.onboarding.uploadCertificate}
-            detail={t.onboarding.uploadCertificateDetail}
-            portfolioId={portfolioId}
-            templateId={templateId}
-            canPersist={canPersist}
-            highlighted={selectedSource === "certificate"}
-          />
-          <div className="rounded-xl border border-white/10 bg-[#070B14]/70 p-4">
-            <div className="flex items-center gap-3 text-sm font-black text-white/72">
-              <FolderGit size={18} className="text-white/38" />
-              {t.onboarding.sources.github}
+      <div className="grid gap-4 xl:grid-cols-[1fr_.82fr]">
+        <div className="min-w-0">
+          {selectedSource === "cv" ? (
+            <FileUploadCard
+              t={t}
+              sourceType="cv"
+              title={t.onboarding.uploadCv}
+              detail={t.onboarding.uploadCvDetail}
+              portfolioId={portfolioId}
+              templateId={templateId}
+              locale={locale}
+              canPersist={canPersist}
+              highlighted={selectedSource === "cv"}
+            />
+          ) : null}
+          {selectedSource === "certificate" ? (
+            <FileUploadCard
+              t={t}
+              sourceType="certificate"
+              title={t.onboarding.uploadCertificate}
+              detail={t.onboarding.uploadCertificateDetail}
+              portfolioId={portfolioId}
+              templateId={templateId}
+              locale={locale}
+              canPersist={canPersist}
+              highlighted={selectedSource === "certificate"}
+            />
+          ) : null}
+          {selectedSource === "manual_project" ? (
+            <ManualProjectForm
+              t={t}
+              portfolioId={portfolioId}
+              templateId={templateId}
+              locale={locale}
+              canPersist={canPersist}
+              highlighted
+            />
+          ) : null}
+          {selectedSource === "github_placeholder" ? (
+            <div className="rounded-xl border border-white/10 bg-[#070B14]/70 p-4">
+              <div className="flex items-center gap-3 text-sm font-black text-white/72">
+                <FolderGit size={18} className="text-white/38" />
+                {t.onboarding.sources.github}
+              </div>
+              <p className="mt-2 text-sm leading-6 text-white/48">{t.onboarding.githubDeferred}</p>
             </div>
-            <p className="mt-2 text-sm leading-6 text-white/48">{t.onboarding.githubDeferred}</p>
-          </div>
+          ) : null}
         </div>
 
-        <ManualProjectForm
-          t={t}
-          portfolioId={portfolioId}
-          templateId={templateId}
-          canPersist={canPersist}
-          highlighted={selectedSource === "manual_project"}
-        />
-      </div>
-
-      <div className="rounded-xl border border-white/10 bg-white/[0.045] p-4">
-        <h3 className="text-sm font-black uppercase tracking-[0.18em] text-white/56">{t.onboarding.savedEvidence}</h3>
-        <div className="mt-4 grid gap-2">
-          {evidenceItems.length > 0 ? (
-            evidenceItems.map((item) => (
-              <div key={item.id} className="flex items-start justify-between gap-3 rounded-lg border border-white/8 bg-[#070B14]/66 px-3 py-3">
-                <div>
-                  <p className="text-sm font-black text-white">{item.title}</p>
-                  <p className="mt-1 text-xs leading-5 text-white/48">{item.description}</p>
-                </div>
-                <span className="shrink-0 rounded-md bg-[#2DD4BF]/12 px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#99F6E4]">
-                  {item.sourceType === "manual_project" ? t.onboarding.sources.manualProject : item.sourceType.toUpperCase()}
-                </span>
-              </div>
-            ))
-          ) : (
-            <p className="text-sm leading-6 text-white/48">{t.onboarding.noEvidence}</p>
-          )}
+        <div className="rounded-xl border border-white/10 bg-[#070B14]/72 p-4" data-testid="evidence-vault">
+          <div className="flex items-start gap-3">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.045] text-[#B7C4FF]">
+              <LockKeyhole size={18} />
+            </span>
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-[0.18em] text-white/64">{t.onboarding.evidenceListTitle}</h3>
+              <p className="mt-2 text-xs leading-5 text-white/48">{t.onboarding.honestyNotice}</p>
+            </div>
+          </div>
+          <div className="mt-4 grid gap-2">
+            {selectedEvidence.length > 0 ? (
+              selectedEvidence.map((item) => (
+                <EvidenceVaultItem
+                  key={item.id}
+                  t={t}
+                  item={item}
+                  portfolioId={portfolioId}
+                  templateId={templateId}
+                  locale={locale}
+                  canPersist={canPersist}
+                />
+              ))
+            ) : (
+              <p className="rounded-lg border border-white/8 bg-white/[0.035] p-3 text-sm leading-6 text-white/48">
+                {t.onboarding.noEvidence}
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </section>
@@ -109,6 +133,7 @@ function FileUploadCard({
   detail,
   portfolioId,
   templateId,
+  locale,
   canPersist,
   highlighted,
 }: {
@@ -118,6 +143,7 @@ function FileUploadCard({
   detail: string;
   portfolioId: string;
   templateId: TemplateId;
+  locale: Locale;
   canPersist: boolean;
   highlighted: boolean;
 }) {
@@ -131,9 +157,10 @@ function FileUploadCard({
     >
       <input type="hidden" name="portfolioId" value={portfolioId} />
       <input type="hidden" name="templateId" value={templateId} />
+      <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="sourceType" value={sourceType} />
       <div className="flex items-start gap-3">
-        <span className="grid h-11 w-11 place-items-center rounded-lg border border-white/10 bg-[#071021] text-[#9ed0ff]">
+        <span className="grid h-11 w-11 place-items-center rounded-lg border border-white/10 bg-[#071021] text-[#B7C4FF]">
           <FileUp size={21} />
         </span>
         <div>
@@ -148,13 +175,15 @@ function FileUploadCard({
           type="file"
           accept="application/pdf,.pdf"
           disabled={!canPersist}
+          data-testid={`file-${sourceType}`}
           className="pf-focus block w-full rounded-lg border border-white/12 bg-[#070B14] p-3 text-sm text-white file:mr-3 file:rounded-md file:border-0 file:bg-white file:px-3 file:py-2 file:text-sm file:font-black file:text-[#071021]"
         />
       </label>
       <UploadButton
         disabled={!canPersist}
         label={sourceType === "cv" ? t.onboarding.uploadCv : t.onboarding.uploadCertificate}
-        saving={t.onboarding.saving}
+        saving={t.onboarding.sourceStates.uploading}
+        testId={`upload-${sourceType}`}
       />
     </form>
   );
@@ -164,12 +193,14 @@ function ManualProjectForm({
   t,
   portfolioId,
   templateId,
+  locale,
   canPersist,
   highlighted,
 }: {
   t: Copy;
   portfolioId: string;
   templateId: TemplateId;
+  locale: Locale;
   canPersist: boolean;
   highlighted: boolean;
 }) {
@@ -202,8 +233,9 @@ function ManualProjectForm({
     >
       <input type="hidden" name="portfolioId" value={portfolioId} />
       <input type="hidden" name="templateId" value={templateId} />
+      <input type="hidden" name="locale" value={locale} />
       <div className="flex items-start gap-3">
-        <span className="grid h-11 w-11 place-items-center rounded-lg border border-white/10 bg-[#071021] text-[#99F6E4]">
+        <span className="grid h-11 w-11 place-items-center rounded-lg border border-white/10 bg-[#071021] text-[#B7C4FF]">
           <PenLine size={21} />
         </span>
         <div>
@@ -255,13 +287,90 @@ function ManualProjectForm({
         </div>
       </div>
       <UploadButton
-        disabled={!hydrated}
+        disabled={!hydrated || !canPersist}
         label={canPersist ? t.onboarding.saveManualProject : t.onboarding.persistenceDisabled}
         saving={t.onboarding.saving}
         testId="manual-project-submit"
       />
     </form>
   );
+}
+
+function EvidenceVaultItem({
+  t,
+  item,
+  portfolioId,
+  templateId,
+  locale,
+  canPersist,
+}: {
+  t: Copy;
+  item: EvidenceItem;
+  portfolioId: string;
+  templateId: TemplateId;
+  locale: Locale;
+  canPersist: boolean;
+}) {
+  return (
+    <article className="rounded-lg border border-white/8 bg-[#0B111D] px-3 py-3" data-testid={`evidence-item-${item.sourceType}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1 rounded-md bg-[#2DD4BF]/10 px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#99F6E4]">
+              <CheckCircle2 size={12} />
+              {t.onboarding.sourceStates.savedPrivately}
+            </span>
+            <span className="rounded-md border border-white/10 px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-white/50">
+              {localizeSource(t, item.sourceType)}
+            </span>
+          </div>
+          <p className="mt-3 break-words text-sm font-black text-white">{item.title}</p>
+          <p className="mt-1 text-xs leading-5 text-white/48">{item.description}</p>
+        </div>
+      </div>
+      {canPersist ? (
+        <details className="mt-3 rounded-lg border border-[#ff7a66]/20 bg-[#ff7a66]/8 p-3">
+          <summary className="pf-focus cursor-pointer list-none text-xs font-black uppercase tracking-[0.14em] text-[#ffd8d1]">
+            <span className="inline-flex items-center gap-2">
+              <AlertTriangle size={14} />
+              {t.onboarding.removeEvidence}
+            </span>
+          </summary>
+          <p className="mt-2 text-xs leading-5 text-[#ffd8d1]/82">{t.onboarding.confirmRemoveBody}</p>
+          <form action={removeEvidenceAction} className="mt-3">
+            <input type="hidden" name="portfolioId" value={portfolioId} />
+            <input type="hidden" name="templateId" value={templateId} />
+            <input type="hidden" name="locale" value={locale} />
+            <input type="hidden" name="evidenceId" value={item.id} />
+            <button
+              type="submit"
+              data-testid={`remove-evidence-${item.sourceType}`}
+              className="pf-focus inline-flex items-center justify-center gap-2 rounded-lg border border-[#ff7a66]/30 bg-[#ff7a66]/12 px-3 py-2 text-xs font-black text-[#ffd8d1]"
+            >
+              <Trash2 size={14} />
+              {t.onboarding.removeNow}
+            </button>
+          </form>
+        </details>
+      ) : null}
+    </article>
+  );
+}
+
+function localizeSource(t: Copy, sourceType: EvidenceSourceType) {
+  if (sourceType === "cv") {
+    return t.onboarding.sourceBadges.cv;
+  }
+
+  if (sourceType === "certificate") {
+    return t.onboarding.sourceBadges.certificate;
+  }
+
+  if (sourceType === "github_placeholder") {
+    return t.onboarding.sourceBadges.github;
+  }
+
+  return t.onboarding.sourceBadges.manualProject;
 }
 
 function UploadButton({ disabled, label, saving, testId }: { disabled: boolean; label: string; saving: string; testId?: string }) {

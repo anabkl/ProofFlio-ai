@@ -2,9 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { EVIDENCE_BUCKET } from "@/lib/supabase/config";
+import { EVIDENCE_BUCKET, MAX_EVIDENCE_FILE_BYTES } from "@/lib/supabase/config";
 import { createSupabaseServerClient, type SupabaseServerClient } from "@/lib/supabase/server";
 import { isTemplateId } from "@/lib/onboarding/types";
+import type { Locale } from "@/lib/content";
 
 type ActionResult = {
   ok: boolean;
@@ -19,25 +20,33 @@ type OnboardingActionContext = {
 };
 
 export async function uploadEvidenceAction(formData: FormData) {
-  const context = await getActionContext(formData);
+  const locale = getActionLocale(formData);
+  const context = await getActionContext(formData, locale);
 
   if (isActionResult(context)) {
-    redirectActionError(context.message ?? "Unable to save evidence.", "upload");
+    redirectActionError(context.message ?? actionMessage(locale, "saveEvidenceFailed"), "upload");
   }
 
-  const sourceType = String(formData.get("sourceType") ?? "");
+  const sourceType = normalizeUploadSource(formData.get("sourceType"));
   const file = formData.get("file");
 
-  if (sourceType !== "cv" && sourceType !== "certificate") {
-    redirectActionError("Unsupported evidence source.", "upload", context.templateId);
+  if (!sourceType) {
+    redirectActionError(actionMessage(locale, "unsupportedSource"), "upload", context.templateId);
   }
 
   if (!(file instanceof File) || file.size === 0) {
-    redirectActionError("Choose a PDF file first.", "upload", context.templateId);
+    redirectActionError(actionMessage(locale, "missingPdf"), "upload", context.templateId);
   }
 
-  if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
-    redirectActionError("Only PDF files are supported in this sprint.", "upload", context.templateId);
+  const hasPdfMime = file.type === "application/pdf";
+  const hasPdfExtension = file.name.toLowerCase().endsWith(".pdf");
+
+  if (!hasPdfMime || !hasPdfExtension) {
+    redirectActionError(actionMessage(locale, "invalidPdf"), "upload", context.templateId);
+  }
+
+  if (file.size > MAX_EVIDENCE_FILE_BYTES) {
+    redirectActionError(actionMessage(locale, "pdfTooLarge"), "upload", context.templateId);
   }
 
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-").slice(0, 120);
@@ -84,11 +93,46 @@ export async function uploadEvidenceAction(formData: FormData) {
   redirect(`/onboarding?step=review&template=${context.templateId}`);
 }
 
+export async function startNewDraftAction(formData: FormData) {
+  const locale = getActionLocale(formData);
+  const supabase = await createSupabaseServerClient();
+
+  if (!supabase) {
+    redirectActionError(actionMessage(locale, "missingConfig"), "sources");
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/auth/sign-in?next=/onboarding");
+  }
+
+  const selectedTemplateId = normalizeTemplateId(formData.get("templateId"));
+  const { error } = await supabase.from("portfolios").insert({
+    owner_user_id: user.id,
+    title: "ProofFolio evidence draft",
+    slug: draftSlug(user.id),
+    selected_template_id: selectedTemplateId,
+    onboarding_state: selectedTemplateId === "developer-signature" ? "sources" : "template",
+    status: "draft",
+  });
+
+  if (error) {
+    redirectActionError(error.message, "sources", selectedTemplateId);
+  }
+
+  revalidatePath("/onboarding");
+  redirect(`/onboarding?step=sources&template=${selectedTemplateId}`);
+}
+
 export async function saveManualProjectAction(formData: FormData) {
-  const context = await getActionContext(formData);
+  const locale = getActionLocale(formData);
+  const context = await getActionContext(formData, locale);
 
   if (isActionResult(context)) {
-    redirectActionError(context.message ?? "Unable to save manual project.", "upload");
+    redirectActionError(context.message ?? actionMessage(locale, "saveManualFailed"), "upload");
   }
 
   const title = String(formData.get("title") ?? "").trim();
@@ -149,11 +193,97 @@ export async function saveManualProjectAction(formData: FormData) {
   redirect(`/onboarding?step=review&template=${context.templateId}`);
 }
 
-export async function reviewProposalAction(formData: FormData) {
-  const context = await getActionContext(formData);
+export async function removeEvidenceAction(formData: FormData) {
+  const locale = getActionLocale(formData);
+  const context = await getActionContext(formData, locale);
 
   if (isActionResult(context)) {
-    redirectActionError(context.message ?? "Unable to review proposal.", "review");
+    redirectActionError(context.message ?? actionMessage(locale, "removeFailed"), "upload");
+  }
+
+  const evidenceId = String(formData.get("evidenceId") ?? "");
+
+  if (!evidenceId) {
+    redirectActionError(actionMessage(locale, "missingEvidence"), "upload", context.templateId);
+  }
+
+  const { data: evidence, error: evidenceError } = await context.supabase
+    .from("evidence_items")
+    .select("id,source_type,storage_path")
+    .eq("id", evidenceId)
+    .eq("portfolio_id", context.portfolioId)
+    .eq("owner_user_id", context.userId)
+    .maybeSingle();
+
+  if (evidenceError) {
+    redirectActionError(evidenceError.message, "upload", context.templateId);
+  }
+
+  if (!evidence) {
+    redirectActionError(actionMessage(locale, "missingEvidence"), "upload", context.templateId);
+  }
+
+  if (typeof evidence.storage_path === "string" && evidence.storage_path.length > 0) {
+    const { error: storageError } = await context.supabase.storage
+      .from(EVIDENCE_BUCKET)
+      .remove([evidence.storage_path]);
+
+    if (storageError) {
+      redirectActionError(storageError.message, "upload", context.templateId);
+    }
+  }
+
+  const { error: reviewDeleteError } = await context.supabase
+    .from("proposal_reviews")
+    .delete()
+    .eq("portfolio_id", context.portfolioId)
+    .eq("owner_user_id", context.userId)
+    .eq("source_evidence_id", evidenceId);
+
+  if (reviewDeleteError) {
+    redirectActionError(reviewDeleteError.message, "upload", context.templateId);
+  }
+
+  if (evidence.source_type === "manual_project") {
+    const { error: projectDeleteError } = await context.supabase
+      .from("project_drafts")
+      .delete()
+      .eq("portfolio_id", context.portfolioId)
+      .eq("owner_user_id", context.userId)
+      .contains("evidence_references", [evidenceId]);
+
+    if (projectDeleteError) {
+      redirectActionError(projectDeleteError.message, "upload", context.templateId);
+    }
+  }
+
+  const { error: deleteError } = await context.supabase
+    .from("evidence_items")
+    .delete()
+    .eq("id", evidenceId)
+    .eq("portfolio_id", context.portfolioId)
+    .eq("owner_user_id", context.userId);
+
+  if (deleteError) {
+    redirectActionError(deleteError.message, "upload", context.templateId);
+  }
+
+  await context.supabase
+    .from("portfolios")
+    .update({ onboarding_state: "evidence" })
+    .eq("id", context.portfolioId)
+    .eq("owner_user_id", context.userId);
+
+  revalidatePath("/onboarding");
+  redirect(`/onboarding?step=upload&template=${context.templateId}`);
+}
+
+export async function reviewProposalAction(formData: FormData) {
+  const locale = getActionLocale(formData);
+  const context = await getActionContext(formData, locale);
+
+  if (isActionResult(context)) {
+    redirectActionError(context.message ?? actionMessage(locale, "reviewFailed"), "review");
   }
 
   const sourceEvidenceId = String(formData.get("sourceEvidenceId") ?? "");
@@ -211,10 +341,11 @@ export async function reviewProposalAction(formData: FormData) {
 }
 
 export async function selectTemplateAction(formData: FormData) {
-  const context = await getActionContext(formData);
+  const locale = getActionLocale(formData);
+  const context = await getActionContext(formData, locale);
 
   if (isActionResult(context)) {
-    redirectActionError(context.message ?? "Unable to select template.", "template");
+    redirectActionError(context.message ?? actionMessage(locale, "templateFailed"), "template");
   }
 
   const templateId = String(formData.get("templateId") ?? "");
@@ -238,10 +369,11 @@ export async function selectTemplateAction(formData: FormData) {
 }
 
 export async function continueToEditorAction(formData: FormData) {
-  const context = await getActionContext(formData);
+  const locale = getActionLocale(formData);
+  const context = await getActionContext(formData, locale);
 
   if (isActionResult(context)) {
-    redirectActionError(context.message ?? "Unable to open the editor.", "summary");
+    redirectActionError(context.message ?? actionMessage(locale, "editorFailed"), "summary");
   }
 
   await context.supabase
@@ -268,11 +400,11 @@ function redirectActionError(message: string, step: string, templateId = "develo
   redirect(`/onboarding?${params.toString()}`);
 }
 
-async function getActionContext(formData: FormData): Promise<ActionResult | OnboardingActionContext> {
+async function getActionContext(formData: FormData, locale: Locale): Promise<ActionResult | OnboardingActionContext> {
   const supabase = await createSupabaseServerClient();
 
   if (!supabase) {
-    return { ok: false, message: "Supabase is not configured yet." } satisfies ActionResult;
+    return { ok: false, message: actionMessage(locale, "missingConfig") } satisfies ActionResult;
   }
 
   const {
@@ -288,13 +420,13 @@ async function getActionContext(formData: FormData): Promise<ActionResult | Onbo
   const templateId = isTemplateId(templateParam) ? templateParam : "developer-signature";
 
   if (!portfolioId) {
-    return { ok: false, message: "No portfolio draft was found." } satisfies ActionResult;
+    return { ok: false, message: actionMessage(locale, "missingPortfolio") } satisfies ActionResult;
   }
 
   const ownsPortfolio = await verifyPortfolioOwnership(supabase, portfolioId, user.id);
 
   if (!ownsPortfolio) {
-    return { ok: false, message: "This portfolio draft is not available." } satisfies ActionResult;
+    return { ok: false, message: actionMessage(locale, "unavailablePortfolio") } satisfies ActionResult;
   }
 
   return {
@@ -324,3 +456,63 @@ function normalizeOptionalUrl(value: FormDataEntryValue | null) {
   const url = String(value ?? "").trim();
   return url.length > 0 ? url : null;
 }
+
+function normalizeUploadSource(value: FormDataEntryValue | null) {
+  if (value === "cv" || value === "certificate") {
+    return value;
+  }
+
+  return null;
+}
+
+function normalizeTemplateId(value: FormDataEntryValue | null) {
+  const templateId = String(value ?? "developer-signature");
+  return isTemplateId(templateId) ? templateId : "developer-signature";
+}
+
+function getActionLocale(formData: FormData): Locale {
+  return formData.get("locale") === "fr" ? "fr" : "en";
+}
+
+function actionMessage(locale: Locale, key: keyof typeof actionMessages.en) {
+  return actionMessages[locale][key];
+}
+
+function draftSlug(userId: string) {
+  return `draft-${userId.slice(0, 8)}-${Date.now().toString(36)}`;
+}
+
+const actionMessages = {
+  en: {
+    editorFailed: "Unable to open the editor.",
+    invalidPdf: "Only PDF files are supported in this sprint.",
+    missingConfig: "Supabase is not configured yet.",
+    missingEvidence: "This saved evidence item is not available.",
+    missingPdf: "Choose a PDF file first.",
+    missingPortfolio: "No portfolio draft was found.",
+    pdfTooLarge: "PDF uploads must be 10 MB or smaller.",
+    removeFailed: "Unable to remove evidence.",
+    reviewFailed: "Unable to review proposal.",
+    saveEvidenceFailed: "Unable to save evidence.",
+    saveManualFailed: "Unable to save manual project.",
+    templateFailed: "Unable to select template.",
+    unavailablePortfolio: "This portfolio draft is not available.",
+    unsupportedSource: "Unsupported evidence source.",
+  },
+  fr: {
+    editorFailed: "Impossible d'ouvrir l'éditeur.",
+    invalidPdf: "Seuls les fichiers PDF sont acceptés pendant ce sprint.",
+    missingConfig: "Supabase n'est pas encore configuré.",
+    missingEvidence: "Cette preuve sauvegardée n'est pas disponible.",
+    missingPdf: "Choisissez d'abord un fichier PDF.",
+    missingPortfolio: "Aucun brouillon de portfolio n'a été trouvé.",
+    pdfTooLarge: "Les fichiers PDF doivent peser 10 Mo ou moins.",
+    removeFailed: "Impossible de supprimer la preuve.",
+    reviewFailed: "Impossible d'enregistrer la décision.",
+    saveEvidenceFailed: "Impossible d'enregistrer la preuve.",
+    saveManualFailed: "Impossible d'enregistrer le projet manuel.",
+    templateFailed: "Impossible de sélectionner ce template.",
+    unavailablePortfolio: "Ce brouillon de portfolio n'est pas disponible.",
+    unsupportedSource: "Source de preuve non prise en charge.",
+  },
+} satisfies Record<Locale, Record<string, string>>;

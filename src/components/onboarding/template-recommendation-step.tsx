@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useFormStatus } from "react-dom";
 import { Eye, Sparkles } from "lucide-react";
 import { selectTemplateAction } from "@/app/onboarding/actions";
-import type { Copy, TemplateId } from "@/lib/content";
+import type { Copy, Locale, TemplateId } from "@/lib/content";
 import { recommendedTemplateIds } from "@/lib/onboarding/types";
 import { templateMeta } from "@/lib/content";
 
@@ -12,11 +12,13 @@ export function TemplateRecommendationStep({
   t,
   portfolioId,
   selectedTemplateId,
+  locale,
   canPersist,
 }: {
   t: Copy;
   portfolioId: string;
   selectedTemplateId: TemplateId;
+  locale: Locale;
   canPersist: boolean;
 }) {
   return (
@@ -72,6 +74,7 @@ export function TemplateRecommendationStep({
                 <form action={selectTemplateAction}>
                   <input type="hidden" name="portfolioId" value={portfolioId} />
                   <input type="hidden" name="templateId" value={templateId} />
+                  <input type="hidden" name="locale" value={locale} />
                   <SelectTemplateButton disabled={!canPersist} label={selected ? t.onboarding.selected : t.common.useTemplate} saving={t.onboarding.saving} />
                 </form>
               </div>
