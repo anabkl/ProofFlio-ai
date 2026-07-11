@@ -14,6 +14,7 @@ import {
   FileText,
   FolderGit,
   Globe2,
+  LogOut,
   Menu,
   Monitor,
   Redo2,
@@ -25,7 +26,7 @@ import {
   WandSparkles,
   X,
 } from "lucide-react";
-import { AuthNavStatus } from "@/components/auth/auth-nav-status";
+import { signOutAction } from "@/app/auth/actions";
 import { LivingTemplatePage } from "@/components/living-templates";
 import { useLocale } from "@/components/locale-provider";
 import { PricingSection } from "@/components/pricing-section";
@@ -46,17 +47,35 @@ function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export type MarketingUser = { displayName: string; email: string } | null;
+
+export function AppShell({ children, user = null }: { children: React.ReactNode; user?: MarketingUser }) {
   return (
     <div className="min-h-screen overflow-hidden bg-[#05070d] text-white">
-      <Navigation />
+      <Navigation user={user} />
       {children}
       <Footer />
     </div>
   );
 }
 
-function Navigation() {
+function initialsFromName(value: string) {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return "PF";
+  }
+
+  const parts = trimmed.split(/\s+/).filter(Boolean);
+
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+}
+
+function Navigation({ user }: { user: MarketingUser }) {
   const { locale, localeReady, setLocale, t } = useLocale();
   const [mobileOpen, setMobileOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -71,7 +90,6 @@ function Navigation() {
     { href: "/templates", label: t.nav.templates },
     { href: "/demo", label: t.nav.demo },
     { href: "/#plans", label: t.nav.pricing },
-    { href: "/onboarding", label: t.nav.startShort },
   ];
 
   useEffect(() => {
@@ -141,15 +159,54 @@ function Navigation() {
                 </button>
               ))}
             </div>
-            <AuthNavStatus />
-            <Link
-              href="/onboarding"
-              aria-label={t.nav.startLabel}
-              className="pf-focus inline-flex shrink-0 rounded-md bg-[#f7fbff] px-2.5 py-2 text-sm font-black text-[#071021] transition hover:bg-[#9ed0ff] sm:px-4"
-            >
-              <span className="hidden sm:inline">{t.nav.create}</span>
-              <span className="sm:hidden">{t.nav.startShort}</span>
-            </Link>
+            {user ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="pf-focus hidden shrink-0 items-center gap-2 rounded-full border border-white/12 bg-white/6 py-1 pl-1 pr-3 text-sm font-black text-white transition hover:bg-white/10 lg:inline-flex"
+                >
+                  <span className="grid h-6 w-6 place-items-center rounded-full bg-[#4da3ff]/22 text-[11px] font-black text-[#9ed0ff]">
+                    {initialsFromName(user.displayName || user.email)}
+                  </span>
+                  <span className="max-w-[120px] truncate">{user.displayName || user.email}</span>
+                </Link>
+                <form action={signOutAction} className="hidden lg:block">
+                  <button
+                    type="submit"
+                    className="pf-focus inline-flex shrink-0 items-center gap-1.5 rounded-md border border-white/12 bg-white/6 px-3 py-2 text-xs font-black text-white/70 transition hover:bg-white/10 hover:text-white"
+                  >
+                    <LogOut size={14} />
+                    {t.auth.signOut}
+                  </button>
+                </form>
+                <Link
+                  href="/dashboard"
+                  aria-label={t.nav.dashboard}
+                  className="pf-focus inline-flex shrink-0 items-center justify-center rounded-md border border-white/12 bg-white/6 px-2.5 py-2 lg:hidden"
+                >
+                  <span className="grid h-6 w-6 place-items-center rounded-full bg-[#4da3ff]/22 text-[11px] font-black text-[#9ed0ff]">
+                    {initialsFromName(user.displayName || user.email)}
+                  </span>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/auth/sign-in?next=/dashboard"
+                  className="pf-focus hidden shrink-0 rounded-md px-3 py-2 text-sm font-black text-white/76 transition hover:bg-white/8 hover:text-white lg:inline-flex lg:items-center"
+                >
+                  {t.nav.signIn}
+                </Link>
+                <Link
+                  href="/auth/sign-up?next=/onboarding"
+                  aria-label={t.nav.createAccount}
+                  className="pf-focus inline-flex shrink-0 rounded-md bg-[#f7fbff] px-2.5 py-2 text-sm font-black text-[#071021] transition hover:bg-[#9ed0ff] sm:px-4"
+                >
+                  <span className="hidden sm:inline">{t.nav.createAccount}</span>
+                  <span className="sm:hidden">{t.nav.startShort}</span>
+                </Link>
+              </>
+            )}
             <button
               ref={menuButtonRef}
               type="button"
@@ -185,6 +242,45 @@ function Navigation() {
                     {link.label}
                   </Link>
                 ))}
+                <div className="mt-2 grid gap-2 border-t border-white/10 pt-3">
+                  {user ? (
+                    <>
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setMobileOpen(false)}
+                        className="pf-focus rounded-lg border border-white/10 bg-white/[0.045] px-4 py-3 text-sm font-black text-white/78 hover:bg-white/8 hover:text-white"
+                      >
+                        {t.nav.dashboard}
+                      </Link>
+                      <form action={signOutAction}>
+                        <button
+                          type="submit"
+                          onClick={() => setMobileOpen(false)}
+                          className="pf-focus w-full rounded-lg border border-white/10 bg-white/[0.045] px-4 py-3 text-left text-sm font-black text-white/78 hover:bg-white/8 hover:text-white"
+                        >
+                          {t.auth.signOut}
+                        </button>
+                      </form>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        href="/auth/sign-in?next=/dashboard"
+                        onClick={() => setMobileOpen(false)}
+                        className="pf-focus rounded-lg border border-white/10 bg-white/[0.045] px-4 py-3 text-sm font-black text-white/78 hover:bg-white/8 hover:text-white"
+                      >
+                        {t.nav.signIn}
+                      </Link>
+                      <Link
+                        href="/auth/sign-up?next=/onboarding"
+                        onClick={() => setMobileOpen(false)}
+                        className="pf-focus rounded-lg bg-[#f7fbff] px-4 py-3 text-center text-sm font-black text-[#071021] hover:bg-[#9ed0ff]"
+                      >
+                        {t.nav.createAccount}
+                      </Link>
+                    </>
+                  )}
+                </div>
               </div>
             </motion.nav>
           ) : null}
@@ -216,7 +312,7 @@ function Footer() {
             </Link>
           ))}
         </div>
-        <div className="text-sm text-white/45">Next.js · TypeScript · Tailwind</div>
+        <div className="text-sm text-white/52">Next.js · TypeScript · Tailwind</div>
       </div>
     </footer>
   );
@@ -932,7 +1028,7 @@ function RecruiterSnapshotSection() {
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             {t.portfolio.scanSteps.map((step, index) => (
               <div key={step} className="rounded-lg border border-white/10 bg-black/18 p-4">
-                <div className="text-xs font-black uppercase tracking-[0.18em] text-white/38">0{index + 1}</div>
+                <div className="text-xs font-black uppercase tracking-[0.18em] text-white/52">0{index + 1}</div>
                 <div className="mt-2 text-sm font-black text-white">{step}</div>
               </div>
             ))}
@@ -970,9 +1066,9 @@ function FinalCta() {
   );
 }
 
-export function LandingPage() {
+export function LandingPage({ user = null }: { user?: MarketingUser }) {
   return (
-    <AppShell>
+    <AppShell user={user}>
       <main id="main-content">
         <Hero />
         <ImportEvidenceSection />
@@ -988,12 +1084,12 @@ export function LandingPage() {
   );
 }
 
-export function DemoPage() {
+export function DemoPage({ user = null }: { user?: MarketingUser }) {
   const { t } = useLocale();
   const [tab, setTab] = useState(0);
 
   return (
-    <AppShell>
+    <AppShell user={user}>
       <main id="main-content" className="bg-[#05070d] pt-28">
         <section className="pf-container pb-20 pt-10">
           <div className="grid gap-8 lg:grid-cols-[.9fr_1.1fr] lg:items-center">
@@ -1060,11 +1156,11 @@ export function DemoPage() {
   );
 }
 
-export function TemplatesPage() {
+export function TemplatesPage({ user = null }: { user?: MarketingUser }) {
   const { t } = useLocale();
 
   return (
-    <AppShell>
+    <AppShell user={user}>
       <main id="main-content" className="bg-[#05070d] pt-28">
         <section className="pf-container py-14">
           <SectionIntro {...t.templateShowcase} />
@@ -1102,9 +1198,9 @@ export function TemplatesPage() {
   );
 }
 
-export function TemplatePageView({ templateId }: { templateId: TemplateId }) {
+export function TemplatePageView({ templateId, user = null }: { templateId: TemplateId; user?: MarketingUser }) {
   return (
-    <AppShell>
+    <AppShell user={user}>
       <LivingTemplatePage templateId={templateId} />
     </AppShell>
   );
