@@ -1,0 +1,135 @@
+import { templateIds, type TemplateId } from "@/lib/content";
+import type { GitHubRepositoryRecord } from "@/lib/github/api";
+
+export const onboardingSteps = ["sources", "upload", "review", "template", "summary"] as const;
+export type OnboardingStep = (typeof onboardingSteps)[number];
+
+export type EvidenceSourceType = "cv" | "certificate" | "manual_project" | "github_placeholder" | "github_repository";
+export type ReviewState = "pending" | "approved" | "edited" | "rejected";
+export type EvidenceSourceStatus = "not_added" | "uploading" | "saved_privately" | "needs_attention";
+
+export type PortfolioDraft = {
+  id: string;
+  title: string;
+  selectedTemplateId: TemplateId;
+  onboardingState: string;
+};
+
+export type EvidenceItem = {
+  id: string;
+  sourceType: EvidenceSourceType;
+  title: string;
+  description: string;
+  storagePath: string | null;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+};
+
+export type ProposalReview = {
+  id: string;
+  sourceEvidenceId: string | null;
+  proposedTitle: string;
+  proposedSummary: string;
+  proposalType: string;
+  reviewState: ReviewState;
+  editedContent: Record<string, unknown>;
+};
+
+export type ProposalSuggestion = {
+  key: string;
+  sourceEvidenceId: string;
+  sourceType: EvidenceSourceType;
+  sourceTitle: string;
+  sourceDescription: string;
+  label: string;
+  proposedTitle: string;
+  proposedSummary: string;
+  proofContext: string;
+  proposalType: string;
+  review: ProposalReview | null;
+};
+
+export type DraftProgress = {
+  sourcesAdded: number;
+  uploadsCompleted: number;
+  projectsAdded: number;
+  suggestionsApproved: number;
+  templateSelected: boolean;
+};
+
+export type DraftRecovery = {
+  available: boolean;
+  title: string;
+  recommendedStep: OnboardingStep;
+  progress: DraftProgress;
+  updatedAt: string | null;
+};
+
+export type OnboardingInitialState = {
+  configured: boolean;
+  authenticated: boolean;
+  portfolio: PortfolioDraft;
+  draftRecovery: DraftRecovery;
+  evidenceItems: EvidenceItem[];
+  proposalReviews: ProposalReview[];
+  suggestions: ProposalSuggestion[];
+  selectedTemplateId: TemplateId;
+  selectedSource: EvidenceSourceType;
+  step: OnboardingStep;
+  approvedCount: number;
+  github: {
+    configured: boolean;
+    connected: boolean;
+    login: string;
+    name: string;
+    avatarUrl: string;
+    repositories: GitHubRepositoryRecord[];
+    connectedAt: string | null;
+    lastSyncedAt: string | null;
+    canSync: boolean;
+  };
+  aiProviderEnabled: boolean;
+  errorMessage?: string;
+};
+
+export const recommendedTemplateIds = [
+  "developer-signature",
+  "dark-tech",
+  "recruiter-focus",
+] as const satisfies readonly TemplateId[];
+
+export function isTemplateId(value: string | null | undefined): value is TemplateId {
+  return Boolean(value && templateIds.includes(value as TemplateId));
+}
+
+export function normalizeOnboardingStep(value: string | null | undefined): OnboardingStep {
+  return onboardingSteps.includes(value as OnboardingStep) ? (value as OnboardingStep) : "sources";
+}
+
+export function normalizeEvidenceSource(value: string | null | undefined): EvidenceSourceType {
+  if (value === "cv" || value === "certificate" || value === "manual_project" || value === "github_placeholder") {
+    return value;
+  }
+
+  if (value === "github_repository") {
+    return value;
+  }
+
+  return "cv";
+}
+
+export function sourceLabel(sourceType: EvidenceSourceType) {
+  if (sourceType === "manual_project") {
+    return "Manual project";
+  }
+
+  if (sourceType === "github_placeholder") {
+    return "GitHub - coming soon";
+  }
+
+  if (sourceType === "github_repository") {
+    return "GitHub repository";
+  }
+
+  return sourceType === "cv" ? "CV" : "Certificate";
+}

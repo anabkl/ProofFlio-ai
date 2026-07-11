@@ -339,7 +339,7 @@ export function DeveloperSignatureTemplate() {
             <h2 className="text-3xl font-black text-white">{t.common.proof}</h2>
             <p className="mt-3 max-w-3xl text-white/64">{t.portfolio.availability}</p>
           </div>
-          <a href="/editor?template=developer-signature" className="pf-focus inline-flex items-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-black text-[#06101f]">
+          <a href="/onboarding?template=developer-signature" className="pf-focus inline-flex items-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-black text-[#06101f]">
             {t.common.useTemplate}
             <ExternalLink size={16} />
           </a>

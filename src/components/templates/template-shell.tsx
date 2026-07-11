@@ -76,7 +76,7 @@ export function TemplateShell({
   const navLabels = t.templateUi.nav as Record<string, string>;
 
   return (
-    <main className={cn("template-route min-h-screen pt-20", templateMeta[templateId].className)} data-template={templateId}>
+    <main id="main-content" className={cn("template-route min-h-screen pt-20", templateMeta[templateId].className)} data-template={templateId}>
       <div className="fixed inset-x-0 top-16 z-40 h-1 bg-black/10" aria-hidden="true">
         <div
           className={cn("h-full transition-[width] duration-150", tone === "light" ? "bg-[#172033]" : "bg-[#4da3ff]")}
@@ -120,7 +120,7 @@ export function TemplateShell({
             </a>
           ))}
           <Link
-            href={`/editor?template=${templateId}`}
+            href={`/onboarding?template=${templateId}`}
             className="pf-focus ml-auto inline-flex shrink-0 items-center gap-2 rounded-xl bg-[#f7fbff] px-3 py-2 text-xs font-black text-[#071021]"
           >
             <Sparkles size={15} />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { BadgeCheck, CreditCard, Sparkles } from "lucide-react";
 import { useLocale } from "@/components/locale-provider";
@@ -15,6 +15,12 @@ type BillingMode = "monthly" | "yearly";
 export function PricingSection() {
   const { t } = useLocale();
   const [billing, setBilling] = useState<BillingMode>("monthly");
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => setHydrated(true));
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   return (
     <section id="plans" className="pricing-aurora relative overflow-hidden bg-[#02040a] py-24">
@@ -41,12 +47,22 @@ export function PricingSection() {
                 key={mode}
                 type="button"
                 data-testid={`billing-${mode}`}
+                disabled={!hydrated}
                 onClick={() => setBilling(mode)}
+                aria-pressed={billing === mode}
+                aria-label={mode === "monthly" ? t.plans.monthly : t.plans.yearly}
                 className={cn(
-                  "pf-focus rounded-md px-4 py-2 text-sm font-black transition",
-                  billing === mode ? "bg-white text-[#071021]" : "text-white/62 hover:bg-white/8 hover:text-white",
+                  "pf-focus inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-black transition",
+                  billing === mode ? "bg-white text-[#071021] shadow-[0_8px_28px_rgba(255,255,255,.16)]" : "text-white/62 hover:bg-white/8 hover:text-white",
                 )}
               >
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "h-2 w-2 rounded-full transition",
+                    billing === mode ? "bg-[#2dd4bf]" : "bg-white/24",
+                  )}
+                />
                 {mode === "monthly" ? t.plans.monthly : t.plans.yearly}
               </button>
             ))}
@@ -59,6 +75,7 @@ export function PricingSection() {
               key={tier.id}
               tier={tier}
               price={billing === "monthly" ? tier.monthlyPrice : tier.yearlyPrice}
+              billing={billing}
               featured={tier.id === "student"}
               aspirational={tier.id === "vip"}
               index={index}
@@ -80,7 +97,7 @@ export function PricingSection() {
             </div>
             <CreditCard size={22} className="text-white/32" aria-hidden="true" />
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" tabIndex={0} aria-label={t.plans.tableTitle}>
             <table className="min-w-[820px] w-full border-separate border-spacing-0 text-sm">
               <thead>
                 <tr className="text-left text-white">
@@ -134,12 +151,14 @@ export function PricingSection() {
 function PricingCard({
   tier,
   price,
+  billing,
   featured,
   aspirational,
   index,
 }: {
   tier: Copy["plans"]["tiers"][number];
   price: string;
+  billing: BillingMode;
   featured: boolean;
   aspirational: boolean;
   index: number;
@@ -162,6 +181,7 @@ function PricingCard({
       onPointerLeave={() => setTilt({ x: 0, y: 0 })}
       style={{ transform: `perspective(900px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` }}
       data-testid={`pricing-plan-${tier.id}`}
+      data-billing={billing}
       className={cn(
         "relative min-h-[360px] rounded-lg border p-6 transition will-change-transform",
         featured
@@ -190,7 +210,9 @@ function PricingCard({
         </div>
         <div className={cn("h-12 w-12 rounded-lg border", featured ? "border-[#4da3ff]/40 bg-[#4da3ff]/14" : "border-white/12 bg-white/8")} />
       </div>
-      <div className="mt-8 text-4xl font-black tracking-tight text-white sm:text-5xl">{price}</div>
+      <div className="mt-8 text-4xl font-black tracking-tight text-white sm:text-5xl" aria-live="polite">
+        {price}
+      </div>
       <p className="mt-5 min-h-20 text-base leading-7 text-white/62">{tier.description}</p>
       <button
         type="button"
