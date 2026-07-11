@@ -20,7 +20,13 @@ import {
   onboardingSteps,
 } from "@/lib/onboarding/types";
 
-export function OnboardingFlow({ initialState }: { initialState: OnboardingInitialState }) {
+export function OnboardingFlow({
+  initialState,
+  hideHeader = false,
+}: {
+  initialState: OnboardingInitialState;
+  hideHeader?: boolean;
+}) {
   const { locale, t } = useLocale();
   const [activeStep, setActiveStep] = useState<OnboardingStep>(initialState.step);
   const [selectedSource, setSelectedSource] = useState<EvidenceSourceType>(initialState.selectedSource);
@@ -69,14 +75,19 @@ export function OnboardingFlow({ initialState }: { initialState: OnboardingIniti
     changeStep(onboardingSteps[Math.max(0, index - 1)]);
   }
 
+  // hideHeader means an ancestor AppShell already owns the page's <main> landmark.
+  const MainTag = hideHeader ? "div" : "main";
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#05070d] text-white">
-      <a href="#main-content" className="pf-focus sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-black focus:text-[#071021]">
-        {t.nav.skip}
-      </a>
-      <WorkspaceHeader contextLabel={t.onboarding.workspace} />
+      {!hideHeader ? (
+        <a href="#main-content" className="pf-focus sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-black focus:text-[#071021]">
+          {t.nav.skip}
+        </a>
+      ) : null}
+      {!hideHeader ? <WorkspaceHeader contextLabel={t.onboarding.workspace} /> : null}
 
-      <main id="main-content" className="relative">
+      <MainTag id={hideHeader ? undefined : "main-content"} className="relative">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(78,140,255,.12),transparent_34%),linear-gradient(180deg,rgba(11,18,34,.92),rgba(5,7,13,1))]" aria-hidden="true" />
         <div className="absolute inset-0 pf-grid-v3 opacity-20" aria-hidden="true" />
         <div className="pf-container relative z-10 py-8 sm:py-10">
@@ -219,7 +230,7 @@ export function OnboardingFlow({ initialState }: { initialState: OnboardingIniti
             </section>
           </section>
         </div>
-      </main>
+      </MainTag>
     </div>
   );
 }

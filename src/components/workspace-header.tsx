@@ -17,7 +17,7 @@ export function WorkspaceHeader({ contextLabel }: { contextLabel: string }) {
           </span>
           <span className="min-w-0">
             <span className="block truncate text-sm font-black tracking-[0.18em]">ProofFolio AI</span>
-            <span className="hidden truncate text-[11px] uppercase tracking-[0.24em] text-white/45 sm:block">
+            <span className="hidden truncate text-[11px] uppercase tracking-[0.24em] text-white/52 sm:block">
               {contextLabel}
             </span>
           </span>

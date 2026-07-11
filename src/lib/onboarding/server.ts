@@ -16,6 +16,7 @@ import {
   sourceLabel,
 } from "@/lib/onboarding/types";
 import { createSupabaseServerClient, type SupabaseServerClient } from "@/lib/supabase/server";
+import { ensureProfile } from "@/lib/profile/server";
 
 type SearchParamsInput = Record<string, string | string[] | undefined>;
 
@@ -166,10 +167,7 @@ async function ensurePortfolioDraft(
   user: User,
   requestedTemplateId: TemplateId | null,
 ): Promise<{ portfolio: PortfolioDraft; existing: boolean }> {
-  await supabase.from("profiles").upsert({
-    id: user.id,
-    display_name: profileNameFromEmail(user.email),
-  });
+  await ensureProfile(supabase, user);
 
   const { data: existing, error: selectError } = await supabase
     .from("portfolios")
@@ -365,14 +363,6 @@ function recommendedStepFromProgress(portfolio: PortfolioDraft, progress: DraftP
 
 function draftSlug(userId: string) {
   return `draft-${userId.slice(0, 8)}-${Date.now().toString(36)}`;
-}
-
-function profileNameFromEmail(email: string | undefined) {
-  if (!email) {
-    return "ProofFolio user";
-  }
-
-  return email.split("@")[0]?.replace(/[._-]+/g, " ") || "ProofFolio user";
 }
 
 function getSingle(value: string | string[] | undefined) {

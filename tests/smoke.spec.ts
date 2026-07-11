@@ -362,13 +362,13 @@ test.describe("ProofFolio AI UI demo", () => {
     await expect(page.getByTestId("template-option-dark-tech")).toContainText("Selected");
   });
 
-  test("header mobile CTA targets onboarding", async ({ page }) => {
+  test("header mobile CTA targets sign-up with onboarding as next", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/", { waitUntil: "domcontentloaded" });
 
-    const startLink = page.getByRole("link", { name: "Start with your evidence" }).first();
-    await expect(startLink).toBeVisible();
-    await expect(startLink).toHaveAttribute("href", "/onboarding");
+    const createLink = page.getByRole("link", { name: "Create your portfolio" }).first();
+    await expect(createLink).toBeVisible();
+    await expect(createLink).toHaveAttribute("href", "/auth/sign-up?next=/onboarding");
   });
 
   test("onboarding switches between English and French", async ({ page }) => {

@@ -2,6 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { sanitizeNextPath } from "@/lib/auth/session";
+import { ensureProfile } from "@/lib/profile/server";
 import type { Locale } from "@/lib/content";
 
 export type AuthActionState = {
@@ -9,6 +11,9 @@ export type AuthActionState = {
   fieldErrors?: {
     email?: string;
     password?: string;
+    displayName?: string;
+    confirmPassword?: string;
+    terms?: string;
   };
 };
 
@@ -16,7 +21,7 @@ const emptyState: AuthActionState = { message: "" };
 
 export async function signInAction(previousState: AuthActionState = emptyState, formData: FormData) {
   void previousState;
-  const parsed = parseAuthForm(formData);
+  const parsed = parseSignInForm(formData);
 
   if (parsed.fieldErrors) {
     return localizedState(parsed.locale, "validation", parsed.fieldErrors);
@@ -42,7 +47,7 @@ export async function signInAction(previousState: AuthActionState = emptyState, 
 
 export async function signUpAction(previousState: AuthActionState = emptyState, formData: FormData) {
   void previousState;
-  const parsed = parseAuthForm(formData);
+  const parsed = parseSignUpForm(formData);
 
   if (parsed.fieldErrors) {
     return localizedState(parsed.locale, "validation", parsed.fieldErrors);
@@ -54,13 +59,17 @@ export async function signUpAction(previousState: AuthActionState = emptyState, 
     return localizedState(parsed.locale, "missingConfig");
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: parsed.email,
     password: parsed.password,
   });
 
   if (error) {
     return { message: error.message };
+  }
+
+  if (data.user) {
+    await ensureProfile(supabase, data.user, parsed.displayName);
   }
 
   redirect(parsed.next);
@@ -76,11 +85,11 @@ export async function signOutAction() {
   redirect("/");
 }
 
-function parseAuthForm(formData: FormData) {
+function parseSignInForm(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const locale = normalizeLocale(formData.get("locale"));
-  const next = sanitizeNext(String(formData.get("next") ?? "/onboarding"));
+  const next = sanitizeNextPath(String(formData.get("next") ?? ""), "/dashboard");
   const fieldErrors: AuthActionState["fieldErrors"] = {};
 
   if (!email || !email.includes("@")) {
@@ -95,6 +104,52 @@ function parseAuthForm(formData: FormData) {
   return {
     email,
     password,
+    locale,
+    next,
+    fieldErrors: Object.keys(fieldErrors).length > 0 ? fieldErrors : undefined,
+  };
+}
+
+function parseSignUpForm(formData: FormData) {
+  const email = String(formData.get("email") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+  const confirmPassword = String(formData.get("confirmPassword") ?? "");
+  const displayName = String(formData.get("displayName") ?? "").trim();
+  const termsAccepted = formData.get("terms") === "on";
+  const locale = normalizeLocale(formData.get("locale"));
+  const next = sanitizeNextPath(String(formData.get("next") ?? ""), "/onboarding");
+  const fieldErrors: AuthActionState["fieldErrors"] = {};
+
+  if (!displayName) {
+    fieldErrors.displayName =
+      locale === "fr" ? "Ajoutez votre nom avant de créer un compte." : "Add your name before creating an account.";
+  }
+
+  if (!email || !email.includes("@")) {
+    fieldErrors.email = locale === "fr" ? "Entrez une adresse e-mail valide." : "Enter a valid email address.";
+  }
+
+  if (password.length < 6) {
+    fieldErrors.password =
+      locale === "fr" ? "Utilisez au moins 6 caractères." : "Use at least 6 characters.";
+  }
+
+  if (confirmPassword !== password) {
+    fieldErrors.confirmPassword =
+      locale === "fr" ? "Les mots de passe ne correspondent pas." : "Passwords do not match.";
+  }
+
+  if (!termsAccepted) {
+    fieldErrors.terms =
+      locale === "fr"
+        ? "Acceptez la note de confidentialité avant de créer un compte."
+        : "Acknowledge the privacy note before creating an account.";
+  }
+
+  return {
+    email,
+    password,
+    displayName,
     locale,
     next,
     fieldErrors: Object.keys(fieldErrors).length > 0 ? fieldErrors : undefined,
@@ -126,12 +181,4 @@ function localizedState(
 
 function normalizeLocale(value: FormDataEntryValue | null): Locale {
   return value === "fr" ? "fr" : "en";
-}
-
-function sanitizeNext(value: string) {
-  if (!value.startsWith("/") || value.startsWith("//")) {
-    return "/onboarding";
-  }
-
-  return value;
 }
