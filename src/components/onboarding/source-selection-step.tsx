@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { Award, FileText, FolderGit, PenLine, ShieldCheck } from "lucide-react";
 import type { Copy, TemplateId } from "@/lib/content";
+import type { GitHubConnectionState } from "@/lib/github/server";
 import type { EvidenceItem, EvidenceSourceStatus, EvidenceSourceType } from "@/lib/onboarding/types";
 
 const sourceIcons = {
   cv: FileText,
   certificate: Award,
   manual_project: PenLine,
-  github_placeholder: FolderGit,
+  github_repository: FolderGit,
 } as const;
 
 export function SourceSelectionStep({
@@ -19,6 +20,7 @@ export function SourceSelectionStep({
   evidenceItems,
   errorMessage,
   canPersist,
+  github,
   onSelect,
 }: {
   t: Copy;
@@ -27,13 +29,14 @@ export function SourceSelectionStep({
   evidenceItems: EvidenceItem[];
   errorMessage?: string;
   canPersist: boolean;
+  github: GitHubConnectionState;
   onSelect: (source: EvidenceSourceType) => void;
 }) {
   const sources = [
     { id: "cv", label: t.onboarding.sources.cv, detail: t.onboarding.sources.cvDetail, disabled: false },
     { id: "certificate", label: t.onboarding.sources.certificate, detail: t.onboarding.sources.certificateDetail, disabled: false },
     { id: "manual_project", label: t.onboarding.sources.manualProject, detail: t.onboarding.sources.manualDetail, disabled: false },
-    { id: "github_placeholder", label: t.onboarding.sources.github, detail: t.onboarding.sources.githubDetail, disabled: true },
+    { id: "github_repository", label: t.onboarding.sources.github, detail: t.onboarding.sources.githubDetail, disabled: false },
   ] as const;
 
   return (
@@ -56,7 +59,7 @@ export function SourceSelectionStep({
           const Icon = sourceIcons[source.id];
           const count = evidenceItems.filter((item) => item.sourceType === source.id).length;
           const active = selectedSource === source.id;
-          const status = getSourceStatus(source.id, count, active, canPersist, errorMessage);
+          const status = getSourceStatus(source.id, count, active, canPersist, errorMessage, github.connected);
           const statusLabel = localizeStatus(t, status, source.disabled);
 
           const cardContent = (
@@ -128,10 +131,10 @@ function getSourceStatus(
   active: boolean,
   canPersist: boolean,
   errorMessage?: string,
+  githubConnected?: boolean,
 ): EvidenceSourceStatus {
-  if (sourceId === "github_placeholder") {
-    return "not_added";
-  }
+  void sourceId;
+  void githubConnected;
 
   if (!canPersist && count > 0) {
     return "needs_attention";

@@ -158,6 +158,7 @@ export function OnboardingFlow({
                   evidenceItems={initialState.evidenceItems}
                   errorMessage={initialState.errorMessage}
                   canPersist={canPersist}
+                  github={initialState.github}
                   onSelect={(source) => {
                     setSelectedSource(source);
                     changeStep("upload");
@@ -173,6 +174,7 @@ export function OnboardingFlow({
                   locale={locale}
                   canPersist={canPersist}
                   evidenceItems={initialState.evidenceItems}
+                  github={initialState.github}
                 />
               ) : null}
               {activeStep === "review" ? (
@@ -184,6 +186,7 @@ export function OnboardingFlow({
                   locale={locale}
                   approvedCount={initialState.approvedCount}
                   canPersist={canPersist}
+                  aiProviderEnabled={initialState.aiProviderEnabled}
                 />
               ) : null}
               {activeStep === "template" ? (

@@ -15,6 +15,7 @@ import {
   FileText,
   FolderKanban,
   Gauge,
+  Globe2,
   LayoutPanelTop,
   LoaderCircle,
   LockKeyhole,
@@ -29,8 +30,11 @@ import {
 } from "lucide-react";
 import {
   saveEditorIdentityAction,
+  saveEditorPublishSettingsAction,
   saveEditorPresentationAction,
   saveEditorProjectAction,
+  publishPortfolioAction,
+  unpublishPortfolioAction,
 } from "@/app/editor/actions";
 import { useLocale } from "@/components/locale-provider";
 import { EditorPreview } from "@/components/editor/editor-preview";
@@ -54,7 +58,7 @@ type SaveState = "preview" | "unsaved" | "saving" | "saved" | "failed";
 type PreviewViewport = "desktop" | "mobile";
 
 type RecoveryPayload = {
-  identity?: { title: string; headline: string };
+  identity?: { title: string; headline: string; targetRole: string; availability: string };
   projects?: Record<string, Pick<EditorProject, "title" | "summary" | "technologies" | "repositoryUrl" | "liveDemoUrl">>;
   updatedAt: string;
 };
@@ -115,6 +119,8 @@ function EditorWorkspace({ initialState, hideHeader }: { initialState: EditorIni
     const snapshot = {
       title: portfolio.title,
       headline: portfolio.profileSettings.headline,
+      targetRole: portfolio.profileSettings.targetRole,
+      availability: portfolio.profileSettings.availability,
     };
     setSaveState("saving");
     setSaveMessage("");
@@ -123,6 +129,8 @@ function EditorWorkspace({ initialState, hideHeader }: { initialState: EditorIni
       portfolioId: portfolio.id,
       title: snapshot.title,
       headline: snapshot.headline,
+      targetRole: snapshot.targetRole,
+      availability: snapshot.availability,
       locale,
     });
 
@@ -212,17 +220,24 @@ function EditorWorkspace({ initialState, hideHeader }: { initialState: EditorIni
     return () => window.clearTimeout(timer);
   }, [dirtyProjectKey, initialState.canPersist, persistProject, projects]);
 
-  function updateIdentity(field: "title" | "headline", value: string) {
+  function updateIdentity(field: "title" | "headline" | "targetRole" | "availability", value: string) {
     const nextIdentity = {
       title: field === "title" ? value : portfolio.title,
       headline: field === "headline" ? value : portfolio.profileSettings.headline,
+      targetRole: field === "targetRole" ? value : portfolio.profileSettings.targetRole,
+      availability: field === "availability" ? value : portfolio.profileSettings.availability,
     };
 
     identityRevision.current += 1;
     setPortfolio((current) => ({
       ...current,
       title: nextIdentity.title,
-      profileSettings: { ...current.profileSettings, headline: nextIdentity.headline },
+      profileSettings: {
+        ...current.profileSettings,
+        headline: nextIdentity.headline,
+        targetRole: nextIdentity.targetRole,
+        availability: nextIdentity.availability,
+      },
     }));
     setIdentityDirty(true);
     setSaveState(initialState.canPersist ? "unsaved" : "preview");
@@ -326,6 +341,8 @@ function EditorWorkspace({ initialState, hideHeader }: { initialState: EditorIni
         profileSettings: {
           ...current.profileSettings,
           headline: recovery.identity?.headline ?? current.profileSettings.headline,
+          targetRole: recovery.identity?.targetRole ?? current.profileSettings.targetRole,
+          availability: recovery.identity?.availability ?? current.profileSettings.availability,
         },
       }));
       setIdentityDirty(true);
@@ -357,6 +374,95 @@ function EditorWorkspace({ initialState, hideHeader }: { initialState: EditorIni
     setRecovery(null);
   }
 
+<<<<<<< HEAD
+=======
+  const publishState =
+    portfolio.status === "published"
+      ? "published"
+      : portfolio.status === "unpublished"
+        ? "unpublished"
+        : portfolio.title.trim() && portfolio.slug.trim() && (projects.length > 0 || approvedEvidenceCount > 0)
+          ? "ready"
+          : "draft";
+  const previewHref = portfolio.slug ? `/p/${portfolio.slug}?preview=1&portfolio=${portfolio.id}` : "/editor";
+  const publicHref = portfolio.slug ? `/p/${portfolio.slug}` : "/editor";
+
+  async function saveSlug() {
+    if (!initialState.canPersist) {
+      return;
+    }
+
+    setSaveState("saving");
+    setSaveMessage("");
+    const result = await saveEditorPublishSettingsAction({
+      portfolioId: portfolio.id,
+      slug: portfolio.slug,
+      locale,
+    });
+
+    if (!result.ok) {
+      setSaveState("failed");
+      setSaveMessage(result.message);
+      return;
+    }
+
+    setSaveState("saved");
+  }
+
+  async function publishPortfolio() {
+    if (!initialState.canPersist) {
+      return;
+    }
+
+    setSaveState("saving");
+    setSaveMessage("");
+    const result = await publishPortfolioAction({
+      portfolioId: portfolio.id,
+      slug: portfolio.slug,
+      locale,
+    });
+
+    if (!result.ok) {
+      setSaveState("failed");
+      setSaveMessage(result.message);
+      return;
+    }
+
+    setPortfolio((current) => ({
+      ...current,
+      status: "published",
+      publishedAt: new Date().toISOString(),
+    }));
+    setSaveState("saved");
+  }
+
+  async function unpublishPortfolio() {
+    if (!initialState.canPersist || !window.confirm(t.editor.publish.confirmUnpublish)) {
+      return;
+    }
+
+    setSaveState("saving");
+    setSaveMessage("");
+    const result = await unpublishPortfolioAction({
+      portfolioId: portfolio.id,
+      slug: portfolio.slug,
+      locale,
+    });
+
+    if (!result.ok) {
+      setSaveState("failed");
+      setSaveMessage(result.message);
+      return;
+    }
+
+    setPortfolio((current) => ({
+      ...current,
+      status: "unpublished",
+    }));
+    setSaveState("saved");
+  }
+
+>>>>>>> origin/main
   // hideHeader means an ancestor AppShell already owns the page's <main> landmark.
   const MainTag = hideHeader ? "div" : "main";
 
@@ -425,10 +531,72 @@ function EditorWorkspace({ initialState, hideHeader }: { initialState: EditorIni
                   <Field label={t.editor.fields.headline} htmlFor="editor-headline">
                     <textarea id="editor-headline" data-testid="editor-headline" value={portfolio.profileSettings.headline} onChange={(event) => updateIdentity("headline", event.target.value)} maxLength={220} rows={4} className="editor-input resize-y" />
                   </Field>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label={t.editor.fields.targetRole} htmlFor="editor-target-role">
+                      <input id="editor-target-role" value={portfolio.profileSettings.targetRole} onChange={(event) => updateIdentity("targetRole", event.target.value)} maxLength={100} className="editor-input" />
+                    </Field>
+                    <Field label={t.editor.fields.availability} htmlFor="editor-availability">
+                      <input id="editor-availability" value={portfolio.profileSettings.availability} onChange={(event) => updateIdentity("availability", event.target.value)} maxLength={120} className="editor-input" />
+                    </Field>
+                  </div>
                   <button type="button" onClick={() => void persistIdentity()} disabled={!initialState.canPersist || !identityDirty || saveState === "saving"} className="pf-focus inline-flex w-fit items-center gap-2 rounded-md border border-white/14 bg-white/6 px-3 py-2 text-xs font-black text-white disabled:opacity-40">
                     <Save size={15} aria-hidden="true" />
                     {t.editor.actions.saveNow}
                   </button>
+                </div>
+              </EditorPanel>
+
+              <EditorPanel icon={Globe2} title={t.editor.panels.publish} description={t.editor.panelDescriptions.publish} defaultOpen testId="editor-publish-panel">
+                <div className="space-y-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-md border border-[#4E8CFF]/24 bg-[#4E8CFF]/10 px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#BFDBFE]">
+                      {t.editor.publish.states[publishState]}
+                    </span>
+                    <span className="text-xs leading-5 text-white/52">{t.editor.publish.warning}</span>
+                  </div>
+                  <Field label={t.editor.publish.slugLabel} htmlFor="editor-public-slug">
+                    <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+                      <input id="editor-public-slug" data-testid="editor-public-slug" value={portfolio.slug} onChange={(event) => setPortfolio((current) => ({ ...current, slug: event.target.value.toLowerCase() }))} maxLength={60} className="editor-input" />
+                      <button type="button" onClick={() => void saveSlug()} disabled={!initialState.canPersist || saveState === "saving" || portfolio.status === "published"} className="pf-focus rounded-md border border-white/14 bg-white/6 px-3 py-2 text-xs font-black text-white disabled:opacity-40">
+                        {t.editor.publish.saveSlug}
+                      </button>
+                    </div>
+                  </Field>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3">
+                      <div className="text-[11px] font-black uppercase tracking-[0.14em] text-white/42">{t.editor.publish.requirements}</div>
+                      <ul className="mt-3 space-y-2 text-sm leading-6 text-white/62">
+                        <li>{t.editor.publish.requirementTitle}</li>
+                        <li>{t.editor.publish.requirementTemplate}</li>
+                        <li>{t.editor.publish.requirementEvidence}</li>
+                      </ul>
+                    </div>
+                    <div className="rounded-lg border border-white/10 bg-white/[0.035] p-3">
+                      <div className="text-[11px] font-black uppercase tracking-[0.14em] text-white/42">{t.editor.publish.previewLink}</div>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <Link href={previewHref} className="pf-focus inline-flex items-center gap-2 rounded-md border border-white/12 px-3 py-2 text-xs font-black text-white/74">
+                          <Eye size={14} />
+                          {t.editor.publish.previewAction}
+                        </Link>
+                        {portfolio.status === "published" ? (
+                          <Link href={publicHref} className="pf-focus inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 text-xs font-black text-[#071021]">
+                            <Globe2 size={14} />
+                            {t.editor.publish.viewPublic}
+                          </Link>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" data-testid="editor-publish-button" onClick={() => void publishPortfolio()} disabled={!initialState.canPersist || saveState === "saving"} className="pf-focus inline-flex items-center gap-2 rounded-md bg-[#F8FAFC] px-4 py-2.5 text-xs font-black text-[#071021] disabled:opacity-40">
+                      <BadgeCheck size={15} aria-hidden="true" />
+                      {t.editor.publish.publishAction}
+                    </button>
+                    <button type="button" data-testid="editor-unpublish-button" onClick={() => void unpublishPortfolio()} disabled={!initialState.canPersist || saveState === "saving" || portfolio.status !== "published"} className="pf-focus inline-flex items-center gap-2 rounded-md border border-[#ff7a66]/24 bg-[#ff7a66]/10 px-4 py-2.5 text-xs font-black text-[#ffd8d1] disabled:opacity-35">
+                      <EyeOff size={15} aria-hidden="true" />
+                      {t.editor.publish.unpublishAction}
+                    </button>
+                  </div>
                 </div>
               </EditorPanel>
 
@@ -628,7 +796,7 @@ function ProjectEditor({ project, index, dirty, canPersist, saveState, onChange,
       onToggle={(event) => setIsOpen(event.currentTarget.open)}
     >
       <summary className="pf-focus flex cursor-pointer list-none items-center gap-3 p-3 [&::-webkit-details-marker]:hidden">
-        <SourcePill source="manual_project" t={t} />
+        <SourcePill source={project.sourceType} t={t} />
         <span className="min-w-0 flex-1 truncate text-sm font-black text-white/78">{project.title}</span>
         {dirty ? <CircleDot size={14} className="text-[#FCD34D]" aria-label={t.editor.saveStates.unsaved} /> : <BadgeCheck size={14} className="text-[#2DD4BF]" aria-label={t.editor.evidence.approved} />}
         <ChevronDown size={15} className="text-white/38" aria-hidden="true" />
@@ -705,8 +873,15 @@ function SelectControl<T extends string>({ label, value, options, labels, onChan
   );
 }
 
-function SourcePill({ source, t }: { source: "cv" | "certificate" | "manual_project" | "github_placeholder"; t: Copy }) {
-  const label = source === "cv" ? t.editor.sourceBadges.cv : source === "certificate" ? t.editor.sourceBadges.certificate : source === "github_placeholder" ? t.editor.sourceBadges.github : t.editor.sourceBadges.manualProject;
+function SourcePill({ source, t }: { source: "cv" | "certificate" | "manual_project" | "github_placeholder" | "github_repository"; t: Copy }) {
+  const label =
+    source === "cv"
+      ? t.editor.sourceBadges.cv
+      : source === "certificate"
+        ? t.editor.sourceBadges.certificate
+        : source === "github_placeholder" || source === "github_repository"
+          ? t.editor.sourceBadges.github
+          : t.editor.sourceBadges.manualProject;
   return <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-[#4E8CFF]/20 bg-[#4E8CFF]/10 px-2 py-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#BFDBFE]"><BadgeCheck size={11} aria-hidden="true" />{label}</span>;
 }
 

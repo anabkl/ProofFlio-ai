@@ -97,7 +97,7 @@ export function PricingSection() {
             </div>
             <CreditCard size={22} className="text-white/32" aria-hidden="true" />
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" tabIndex={0} aria-label={t.plans.tableTitle}>
             <table className="min-w-[820px] w-full border-separate border-spacing-0 text-sm">
               <thead>
                 <tr className="text-left text-white">

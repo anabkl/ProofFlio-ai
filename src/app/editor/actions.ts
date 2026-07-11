@@ -22,6 +22,8 @@ type IdentityInput = {
   portfolioId: string;
   title: string;
   headline: string;
+  targetRole: string;
+  availability: string;
   locale: Locale;
 };
 
@@ -45,6 +47,18 @@ type ProjectInput = {
   locale: Locale;
 };
 
+type PublishSettingsInput = {
+  portfolioId: string;
+  slug: string;
+  locale: Locale;
+};
+
+type PublishInput = {
+  portfolioId: string;
+  slug: string;
+  locale: Locale;
+};
+
 type OwnedContext = {
   supabase: SupabaseServerClient;
   userId: string;
@@ -57,8 +71,10 @@ export async function saveEditorIdentityAction(input: IdentityInput): Promise<Ed
   const locale = normalizeLocale(input.locale);
   const title = input.title.trim();
   const headline = input.headline.trim();
+  const targetRole = input.targetRole.trim();
+  const availability = input.availability.trim();
 
-  if (!title || title.length > 120 || headline.length > 220) {
+  if (!title || title.length > 120 || headline.length > 220 || targetRole.length > 100 || availability.length > 120) {
     return failure(locale, "validation");
   }
 
@@ -84,7 +100,7 @@ export async function saveEditorIdentityAction(input: IdentityInput): Promise<Ed
     .from("portfolios")
     .update({
       title,
-      profile_settings: { ...profileSettings, headline },
+      profile_settings: { ...profileSettings, headline, targetRole, availability },
     })
     .eq("id", context.portfolioId)
     .eq("owner_user_id", context.userId);
@@ -250,6 +266,142 @@ export async function saveEditorProjectAction(input: ProjectInput): Promise<Edit
   return success();
 }
 
+export async function saveEditorPublishSettingsAction(input: PublishSettingsInput): Promise<EditorActionResult> {
+  const locale = normalizeLocale(input.locale);
+  const slug = normalizeSlug(input.slug);
+
+  if (!slug) {
+    return failure(locale, "validation");
+  }
+
+  const context = await getOwnedContext(input.portfolioId, locale);
+
+  if ("ok" in context) {
+    return context;
+  }
+
+  const { error } = await context.supabase
+    .from("portfolios")
+    .update({ slug })
+    .eq("id", context.portfolioId)
+    .eq("owner_user_id", context.userId)
+    .neq("status", "published");
+
+  if (error) {
+    return failure(locale, "database");
+  }
+
+  revalidatePath("/editor");
+  return success();
+}
+
+export async function publishPortfolioAction(input: PublishInput): Promise<EditorActionResult> {
+  const locale = normalizeLocale(input.locale);
+  const slug = normalizeSlug(input.slug);
+
+  if (!slug) {
+    return failure(locale, "validation");
+  }
+
+  const context = await getOwnedContext(input.portfolioId, locale);
+
+  if ("ok" in context) {
+    return context;
+  }
+
+  const { data: portfolio, error: portfolioError } = await context.supabase
+    .from("portfolios")
+    .select("id,title,selected_template_id,profile_settings")
+    .eq("id", context.portfolioId)
+    .eq("owner_user_id", context.userId)
+    .single();
+
+  if (portfolioError || !portfolio) {
+    return failure(locale, "database");
+  }
+
+  const title = String(portfolio.title ?? "").trim();
+  const selectedTemplateId = String(portfolio.selected_template_id ?? "");
+
+  const [{ count: approvedProjectsCount, error: projectCountError }, { count: approvedEvidenceCount, error: evidenceCountError }] =
+    await Promise.all([
+      context.supabase
+        .from("project_drafts")
+        .select("id", { count: "exact", head: true })
+        .eq("portfolio_id", context.portfolioId)
+        .eq("owner_user_id", context.userId)
+        .eq("status", "approved"),
+      context.supabase
+        .from("proposal_reviews")
+        .select("id", { count: "exact", head: true })
+        .eq("portfolio_id", context.portfolioId)
+        .eq("owner_user_id", context.userId)
+        .in("review_state", ["approved", "edited"]),
+    ]);
+
+  if (projectCountError || evidenceCountError) {
+    return failure(locale, "database");
+  }
+
+  if (!title || !isEditorTemplateId(selectedTemplateId) || (approvedProjectsCount ?? 0) + (approvedEvidenceCount ?? 0) < 1) {
+    return failure(locale, "validation");
+  }
+
+  const { error } = await context.supabase
+    .from("portfolios")
+    .update({
+      slug,
+      status: "published",
+      published_at: new Date().toISOString(),
+    })
+    .eq("id", context.portfolioId)
+    .eq("owner_user_id", context.userId);
+
+  if (error) {
+    return failure(locale, "database");
+  }
+
+  revalidatePath("/editor");
+  revalidatePath(`/p/${slug}`);
+  revalidatePath("/sitemap.xml");
+  return success();
+}
+
+export async function unpublishPortfolioAction(input: PublishInput): Promise<EditorActionResult> {
+  const locale = normalizeLocale(input.locale);
+  const context = await getOwnedContext(input.portfolioId, locale);
+
+  if ("ok" in context) {
+    return context;
+  }
+
+  const { data: current, error: selectError } = await context.supabase
+    .from("portfolios")
+    .select("slug")
+    .eq("id", context.portfolioId)
+    .eq("owner_user_id", context.userId)
+    .single();
+
+  if (selectError || !current) {
+    return failure(locale, "database");
+  }
+
+  const { error } = await context.supabase
+    .from("portfolios")
+    .update({ status: "unpublished" })
+    .eq("id", context.portfolioId)
+    .eq("owner_user_id", context.userId);
+
+  if (error) {
+    return failure(locale, "database");
+  }
+
+  revalidatePath("/editor");
+  revalidatePath(`/p/${current.slug}`);
+  revalidatePath("/sitemap.xml");
+  return success();
+}
+
 async function getOwnedContext(portfolioId: string, locale: Locale): Promise<OwnedContext | EditorActionResult> {
   if (!uuidPattern.test(portfolioId)) {
     return failure(locale, "forbidden");
@@ -336,6 +488,22 @@ function normalizeUrl(value: string) {
   }
 }
 
+function normalizeSlug(value: string) {
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  if (!normalized || normalized.length < 3 || normalized.length > 60) {
+    return null;
+  }
+
+  return normalized;
+}
+
 function normalizeStringArray(value: unknown) {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
 }
@@ -358,14 +526,14 @@ function failure(locale: Locale, reason: Extract<EditorActionResult, { ok: false
       setup: "Supabase is not configured. Your changes remain only in the local recovery buffer.",
       unauthenticated: "Your session expired. Sign in again before saving.",
       forbidden: "This portfolio or project is not available to your account.",
-      validation: "Review the highlighted values. Titles, summaries and links must be valid before saving.",
+      validation: "Review the highlighted values. Titles, summaries, slug and links must be valid before saving or publishing.",
       database: "The workspace could not save this change. Your unsaved text remains available locally.",
     },
     fr: {
       setup: "Supabase n’est pas configuré. Vos modifications restent uniquement dans la récupération locale.",
       unauthenticated: "Votre session a expiré. Reconnectez-vous avant d’enregistrer.",
       forbidden: "Ce portfolio ou ce projet n’est pas accessible à votre compte.",
-      validation: "Vérifiez les valeurs signalées. Les titres, résumés et liens doivent être valides avant l’enregistrement.",
+      validation: "Vérifiez les valeurs signalées. Les titres, résumés, slug et liens doivent être valides avant l’enregistrement ou la publication.",
       database: "L’espace n’a pas pu enregistrer cette modification. Votre texte non enregistré reste disponible localement.",
     },
   } as const;

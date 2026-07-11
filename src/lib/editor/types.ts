@@ -25,6 +25,8 @@ export type SectionVisibility = Record<EditorSectionId, boolean>;
 
 export type EditorProfileSettings = {
   headline: string;
+  targetRole: string;
+  availability: string;
   sectionOrder: EditorSectionId[];
   sectionVisibility: SectionVisibility;
 };
@@ -41,10 +43,12 @@ export type EditorDesignSettings = {
 export type EditorPortfolio = {
   id: string;
   title: string;
+  slug: string;
   displayName: string;
   selectedTemplateId: TemplateId;
-  status: "draft" | "published";
+  status: "draft" | "unpublished" | "published";
   updatedAt: string;
+  publishedAt: string | null;
   profileSettings: EditorProfileSettings;
   designSettings: EditorDesignSettings;
 };
@@ -62,7 +66,7 @@ export type EditorEvidenceItem = {
 export type EditorProject = {
   id: string;
   sourceEvidenceId: string;
-  sourceType: "manual_project";
+  sourceType: "manual_project" | "github_repository";
   reviewId: string;
   reviewState: "approved" | "edited";
   title: string;
@@ -82,12 +86,16 @@ export type EditorInitialState = {
   evidenceItems: EditorEvidenceItem[];
 };
 
+export type EditorPublishState = "draft" | "ready" | "published" | "unpublished";
+
 export type EditorActionResult =
   | { ok: true; savedAt: string }
   | { ok: false; reason: "setup" | "unauthenticated" | "forbidden" | "validation" | "database"; message: string };
 
 export const defaultProfileSettings: EditorProfileSettings = {
   headline: "",
+  targetRole: "",
+  availability: "",
   sectionOrder: [...editorSectionIds],
   sectionVisibility: {
     projects: true,

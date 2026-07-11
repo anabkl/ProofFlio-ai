@@ -1,9 +1,10 @@
 import { templateIds, type TemplateId } from "@/lib/content";
+import type { GitHubRepositoryRecord } from "@/lib/github/api";
 
 export const onboardingSteps = ["sources", "upload", "review", "template", "summary"] as const;
 export type OnboardingStep = (typeof onboardingSteps)[number];
 
-export type EvidenceSourceType = "cv" | "certificate" | "manual_project" | "github_placeholder";
+export type EvidenceSourceType = "cv" | "certificate" | "manual_project" | "github_placeholder" | "github_repository";
 export type ReviewState = "pending" | "approved" | "edited" | "rejected";
 export type EvidenceSourceStatus = "not_added" | "uploading" | "saved_privately" | "needs_attention";
 
@@ -76,6 +77,18 @@ export type OnboardingInitialState = {
   selectedSource: EvidenceSourceType;
   step: OnboardingStep;
   approvedCount: number;
+  github: {
+    configured: boolean;
+    connected: boolean;
+    login: string;
+    name: string;
+    avatarUrl: string;
+    repositories: GitHubRepositoryRecord[];
+    connectedAt: string | null;
+    lastSyncedAt: string | null;
+    canSync: boolean;
+  };
+  aiProviderEnabled: boolean;
   errorMessage?: string;
 };
 
@@ -98,6 +111,10 @@ export function normalizeEvidenceSource(value: string | null | undefined): Evide
     return value;
   }
 
+  if (value === "github_repository") {
+    return value;
+  }
+
   return "cv";
 }
 
@@ -108,6 +125,10 @@ export function sourceLabel(sourceType: EvidenceSourceType) {
 
   if (sourceType === "github_placeholder") {
     return "GitHub - coming soon";
+  }
+
+  if (sourceType === "github_repository") {
+    return "GitHub repository";
   }
 
   return sourceType === "cv" ? "CV" : "Certificate";

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { syncGitHubRepositories, importGitHubRepositories, disconnectGitHubConnection } from "@/lib/github/server";
 import { EVIDENCE_BUCKET, MAX_EVIDENCE_FILE_BYTES } from "@/lib/supabase/config";
 import { createSupabaseServerClient, type SupabaseServerClient } from "@/lib/supabase/server";
 import { isTemplateId } from "@/lib/onboarding/types";
@@ -330,6 +331,18 @@ export async function reviewProposalAction(formData: FormData) {
     redirectActionError(error.message, "review", context.templateId);
   }
 
+  const nextProjectStatus = reviewState === "rejected" ? "archived" : "approved";
+  await context.supabase
+    .from("project_drafts")
+    .update({
+      title: proposedTitle,
+      summary: proposedSummary,
+      status: nextProjectStatus,
+    })
+    .eq("portfolio_id", context.portfolioId)
+    .eq("owner_user_id", context.userId)
+    .contains("evidence_references", [sourceEvidenceId]);
+
   await context.supabase
     .from("portfolios")
     .update({ onboarding_state: "review" })
@@ -366,6 +379,68 @@ export async function selectTemplateAction(formData: FormData) {
 
   revalidatePath("/onboarding");
   redirect(`/onboarding?step=summary&template=${templateId}`);
+}
+
+export async function syncGitHubRepositoriesAction(formData: FormData) {
+  const locale = getActionLocale(formData);
+  const context = await getActionContext(formData, locale);
+
+  if (isActionResult(context)) {
+    redirectActionError(context.message ?? actionMessage(locale, "githubSyncFailed"), "upload", "developer-signature");
+  }
+
+  try {
+    await syncGitHubRepositories(context.supabase, context.userId);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : actionMessage(locale, "githubSyncFailed");
+    redirectActionError(message, "upload", context.templateId);
+  }
+
+  revalidatePath("/onboarding");
+  redirect(`/onboarding?step=upload&source=github_repository&template=${context.templateId}`);
+}
+
+export async function importGitHubRepositoriesAction(formData: FormData) {
+  const locale = getActionLocale(formData);
+  const context = await getActionContext(formData, locale);
+
+  if (isActionResult(context)) {
+    redirectActionError(context.message ?? actionMessage(locale, "githubImportFailed"), "upload", "developer-signature");
+  }
+
+  const selectedRepositoryIds = formData
+    .getAll("repositoryId")
+    .map((value) => Number(value))
+    .filter((value) => Number.isInteger(value) && value > 0);
+
+  try {
+    await importGitHubRepositories(context.supabase, context.userId, context.portfolioId, selectedRepositoryIds);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : actionMessage(locale, "githubImportFailed");
+    redirectActionError(message, "upload", context.templateId);
+  }
+
+  revalidatePath("/onboarding");
+  redirect(`/onboarding?step=review&template=${context.templateId}`);
+}
+
+export async function disconnectGitHubAction(formData: FormData) {
+  const locale = getActionLocale(formData);
+  const context = await getActionContext(formData, locale);
+
+  if (isActionResult(context)) {
+    redirectActionError(context.message ?? actionMessage(locale, "githubDisconnectFailed"), "upload", "developer-signature");
+  }
+
+  try {
+    await disconnectGitHubConnection(context.supabase, context.userId, context.portfolioId);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : actionMessage(locale, "githubDisconnectFailed");
+    redirectActionError(message, "upload", context.templateId);
+  }
+
+  revalidatePath("/onboarding");
+  redirect(`/onboarding?step=upload&source=github_repository&template=${context.templateId}`);
 }
 
 export async function continueToEditorAction(formData: FormData) {
@@ -496,6 +571,9 @@ const actionMessages = {
     saveEvidenceFailed: "Unable to save evidence.",
     saveManualFailed: "Unable to save manual project.",
     templateFailed: "Unable to select template.",
+    githubSyncFailed: "Unable to sync GitHub repositories.",
+    githubImportFailed: "Unable to import selected GitHub repositories.",
+    githubDisconnectFailed: "Unable to disconnect GitHub right now.",
     unavailablePortfolio: "This portfolio draft is not available.",
     unsupportedSource: "Unsupported evidence source.",
   },
@@ -512,6 +590,9 @@ const actionMessages = {
     saveEvidenceFailed: "Impossible d'enregistrer la preuve.",
     saveManualFailed: "Impossible d'enregistrer le projet manuel.",
     templateFailed: "Impossible de sélectionner ce template.",
+    githubSyncFailed: "Impossible de synchroniser les repositories GitHub.",
+    githubImportFailed: "Impossible d'importer les repositories GitHub sélectionnés.",
+    githubDisconnectFailed: "Impossible de déconnecter GitHub pour le moment.",
     unavailablePortfolio: "Ce brouillon de portfolio n'est pas disponible.",
     unsupportedSource: "Source de preuve non prise en charge.",
   },
