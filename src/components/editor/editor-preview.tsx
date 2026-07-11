@@ -252,7 +252,7 @@ function sourceLabel(source: EditorEvidenceItem["sourceType"], t: Copy) {
     return t.editor.sourceBadges.cv;
   }
 
-  if (source === "github_placeholder") {
+  if (source === "github_placeholder" || source === "github_repository") {
     return t.editor.sourceBadges.github;
   }
 

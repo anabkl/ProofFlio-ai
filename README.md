@@ -4,6 +4,8 @@ ProofFolio AI is a bilingual premium product demo for turning CV material, GitHu
 
 V3 adds the first real Supabase-backed foundation: auth, private evidence upload, manual project persistence, persisted proposal reviews, template selection, and editor handoff. The visible product language remains honest: prototype suggestions are not presented as real AI analysis.
 
+V3.5 extends that foundation with explicit publishing, public portfolios at `/p/[slug]`, recruiter-ready public proof views, and a first GitHub evidence flow for user-selected public repositories only.
+
 ## Current Routes
 
 - `/`
@@ -20,6 +22,7 @@ V3 adds the first real Supabase-backed foundation: auth, private evidence upload
 - `/auth/sign-up`
 - `/onboarding`
 - `/editor`
+- `/p/[slug]`
 
 ## Current Scope
 
@@ -27,13 +30,15 @@ V3 adds the first real Supabase-backed foundation: auth, private evidence upload
 - English and French UI
 - RTL-ready locale metadata for a future Arabic locale
 - Supabase Auth, PostgreSQL, Storage, RLS migrations, and server actions for V3 onboarding
+- Public portfolio publishing with owner preview and published-only public access
+- GitHub OAuth for public-profile and public-repository evidence import
 - Local mock/demo data remains for public visual routes
 - Premium landing page and optional isolated hero WebGL enhancement
 - Correct Free / Student / VIP pricing preview
 - Seven distinct living portfolio template demos
 - Local-state editor preview with desktop and mobile views
 
-No payment, GitHub OAuth, CV parser, AI provider integration, analytics persistence, moderation, admin system, or public publishing is implemented yet.
+No payments, subscriptions, private repository import, CV parser, analytics dashboards, moderation, marketplace features, or admin tooling are implemented.
 
 ## Product Alignment
 
@@ -43,8 +48,10 @@ The UI demo reflects Aya's product workflow through visible states and terminolo
 - CV, GitHub, and certificate evidence gathering
 - AI proposal panels
 - user review and approval before publishing
+- explicit publish and unpublish controls
 - template selection and customization
 - public portfolio URL and recruiter snapshot framing
+- deterministic GitHub repository suggestions with optional provider adapter disabled by default
 - analytics, notifications, subscriptions, moderation, and administration as future phases
 - evidence-first onboarding at `/onboarding`
 
@@ -63,12 +70,15 @@ Pricing is a product preview only. Payments and billing are not enabled.
 
 The V3 backend foundation is real for authentication, portfolio drafts, private CV/certificate storage, manual projects, prototype review decisions, and saved template selection once Supabase environment variables and migrations are applied.
 
+Publishing is real for user-approved content only. Evidence files remain private, and public routes render only approved safe fields.
+
+GitHub import is real for explicit user-selected public repositories only. Private repositories are never requested.
+
 Still deferred:
 
-- GitHub import and OAuth.
 - Automated CV parsing.
-- External AI provider integration.
-- Public publishing.
-- Payments.
+- AI provider execution beyond the optional disabled-by-default adapter boundary.
+- Payments and subscriptions.
+- Public contact delivery and CV file exposure.
 
-All public demo profiles, repositories, analytics, AI insights, readiness scores, public URLs, and recruiter signals remain fictional local mock data.
+Public recruiter signals, project lists, and evidence context now come from persisted user-approved content when a portfolio is published. The landing page and template demos still contain fictional local mock profiles.

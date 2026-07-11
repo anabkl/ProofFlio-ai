@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import type { TemplateId } from "@/lib/content";
+import { isOptionalAiProviderConfigured } from "@/lib/github/config";
+import { getGitHubConnectionState } from "@/lib/github/server";
 import {
   type EvidenceItem,
   type EvidenceSourceType,
@@ -16,6 +18,7 @@ import {
   sourceLabel,
 } from "@/lib/onboarding/types";
 import { createSupabaseServerClient, type SupabaseServerClient } from "@/lib/supabase/server";
+import { ensureProfile } from "@/lib/profile/server";
 
 type SearchParamsInput = Record<string, string | string[] | undefined>;
 
@@ -83,6 +86,18 @@ export async function getOnboardingInitialState(
       selectedSource,
       step,
       approvedCount: 0,
+      github: {
+        configured: false,
+        connected: false,
+        login: "",
+        name: "",
+        avatarUrl: "",
+        repositories: [],
+        connectedAt: null,
+        lastSyncedAt: null,
+        canSync: false,
+      },
+      aiProviderEnabled: false,
       errorMessage: actionError ?? "Supabase is not configured yet. This preview cannot persist evidence.",
     };
   }
@@ -99,9 +114,10 @@ export async function getOnboardingInitialState(
   try {
     const draft = await ensurePortfolioDraft(supabase, user, requestedTemplateId);
     const portfolio = draft.portfolio;
-    const [evidenceItems, proposalReviews] = await Promise.all([
+    const [evidenceItems, proposalReviews, github] = await Promise.all([
       getEvidenceItems(supabase, portfolio.id),
       getProposalReviews(supabase, portfolio.id),
+      getGitHubConnectionState(supabase, user.id),
     ]);
     const suggestions = buildPrototypeSuggestions(evidenceItems, proposalReviews);
     const progress = buildDraftProgress(portfolio, evidenceItems, proposalReviews);
@@ -118,6 +134,8 @@ export async function getOnboardingInitialState(
       selectedSource,
       step,
       approvedCount: proposalReviews.filter((review) => review.reviewState === "approved" || review.reviewState === "edited").length,
+      github,
+      aiProviderEnabled: isOptionalAiProviderConfigured(),
       errorMessage: actionError,
     };
   } catch (error) {
@@ -141,6 +159,18 @@ export async function getOnboardingInitialState(
       selectedSource,
       step,
       approvedCount: 0,
+      github: {
+        configured: false,
+        connected: false,
+        login: "",
+        name: "",
+        avatarUrl: "",
+        repositories: [],
+        connectedAt: null,
+        lastSyncedAt: null,
+        canSync: false,
+      },
+      aiProviderEnabled: false,
       errorMessage: message,
     };
   }
@@ -166,10 +196,7 @@ async function ensurePortfolioDraft(
   user: User,
   requestedTemplateId: TemplateId | null,
 ): Promise<{ portfolio: PortfolioDraft; existing: boolean }> {
-  await supabase.from("profiles").upsert({
-    id: user.id,
-    display_name: profileNameFromEmail(user.email),
-  });
+  await ensureProfile(supabase, user);
 
   const { data: existing, error: selectError } = await supabase
     .from("portfolios")
@@ -283,17 +310,34 @@ async function getProposalReviews(supabase: SupabaseServerClient, portfolioId: s
 
 function mapSuggestion(item: EvidenceItem, review: ProposalReview | null) {
   const stack = Array.isArray(item.metadata.technologies) ? item.metadata.technologies.join(", ") : "";
+  const githubTopics = Array.isArray(item.metadata.topics) ? item.metadata.topics.filter((value): value is string => typeof value === "string") : [];
   const title =
     item.sourceType === "manual_project"
       ? item.title
+      : item.sourceType === "github_repository"
+        ? `${item.title} repository`
       : `${sourceLabel(item.sourceType)} evidence: ${item.title}`;
   const summary =
     item.sourceType === "manual_project"
       ? `${item.description}${stack ? ` Stack: ${stack}.` : ""}`
+      : item.sourceType === "github_repository"
+        ? [
+            "Draft suggestion generated from repository metadata.",
+            item.description,
+            typeof item.metadata.primaryLanguage === "string" && item.metadata.primaryLanguage
+              ? `Primary language: ${item.metadata.primaryLanguage}.`
+              : "",
+            githubTopics.length > 0 ? `Topics: ${githubTopics.join(", ")}.` : "",
+            item.metadata.readmePresent ? "README available." : "README not detected.",
+          ]
+            .filter(Boolean)
+            .join(" ")
       : `Use ${item.title} as source material for a reviewed portfolio proof block. The uploaded file is stored privately and has not been parsed.`;
   const proofContext =
     item.sourceType === "manual_project"
       ? `Manual project evidence saved by the user${stack ? ` with stack: ${stack}` : ""}.`
+      : item.sourceType === "github_repository"
+        ? String(item.metadata.proofContext ?? "Draft suggestion generated from repository metadata.")
       : `${sourceLabel(item.sourceType)} PDF saved privately. No automated parsing is claimed.`;
 
   return {
@@ -367,14 +411,6 @@ function draftSlug(userId: string) {
   return `draft-${userId.slice(0, 8)}-${Date.now().toString(36)}`;
 }
 
-function profileNameFromEmail(email: string | undefined) {
-  if (!email) {
-    return "ProofFolio user";
-  }
-
-  return email.split("@")[0]?.replace(/[._-]+/g, " ") || "ProofFolio user";
-}
-
 function getSingle(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
@@ -398,7 +434,13 @@ function toQueryString(searchParams: SearchParamsInput) {
 }
 
 function normalizeSourceType(value: unknown): EvidenceSourceType {
-  if (value === "cv" || value === "certificate" || value === "manual_project" || value === "github_placeholder") {
+  if (
+    value === "cv" ||
+    value === "certificate" ||
+    value === "manual_project" ||
+    value === "github_placeholder" ||
+    value === "github_repository"
+  ) {
     return value;
   }
 

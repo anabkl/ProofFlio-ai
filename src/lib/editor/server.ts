@@ -56,7 +56,7 @@ export async function getEditorInitialState(searchParams: SearchParamsInput): Pr
 
   const { data: portfolio, error: portfolioError } = await supabase
     .from("portfolios")
-    .select("id,title,selected_template_id,status,profile_settings,design_settings,updated_at")
+    .select("id,title,slug,selected_template_id,status,published_at,profile_settings,design_settings,updated_at")
     .eq("id", portfolioId)
     .eq("owner_user_id", user.id)
     .maybeSingle();
@@ -120,7 +120,10 @@ export async function getEditorInitialState(searchParams: SearchParamsInput): Pr
 
   const projects: EditorProject[] = (projectResult.data ?? []).flatMap((project) => {
     const evidenceIds = normalizeStringArray(project.evidence_references);
-    const sourceEvidenceId = evidenceIds.find((id) => evidenceById.get(id)?.source_type === "manual_project");
+    const sourceEvidenceId = evidenceIds.find((id) => {
+      const sourceType = evidenceById.get(id)?.source_type;
+      return sourceType === "manual_project" || sourceType === "github_repository";
+    });
 
     if (!sourceEvidenceId) {
       return [];
@@ -142,7 +145,7 @@ export async function getEditorInitialState(searchParams: SearchParamsInput): Pr
       {
         id: String(project.id),
         sourceEvidenceId,
-        sourceType: "manual_project",
+        sourceType: normalizeProjectSource(evidenceById.get(sourceEvidenceId)?.source_type),
         reviewId: String(review.id),
         reviewState,
         title: stringValue(editedContent.title) || String(project.title ?? review.proposed_title ?? "Untitled project"),
@@ -163,12 +166,19 @@ export async function getEditorInitialState(searchParams: SearchParamsInput): Pr
     portfolio: {
       id: String(portfolio.id),
       title: String(portfolio.title ?? "Untitled ProofFolio"),
+      slug: String(portfolio.slug ?? ""),
       displayName: stringValue(profile?.display_name) || profileNameFromEmail(user.email),
       selectedTemplateId: isEditorTemplateId(portfolio.selected_template_id)
         ? portfolio.selected_template_id
         : "developer-signature",
-      status: portfolio.status === "published" ? "published" : "draft",
+      status:
+        portfolio.status === "published"
+          ? "published"
+          : portfolio.status === "unpublished"
+            ? "unpublished"
+            : "draft",
       updatedAt: String(portfolio.updated_at ?? ""),
+      publishedAt: typeof portfolio.published_at === "string" ? portfolio.published_at : null,
       profileSettings,
       designSettings,
     },
@@ -184,13 +194,17 @@ function buildPreviewState(selectedTemplateId: TemplateId): EditorInitialState {
     portfolio: {
       id: "preview-editor",
       title: "Maya Chen - Product Engineering Portfolio",
+      slug: "maya-chen-proof",
       displayName: "Maya Chen",
       selectedTemplateId,
       status: "draft",
       updatedAt: "",
+      publishedAt: null,
       profileSettings: {
         ...defaultProfileSettings,
         headline: "Product-minded frontend engineer building accessible AI and data experiences.",
+        targetRole: "Frontend Engineer",
+        availability: "Open to internship and junior product engineering roles",
       },
       designSettings: { ...defaultDesignSettings },
     },
@@ -210,7 +224,7 @@ function buildPreviewState(selectedTemplateId: TemplateId): EditorInitialState {
       {
         id: "preview-modelops",
         sourceEvidenceId: "preview-evidence-modelops",
-        sourceType: "manual_project",
+        sourceType: "github_repository",
         reviewId: "preview-review-modelops",
         reviewState: "edited",
         title: "ModelOps Notes",
@@ -248,6 +262,15 @@ function buildPreviewState(selectedTemplateId: TemplateId): EditorInitialState {
         reviewState: "pending",
         approvedForPortfolio: false,
       },
+      {
+        id: "preview-github",
+        sourceType: "github_repository",
+        title: "modelops-notes",
+        description: "Public GitHub repository metadata imported with user approval.",
+        createdAt: "2026-07-08T12:00:00.000Z",
+        reviewState: "edited",
+        approvedForPortfolio: true,
+      },
     ],
   };
 }
@@ -265,7 +288,9 @@ function buildUnavailableState(
       ...buildPreviewState(selectedTemplateId).portfolio,
       id: portfolioId,
       title: "",
+      slug: "",
       displayName: "",
+      publishedAt: null,
       profileSettings: { ...defaultProfileSettings },
     },
     projects: [],
@@ -289,6 +314,8 @@ function normalizeProfileSettings(value: unknown, fallbackHeadline: string): Edi
 
   return {
     headline: typeof record.headline === "string" ? record.headline : fallbackHeadline,
+    targetRole: typeof record.targetRole === "string" ? record.targetRole : "",
+    availability: typeof record.availability === "string" ? record.availability : "",
     sectionOrder,
     sectionVisibility: {
       projects: booleanValue(rawVisibility.projects, true),
@@ -324,11 +351,21 @@ function normalizeDesignSettings(value: unknown): EditorDesignSettings {
 }
 
 function normalizeEvidenceSource(value: unknown): EvidenceSourceType {
-  if (value === "cv" || value === "certificate" || value === "manual_project" || value === "github_placeholder") {
+  if (
+    value === "cv" ||
+    value === "certificate" ||
+    value === "manual_project" ||
+    value === "github_placeholder" ||
+    value === "github_repository"
+  ) {
     return value;
   }
 
   return "manual_project";
+}
+
+function normalizeProjectSource(value: unknown): "manual_project" | "github_repository" {
+  return value === "github_repository" ? "github_repository" : "manual_project";
 }
 
 function normalizeReviewState(value: unknown): ReviewState | null {

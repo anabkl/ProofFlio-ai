@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { AlertTriangle, ArrowRight, CheckCircle2, FileUp, FolderGit, LockKeyhole, PenLine, Trash2 } from "lucide-react";
-import { removeEvidenceAction, saveManualProjectAction, uploadEvidenceAction } from "@/app/onboarding/actions";
+import { AlertTriangle, ArrowRight, CheckCircle2, FileUp, FolderGit, LockKeyhole, PenLine, RefreshCcw, Trash2, Unplug } from "lucide-react";
+import { disconnectGitHubAction, importGitHubRepositoriesAction, removeEvidenceAction, saveManualProjectAction, syncGitHubRepositoriesAction, uploadEvidenceAction } from "@/app/onboarding/actions";
 import type { Copy, Locale, TemplateId } from "@/lib/content";
+import type { GitHubConnectionState } from "@/lib/github/server";
 import type { EvidenceItem, EvidenceSourceType } from "@/lib/onboarding/types";
 
 export function EvidenceUploadStep({
@@ -15,6 +16,7 @@ export function EvidenceUploadStep({
   locale,
   canPersist,
   evidenceItems,
+  github,
 }: {
   t: Copy;
   selectedSource: EvidenceSourceType;
@@ -23,6 +25,7 @@ export function EvidenceUploadStep({
   locale: Locale;
   canPersist: boolean;
   evidenceItems: EvidenceItem[];
+  github: GitHubConnectionState;
 }) {
   const selectedEvidence = evidenceItems.filter((item) => item.sourceType === selectedSource);
 
@@ -80,14 +83,15 @@ export function EvidenceUploadStep({
               highlighted
             />
           ) : null}
-          {selectedSource === "github_placeholder" ? (
-            <div className="rounded-xl border border-white/10 bg-[#070B14]/70 p-4">
-              <div className="flex items-center gap-3 text-sm font-black text-white/72">
-                <FolderGit size={18} className="text-white/38" />
-                {t.onboarding.sources.github}
-              </div>
-              <p className="mt-2 text-sm leading-6 text-white/48">{t.onboarding.githubDeferred}</p>
-            </div>
+          {selectedSource === "github_repository" ? (
+            <GitHubImportCard
+              t={t}
+              portfolioId={portfolioId}
+              templateId={templateId}
+              locale={locale}
+              canPersist={canPersist}
+              github={github}
+            />
           ) : null}
         </div>
 
@@ -366,11 +370,151 @@ function localizeSource(t: Copy, sourceType: EvidenceSourceType) {
     return t.onboarding.sourceBadges.certificate;
   }
 
-  if (sourceType === "github_placeholder") {
+  if (sourceType === "github_placeholder" || sourceType === "github_repository") {
     return t.onboarding.sourceBadges.github;
   }
 
   return t.onboarding.sourceBadges.manualProject;
+}
+
+function GitHubImportCard({
+  t,
+  portfolioId,
+  templateId,
+  locale,
+  canPersist,
+  github,
+}: {
+  t: Copy;
+  portfolioId: string;
+  templateId: TemplateId;
+  locale: Locale;
+  canPersist: boolean;
+  github: GitHubConnectionState;
+}) {
+  const connected = github.connected;
+  const next = encodeURIComponent(`/onboarding?step=upload&source=github_repository&template=${templateId}`);
+
+  return (
+    <div className="rounded-xl border border-white/10 bg-[#070B14]/70 p-5">
+      <div className="flex items-start gap-3">
+        <span className="grid h-11 w-11 place-items-center rounded-lg border border-white/10 bg-[#071021] text-[#B7C4FF]">
+          <FolderGit size={21} />
+        </span>
+        <div className="min-w-0">
+          <h3 className="text-lg font-black text-white">{t.onboarding.githubTitle}</h3>
+          <p className="mt-2 text-sm leading-6 text-white/54">{t.onboarding.githubBody}</p>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-lg border border-[#7C8CFF]/20 bg-[#7C8CFF]/10 p-3 text-sm leading-6 text-[#DDE3FF]">
+        {t.onboarding.githubHonesty}
+      </div>
+
+      {!github.configured ? (
+        <div className="mt-4 rounded-lg border border-[#ff7a66]/24 bg-[#ff7a66]/10 p-4 text-sm font-bold text-[#ffd8d1]">
+          {t.onboarding.githubSetupMissing}
+        </div>
+      ) : !connected ? (
+        <div className="mt-5 space-y-4">
+          <div className="rounded-lg border border-white/10 bg-white/[0.035] p-4">
+            <div className="text-sm font-black text-white">{t.onboarding.githubConnectTitle}</div>
+            <p className="mt-2 text-sm leading-6 text-white/54">{t.onboarding.githubConnectBody}</p>
+          </div>
+          <a
+            href={`/auth/github?next=${next}`}
+            data-testid="github-connect-link"
+            className="pf-focus inline-flex items-center justify-center gap-2 rounded-lg bg-[#F8FAFC] px-5 py-3 text-sm font-black text-[#071021]"
+          >
+            <FolderGit size={17} />
+            {t.onboarding.githubConnectAction}
+          </a>
+        </div>
+      ) : (
+        <div className="mt-5 space-y-5">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.035] p-4">
+            <div>
+              <div className="text-sm font-black text-white">{github.name || github.login}</div>
+              <div className="mt-1 text-xs leading-5 text-white/48">@{github.login}</div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <form action={syncGitHubRepositoriesAction}>
+                <input type="hidden" name="portfolioId" value={portfolioId} />
+                <input type="hidden" name="templateId" value={templateId} />
+                <input type="hidden" name="locale" value={locale} />
+                <button type="submit" disabled={!canPersist || !github.canSync} data-testid="github-sync-button" className="pf-focus inline-flex items-center gap-2 rounded-lg border border-white/12 px-3 py-2 text-xs font-black text-white/72 disabled:opacity-45">
+                  <RefreshCcw size={14} />
+                  {t.onboarding.githubSyncAction}
+                </button>
+              </form>
+              <form action={disconnectGitHubAction}>
+                <input type="hidden" name="portfolioId" value={portfolioId} />
+                <input type="hidden" name="templateId" value={templateId} />
+                <input type="hidden" name="locale" value={locale} />
+                <button type="submit" disabled={!canPersist} data-testid="github-disconnect-button" className="pf-focus inline-flex items-center gap-2 rounded-lg border border-[#ff7a66]/30 bg-[#ff7a66]/10 px-3 py-2 text-xs font-black text-[#ffd8d1] disabled:opacity-45">
+                  <Unplug size={14} />
+                  {t.onboarding.githubDisconnectAction}
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <form action={importGitHubRepositoriesAction} className="space-y-4" data-testid="github-selection-form">
+            <input type="hidden" name="portfolioId" value={portfolioId} />
+            <input type="hidden" name="templateId" value={templateId} />
+            <input type="hidden" name="locale" value={locale} />
+            <div>
+              <div className="text-sm font-black text-white">{t.onboarding.githubRepositoryTitle}</div>
+              <p className="mt-2 text-sm leading-6 text-white/54">{t.onboarding.githubRepositoryBody}</p>
+            </div>
+            <div className="grid gap-3">
+              {github.repositories.length > 0 ? (
+                github.repositories.map((repository) => (
+                  <label key={repository.id} className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-white/[0.035] p-4">
+                    <input type="checkbox" name="repositoryId" value={repository.id} className="mt-1 h-4 w-4 accent-[#4E8CFF]" />
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-sm font-black text-white">{repository.fullName}</span>
+                        {repository.primaryLanguage ? (
+                          <span className="rounded-md border border-white/10 px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-white/56">
+                            {repository.primaryLanguage}
+                          </span>
+                        ) : null}
+                      </div>
+                      <p className="mt-2 text-sm leading-6 text-white/56">{repository.description || t.onboarding.githubNoDescription}</p>
+                      <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-black uppercase tracking-[0.14em] text-white/46">
+                        <span>{t.onboarding.githubStars.replace("{count}", String(repository.stars))}</span>
+                        <span>{t.onboarding.githubUpdated.replace("{date}", formatGitHubDate(repository.updatedAt, locale))}</span>
+                        <span>{repository.defaultBranch}</span>
+                        <span>{repository.topics.slice(0, 4).join(" · ")}</span>
+                      </div>
+                    </div>
+                  </label>
+                ))
+              ) : (
+                <div className="rounded-lg border border-dashed border-white/10 p-4 text-sm leading-6 text-white/54">
+                  {t.onboarding.githubEmpty}
+                </div>
+              )}
+            </div>
+            <UploadButton disabled={!canPersist || github.repositories.length === 0} label={t.onboarding.githubImportAction} saving={t.onboarding.saving} testId="github-import-button" />
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function formatGitHubDate(value: string, locale: Locale) {
+  if (!value) {
+    return locale === "fr" ? "mise a jour recente" : "recent update";
+  }
+
+  return new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(value));
 }
 
 function UploadButton({ disabled, label, saving, testId }: { disabled: boolean; label: string; saving: string; testId?: string }) {

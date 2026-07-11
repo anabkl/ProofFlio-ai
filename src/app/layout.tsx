@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { LocaleProvider } from "@/components/locale-provider";
+import { getSiteUrl } from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
   title: "ProofFolio AI",
   description:
     "Turn real project evidence into a source-backed professional portfolio.",

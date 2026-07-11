@@ -14,6 +14,7 @@ export function ProposalReviewStep({
   locale,
   approvedCount,
   canPersist,
+  aiProviderEnabled,
 }: {
   t: Copy;
   suggestions: ProposalSuggestion[];
@@ -22,6 +23,7 @@ export function ProposalReviewStep({
   locale: Locale;
   approvedCount: number;
   canPersist: boolean;
+  aiProviderEnabled: boolean;
 }) {
   const rejectedSuggestions = suggestions.filter((suggestion) => suggestion.review?.reviewState === "rejected");
   const activeSuggestions = suggestions.filter((suggestion) => suggestion.review?.reviewState !== "rejected");
@@ -43,6 +45,9 @@ export function ProposalReviewStep({
       </div>
 
       <div className="grid gap-4" data-testid="proposal-review-workspace">
+        <div className="rounded-xl border border-white/10 bg-[#070B14]/72 p-4 text-sm leading-6 text-white/58">
+          {aiProviderEnabled ? t.onboarding.aiProviderEnabled : t.onboarding.aiProviderDisabled}
+        </div>
         <h3 className="text-sm font-black uppercase tracking-[0.18em] text-white/52">{t.onboarding.activeSuggestions}</h3>
         {activeSuggestions.length > 0 ? (
           activeSuggestions.map((suggestion) => (
@@ -275,7 +280,7 @@ function localizeSourceLabel(t: Copy, sourceType: ProposalSuggestion["sourceType
     return t.onboarding.sourceBadges.certificate;
   }
 
-  if (sourceType === "github_placeholder") {
+  if (sourceType === "github_placeholder" || sourceType === "github_repository") {
     return t.onboarding.sourceBadges.github;
   }
 
