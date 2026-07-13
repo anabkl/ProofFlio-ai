@@ -8,6 +8,8 @@ import {
   GraduationCap,
   LayoutDashboard,
   Palette,
+  PenTool,
+  Radar,
   Route,
   ScanSearch,
   Sparkles,
@@ -36,9 +38,16 @@ export const templateIds = [
   "recruiter-focus",
   "developer-signature",
   "career-chronicle",
+  "signal-os",
+  "monograph",
 ] as const;
 
 export type TemplateId = (typeof templateIds)[number];
+
+export const newTemplateIds: readonly TemplateId[] = ["signal-os", "monograph"];
+
+export const templateCategories = ["Technical", "Recruiter", "Executive", "Creative", "Editorial", "Timeline"] as const;
+export type TemplateCategory = (typeof templateCategories)[number];
 
 export const templateMeta: Record<
   TemplateId,
@@ -47,6 +56,7 @@ export const templateMeta: Record<
     className: string;
     accent: string;
     previewClass: string;
+    category: TemplateCategory;
   }
 > = {
   "minimal-executive": {
@@ -54,42 +64,63 @@ export const templateMeta: Record<
     className: "template-minimal",
     accent: "#315dff",
     previewClass: "bg-[#f8f4ed] text-[#172033]",
+    category: "Executive",
   },
   "dark-tech": {
     icon: Code2,
     className: "template-dark",
     accent: "#4da3ff",
     previewClass: "bg-[#071021] text-white",
+    category: "Technical",
   },
   "creative-grid": {
     icon: Palette,
     className: "template-creative",
     accent: "#ff7a66",
     previewClass: "bg-[#fff8ed] text-[#151926]",
+    category: "Creative",
   },
   "story-journey": {
     icon: Route,
     className: "template-story",
     accent: "#67e8a5",
     previewClass: "bg-[#141014] text-[#fff9f2]",
+    category: "Timeline",
   },
   "recruiter-focus": {
     icon: UserCheck,
     className: "template-recruiter",
     accent: "#0f766e",
     previewClass: "bg-[#f7f9fc] text-[#172033]",
+    category: "Recruiter",
   },
   "developer-signature": {
     icon: FolderGit,
     className: "template-developer",
     accent: "#00d5ff",
     previewClass: "bg-[#040813] text-white",
+    category: "Technical",
   },
   "career-chronicle": {
     icon: FileText,
     className: "template-chronicle",
     accent: "#6c7cff",
     previewClass: "bg-[#f4f7fb] text-[#172033]",
+    category: "Timeline",
+  },
+  "signal-os": {
+    icon: Radar,
+    className: "template-signal-os",
+    accent: "#22d3ee",
+    previewClass: "bg-[#050b10] text-white",
+    category: "Technical",
+  },
+  monograph: {
+    icon: PenTool,
+    className: "template-monograph",
+    accent: "#9a4b36",
+    previewClass: "bg-[#f7f2ea] text-[#1c1a17]",
+    category: "Editorial",
   },
 };
 
@@ -150,13 +181,28 @@ export const copy = {
       close: "Close",
       all: "All",
       section: "Section",
+      new: "New",
+    },
+    theme: {
+      label: "Theme",
+      light: "Light",
+      dark: "Dark",
+      system: "System",
+    },
+    evidenceStates: {
+      verified: "Verified",
+      approved: "User approved",
+      external: "External source",
+      draft: "Draft",
+      private: "Private",
+      demo: "Demo content",
     },
     hero: {
       eyebrow: "PORTFOLIOS BUILT FROM REAL EVIDENCE",
       title: "ProofFolio AI",
-      emphasis: "Turn your projects\ninto proof that opens doors.",
+      emphasis: "Turn your work into\nproof recruiters can trust.",
       value:
-        "ProofFolio AI brings together your CV, GitHub and certificates to create a professional, verifiable portfolio that you validate before it goes public.",
+        "Bring together your projects, certificates and professional evidence. Review every suggestion before it becomes part of your portfolio.",
       trust: ["Bilingual", "Controlled by you", "Hosted", "Shareable"],
       highlights: ["Source-backed", "User-validated", "Recruiter-ready"],
       pipeline: ["CV", "GitHub", "Certificates", "AI proposals", "Published portfolio"],
@@ -270,14 +316,22 @@ export const copy = {
     },
     templateShowcase: {
       kicker: "Template showcase",
-      title: "Seven templates, seven different professional stories.",
+      title: "Nine templates, nine different professional stories.",
       body:
         "Each template changes layout rhythm, typography, motion and mood so the portfolio fits the candidate rather than forcing everyone into one skin.",
       directions: [
         { name: "Developer", detail: "Proof-heavy portfolios for builders, repositories and shipped systems.", template: "developer-signature" },
-        { name: "Data / AI", detail: "Structured evidence for models, notebooks, dashboards and learning curves.", template: "career-chronicle" },
+        { name: "Data / AI", detail: "Structured evidence for models, notebooks, dashboards and learning curves.", template: "signal-os" },
         { name: "Creative", detail: "Visual case studies for interface designers and creative technologists.", template: "creative-grid" },
       ],
+      categories: {
+        Technical: "Technical",
+        Recruiter: "Recruiter",
+        Executive: "Executive",
+        Creative: "Creative",
+        Editorial: "Editorial",
+        Timeline: "Timeline",
+      },
     },
     proof: {
       kicker: "Proof, not promises",
@@ -903,6 +957,160 @@ export const copy = {
       scanSteps: ["Fit summary", "Proof quality", "Top projects", "Skill match", "Contact path"],
       filters: ["All", "Frontend", "AI", "Full-stack", "Data"],
     },
+    signalOs: {
+      name: "Yassine El Amrani",
+      initials: "YE",
+      role: "AI & Computer Vision Engineer",
+      headline: "Building supervised AI systems where every output is traceable back to evidence.",
+      location: "Casablanca, Morocco · Remote friendly",
+      availability: "Open to AI engineering roles and computer-vision contract work",
+      email: "yassine.elamrani.demo@prooffolio.local",
+      summary:
+        "A fictional demo profile: an AI/CV engineer who treats model outputs as proposals, not facts, and pairs every shipped system with review evidence.",
+      modes: {
+        immersive: "Immersive mode",
+        recruiter: "Recruiter mode",
+        immersiveHint: "Spatial signal map of projects, models and evidence.",
+        recruiterHint: "Fast, print-friendly scan: skills, experience, projects, contact.",
+      },
+      metrics: [
+        ["14", "Models shipped"],
+        ["6", "Production pipelines"],
+        ["27", "Repos mapped"],
+        ["5", "Certifications"],
+      ],
+      domains: ["Computer Vision", "NLP & OCR", "MLOps", "Data Pipelines", "Arabic/French NLP", "Edge Inference"],
+      skills: [
+        ["PyTorch", "91"],
+        ["Computer Vision", "89"],
+        ["Python", "93"],
+        ["MLOps", "78"],
+        ["NLP / OCR", "83"],
+        ["SQL & Data Pipelines", "80"],
+      ],
+      experience: [
+        {
+          role: "Machine Learning Engineer",
+          org: "Atlas Vision Labs (demo)",
+          period: "2024 — Present",
+          detail: "Owns the computer-vision inspection pipeline from data labeling to production monitoring.",
+        },
+        {
+          role: "Freelance Computer Vision Consultant",
+          org: "Independent (demo)",
+          period: "2022 — 2024",
+          detail: "Delivered document-intelligence and inspection prototypes for small manufacturing and fintech teams.",
+        },
+      ],
+      education: [
+        {
+          title: "Engineering Degree, Artificial Intelligence & Data",
+          org: "National School of Applied Sciences (demo)",
+          period: "2019 — 2022",
+          detail: "Focused on applied machine learning, computer vision and distributed data systems.",
+        },
+      ],
+      certifications: [
+        "DeepLearning.AI TensorFlow Developer",
+        "Coursera Machine Learning Specialization",
+        "AWS Certified Machine Learning – Specialty (demo)",
+        "Hugging Face NLP Course",
+      ],
+      caseStudy: {
+        name: "Invoice Intelligence",
+        tag: "Multilingual invoice extraction for Moroccan SMEs",
+        status: "User approved",
+        problem:
+          "Small Moroccan accounting teams manually re-typed invoices in French, Arabic and mixed-language formats, losing hours per week.",
+        approach:
+          "Built an OCR + layout-aware extraction pipeline with a human review queue: every low-confidence field is flagged for approval before it reaches the accounting export.",
+        architecture: [
+          "Document ingestion & language detection",
+          "Layout-aware OCR (FR/AR/EN)",
+          "Field extraction model",
+          "Confidence scoring",
+          "Human review queue",
+          "Approved export to accounting format",
+        ],
+        outcome: "Cut manual entry time by an estimated 70% in pilot testing with three small accounting teams.",
+        stack: ["Python", "PyTorch", "FastAPI", "PostgreSQL", "Docker"],
+      },
+      projects: [
+        {
+          name: "Line Inspector",
+          category: "Computer Vision",
+          status: "Demo content",
+          signal: "Industrial defect detection on production lines",
+          detail: "A CV inspection prototype that flags surface defects in real time and routes uncertain cases to a human reviewer.",
+        },
+        {
+          name: "Multilingual Doc Extractor",
+          category: "NLP / OCR",
+          status: "Verified",
+          signal: "General-purpose document extraction engine",
+          detail: "Generalizes the invoice pipeline's layout-aware extraction to contracts, ID documents and forms across three languages.",
+        },
+        {
+          name: "Model Supervision Dashboard",
+          category: "MLOps",
+          status: "External source",
+          signal: "Human-in-the-loop review tooling",
+          detail: "An internal tool for reviewing, approving or rejecting model predictions before they reach production, with full audit history.",
+        },
+      ],
+      architectureLabel: "Pipeline evidence",
+      contact: "Contact for AI/CV roles",
+    },
+    monograph: {
+      name: "Léa Fontaine",
+      role: "Product & Brand Designer",
+      headline: "Brand systems and product interfaces built to hold up in daily use, not just in a portfolio shot.",
+      location: "Lyon, France · Available worldwide",
+      availability: "Booking new brand and product engagements from next quarter",
+      email: "lea.fontaine.demo@prooffolio.local",
+      summary:
+        "A fictional demo profile: a multidisciplinary designer working across brand identity, product design systems and art direction.",
+      indexModes: {
+        visual: "Visual edition",
+        text: "Text index",
+        chronological: "Chronological archive",
+      },
+      services: [
+        { name: "Brand identity", detail: "Naming support, visual identity systems and guidelines." },
+        { name: "Product design systems", detail: "Component libraries and design tokens built with engineering." },
+        { name: "Art direction", detail: "Campaign direction, photography briefs and layout systems." },
+        { name: "Motion & brand film", detail: "Short brand films and motion identity for launches." },
+      ],
+      process: [
+        { step: "Discover", detail: "Audit the brand, the product and the market it has to compete in." },
+        { step: "Define", detail: "Set the positioning, tone and system principles before any visual work starts." },
+        { step: "Design", detail: "Build the identity and product system in parallel, tested against real content." },
+        { step: "Deliver", detail: "Ship guidelines, source files and a handoff the team can actually maintain." },
+      ],
+      featured: {
+        name: "Aurora Skincare",
+        client: "Independent skincare brand (demo)",
+        tag: "Brand identity & e-commerce product design system",
+        year: "2025",
+        summary:
+          "A full identity and product design system for an independent skincare brand: naming support, packaging direction, and the design system behind its storefront.",
+        outcome: "Unified a fragmented brand across packaging, storefront and social into one coherent system.",
+      },
+      projects: [
+        { name: "Transit", year: "2024", category: "Product", tag: "Mobility app redesign" },
+        { name: "Foundry Type", year: "2023", category: "Brand", tag: "Independent type foundry identity" },
+        { name: "Nightshade", year: "2023", category: "Brand", tag: "Music festival visual identity" },
+      ],
+      testimonial: {
+        quote:
+          "Léa translated a vague brand feeling into a system our whole team could actually design with. The handoff was cleaner than anything we'd had before.",
+        name: "Amline Torres",
+        role: "Head of Marketing, independent studio (demo)",
+      },
+      aboutPreview:
+        "Ten years across brand and product design, currently focused on identity systems that survive contact with real engineering constraints.",
+      contact: "Enquire about a project",
+    },
     templates: {
       "minimal-executive": {
         name: "Minimal Executive",
@@ -946,6 +1154,18 @@ export const copy = {
         motion: "Scroll-reactive chapters, project detail modal and measured toolkit progress.",
         profile: "A career narrative for students and junior professionals who need to explain growth credibly.",
       },
+      "signal-os": {
+        name: "SIGNAL//OS",
+        tag: "Immersive AI and engineering signal system.",
+        motion: "Spatial signal map in Immersive mode, instant recruiter scan in Recruiter mode.",
+        profile: "An immersive technical portfolio for AI, ML, computer-vision and security engineers.",
+      },
+      monograph: {
+        name: "MONOGRAPH",
+        tag: "Editorial creative and commercial portfolio.",
+        motion: "Image-mask reveals, typographic clipping and restrained parallax between folios.",
+        profile: "An editorial portfolio for product, brand and creative designers.",
+      },
     },
     templateUi: {
       nav: {
@@ -971,6 +1191,12 @@ export const copy = {
         portrait: "Portrait",
         chronology: "Chronology",
         chapters: "Chapters",
+        experience: "Experience",
+        education: "Education",
+        architecture: "Architecture",
+        featured: "Featured",
+        services: "Services",
+        about: "About",
       },
       minimal: {
         selectedWork: "Selected work",
@@ -1157,13 +1383,28 @@ export const copy = {
       close: "Fermer",
       all: "Tous",
       section: "Section",
+      new: "Nouveau",
+    },
+    theme: {
+      label: "Thème",
+      light: "Clair",
+      dark: "Sombre",
+      system: "Système",
+    },
+    evidenceStates: {
+      verified: "Vérifié",
+      approved: "Approuvé par l’utilisateur",
+      external: "Source externe",
+      draft: "Brouillon",
+      private: "Privé",
+      demo: "Contenu de démo",
     },
     hero: {
       eyebrow: "PORTFOLIOS CONSTRUITS À PARTIR DE VRAIES PREUVES",
       title: "ProofFolio AI",
-      emphasis: "Transformez vos projets\nen preuves qui ouvrent des portes.",
+      emphasis: "Transformez votre travail\nen preuve que les recruteurs croient.",
       value:
-        "ProofFolio AI rassemble votre CV, GitHub et vos certificats pour créer un portfolio professionnel, vérifiable et validé par vous.",
+        "Rassemblez vos projets, certificats et preuves professionnelles. Validez chaque suggestion avant qu’elle rejoigne votre portfolio.",
       trust: ["Bilingue", "Contrôlé par vous", "Hébergé", "Partageable"],
       highlights: ["Sourcé", "Validé par vous", "Prêt recruteur"],
       pipeline: ["CV", "GitHub", "Certificats", "Propositions IA", "Portfolio publié"],
@@ -1277,14 +1518,22 @@ export const copy = {
     },
     templateShowcase: {
       kicker: "Galerie de modèles",
-      title: "Sept modèles, sept façons de raconter un parcours.",
+      title: "Neuf modèles, neuf façons de raconter un parcours.",
       body:
         "Chaque modèle change le rythme de mise en page, la typographie, le mouvement et l’ambiance pour s’adapter au candidat.",
       directions: [
         { name: "Développeur", detail: "Portfolios riches en preuves pour builders, repositories et systèmes livrés.", template: "developer-signature" },
-        { name: "Data / IA", detail: "Preuves structurées pour modèles, notebooks, dashboards et progression.", template: "career-chronicle" },
+        { name: "Data / IA", detail: "Preuves structurées pour modèles, notebooks, dashboards et progression.", template: "signal-os" },
         { name: "Créatif", detail: "Cas d’étude visuels pour designers d’interface et creative technologists.", template: "creative-grid" },
       ],
+      categories: {
+        Technical: "Technique",
+        Recruiter: "Recruteur",
+        Executive: "Direction",
+        Creative: "Créatif",
+        Editorial: "Éditorial",
+        Timeline: "Chronologie",
+      },
     },
     proof: {
       kicker: "Preuves de travail et intelligence GitHub",
@@ -1614,27 +1863,6 @@ export const copy = {
       },
       backToSignIn: "Se connecter plutôt",
       proofPoints: ["Stockage privé des preuves", "Brouillons appartenant à l’utilisateur", "Aucune fausse promesse IA"],
-      displayName: "Nom affiché",
-      displayNamePlaceholder: "Ada Lovelace",
-      confirmPassword: "Confirmer le mot de passe",
-      confirmPasswordPlaceholder: "Répétez votre mot de passe",
-      showPassword: "Afficher le mot de passe",
-      hidePassword: "Masquer le mot de passe",
-      terms: "Je comprends que mes preuves restent privées jusqu’à la publication.",
-      forgotPassword: "Mot de passe oublié ?",
-      forgotPasswordComingSoon: "La réinitialisation du mot de passe arrive bientôt. Contactez le support en attendant.",
-      orContinueWith: "Ou continuer avec",
-      oauth: {
-        google: "Continuer avec Google",
-        github: "Continuer avec GitHub",
-        linkedin_oidc: "Continuer avec LinkedIn",
-      },
-      oauthError: "La connexion a été annulée ou a échoué. Réessayez.",
-      validation: {
-        displayName: "Ajoutez votre nom avant de créer un compte.",
-        confirmPassword: "Les mots de passe ne correspondent pas.",
-        terms: "Acceptez la note de confidentialité avant de créer un compte.",
-      },
     },
     onboarding: {
       workspace: "Espace preuves",
@@ -1931,6 +2159,160 @@ export const copy = {
       scanSteps: ["Résumé fit", "Qualité des preuves", "Top projets", "Match compétences", "Contact"],
       filters: ["Tous", "Frontend", "IA", "Full-stack", "Data"],
     },
+    signalOs: {
+      name: "Yassine El Amrani",
+      initials: "YE",
+      role: "Ingénieur IA & Vision par ordinateur",
+      headline: "Construire des systèmes d’IA supervisés où chaque résultat reste traçable jusqu’à sa preuve.",
+      location: "Casablanca, Maroc · Télétravail possible",
+      availability: "Ouvert aux postes d’ingénieur IA et missions en vision par ordinateur",
+      email: "yassine.elamrani.demo@prooffolio.local",
+      summary:
+        "Profil de démonstration fictif : un ingénieur IA/vision qui traite les résultats des modèles comme des propositions, pas des faits, et documente chaque système livré.",
+      modes: {
+        immersive: "Mode immersif",
+        recruiter: "Mode recruteur",
+        immersiveHint: "Carte spatiale des projets, modèles et preuves reliés entre eux.",
+        recruiterHint: "Lecture rapide et imprimable : compétences, expérience, projets, contact.",
+      },
+      metrics: [
+        ["14", "Modèles livrés"],
+        ["6", "Pipelines en production"],
+        ["27", "Dépôts cartographiés"],
+        ["5", "Certifications"],
+      ],
+      domains: ["Vision par ordinateur", "NLP & OCR", "MLOps", "Pipelines de données", "NLP arabe/français", "Inférence embarquée"],
+      skills: [
+        ["PyTorch", "91"],
+        ["Vision par ordinateur", "89"],
+        ["Python", "93"],
+        ["MLOps", "78"],
+        ["NLP / OCR", "83"],
+        ["SQL & pipelines de données", "80"],
+      ],
+      experience: [
+        {
+          role: "Ingénieur Machine Learning",
+          org: "Atlas Vision Labs (démo)",
+          period: "2024 — Présent",
+          detail: "Responsable du pipeline d’inspection par vision, du labeling des données jusqu’au monitoring en production.",
+        },
+        {
+          role: "Consultant indépendant en vision par ordinateur",
+          org: "Indépendant (démo)",
+          period: "2022 — 2024",
+          detail: "Prototypes d’extraction documentaire et d’inspection livrés à de petites équipes industrielles et fintech.",
+        },
+      ],
+      education: [
+        {
+          title: "Diplôme d’ingénieur, Intelligence artificielle & Données",
+          org: "École nationale des sciences appliquées (démo)",
+          period: "2019 — 2022",
+          detail: "Spécialisation en machine learning appliqué, vision par ordinateur et systèmes de données distribués.",
+        },
+      ],
+      certifications: [
+        "DeepLearning.AI TensorFlow Developer",
+        "Coursera Machine Learning Specialization",
+        "AWS Certified Machine Learning – Specialty (démo)",
+        "Hugging Face NLP Course",
+      ],
+      caseStudy: {
+        name: "Invoice Intelligence",
+        tag: "Extraction de factures multilingue pour PME marocaines",
+        status: "Approuvé par l’utilisateur",
+        problem:
+          "De petites équipes comptables marocaines ressaisissaient à la main des factures en français, en arabe et en formats mixtes, perdant des heures chaque semaine.",
+        approach:
+          "Construction d’un pipeline OCR sensible à la mise en page, avec une file de relecture humaine : chaque champ à faible confiance est signalé pour validation avant l’export comptable.",
+        architecture: [
+          "Ingestion des documents & détection de langue",
+          "OCR sensible à la mise en page (FR/AR/EN)",
+          "Modèle d’extraction des champs",
+          "Score de confiance",
+          "File de relecture humaine",
+          "Export approuvé vers le format comptable",
+        ],
+        outcome: "Réduction estimée de 70 % du temps de saisie manuelle lors du pilote avec trois équipes comptables.",
+        stack: ["Python", "PyTorch", "FastAPI", "PostgreSQL", "Docker"],
+      },
+      projects: [
+        {
+          name: "Line Inspector",
+          category: "Vision par ordinateur",
+          status: "Contenu de démo",
+          signal: "Détection de défauts industriels sur ligne de production",
+          detail: "Prototype de vision qui signale les défauts de surface en temps réel et route les cas incertains vers un relecteur humain.",
+        },
+        {
+          name: "Multilingual Doc Extractor",
+          category: "NLP / OCR",
+          status: "Vérifié",
+          signal: "Moteur d’extraction documentaire généraliste",
+          detail: "Généralise l’extraction sensible à la mise en page du pipeline de factures aux contrats, pièces d’identité et formulaires en trois langues.",
+        },
+        {
+          name: "Model Supervision Dashboard",
+          category: "MLOps",
+          status: "Source externe",
+          signal: "Outil de relecture humaine des modèles",
+          detail: "Outil interne pour relire, approuver ou rejeter les prédictions des modèles avant production, avec historique d’audit complet.",
+        },
+      ],
+      architectureLabel: "Preuves du pipeline",
+      contact: "Contact pour un poste IA/vision",
+    },
+    monograph: {
+      name: "Léa Fontaine",
+      role: "Designer produit & marque",
+      headline: "Des systèmes de marque et des interfaces produit pensés pour tenir dans l’usage réel, pas seulement en capture de portfolio.",
+      location: "Lyon, France · Disponible à l’international",
+      availability: "Ouverture de nouvelles missions marque et produit dès le prochain trimestre",
+      email: "lea.fontaine.demo@prooffolio.local",
+      summary:
+        "Profil de démonstration fictif : une designer multidisciplinaire entre identité de marque, systèmes de design produit et direction artistique.",
+      indexModes: {
+        visual: "Édition visuelle",
+        text: "Index texte",
+        chronological: "Archive chronologique",
+      },
+      services: [
+        { name: "Identité de marque", detail: "Accompagnement au naming, systèmes d’identité visuelle et guidelines." },
+        { name: "Design system produit", detail: "Bibliothèques de composants et tokens de design construits avec l’équipe technique." },
+        { name: "Direction artistique", detail: "Direction de campagne, briefs photo et systèmes de mise en page." },
+        { name: "Motion & film de marque", detail: "Courts films de marque et identité en mouvement pour les lancements." },
+      ],
+      process: [
+        { step: "Découvrir", detail: "Auditer la marque, le produit et le marché auquel il doit faire face." },
+        { step: "Définir", detail: "Fixer le positionnement, le ton et les principes du système avant tout travail visuel." },
+        { step: "Concevoir", detail: "Construire l’identité et le système produit en parallèle, testés sur du contenu réel." },
+        { step: "Livrer", detail: "Livrer guidelines, fichiers source et une passation que l’équipe peut vraiment maintenir." },
+      ],
+      featured: {
+        name: "Aurora Skincare",
+        client: "Marque de soin indépendante (démo)",
+        tag: "Identité de marque & design system e-commerce",
+        year: "2025",
+        summary:
+          "Un système complet d’identité et de design produit pour une marque de soin indépendante : accompagnement naming, direction packaging et design system du site.",
+        outcome: "Unification d’une marque fragmentée entre packaging, site et réseaux sociaux en un seul système cohérent.",
+      },
+      projects: [
+        { name: "Transit", year: "2024", category: "Produit", tag: "Refonte d’application de mobilité" },
+        { name: "Foundry Type", year: "2023", category: "Marque", tag: "Identité d’une fonderie de caractères indépendante" },
+        { name: "Nightshade", year: "2023", category: "Marque", tag: "Identité visuelle d’un festival de musique" },
+      ],
+      testimonial: {
+        quote:
+          "Léa a traduit une intuition de marque encore floue en un système que toute notre équipe a pu réellement utiliser pour designer. La passation a été plus propre que tout ce qu’on avait connu avant.",
+        name: "Amline Torres",
+        role: "Directrice marketing, studio indépendant (démo)",
+      },
+      aboutPreview:
+        "Dix ans entre design de marque et design produit, aujourd’hui concentrée sur des systèmes d’identité qui survivent aux contraintes techniques réelles.",
+      contact: "Discuter d’un projet",
+    },
     templates: {
       "minimal-executive": {
         name: "Minimal Executive",
@@ -1974,6 +2356,18 @@ export const copy = {
         motion: "Chapitres liés au scroll, modal projet et progression toolkit mesurée.",
         profile: "Un récit professionnel pour étudiants et juniors qui doivent expliquer leur progression.",
       },
+      "signal-os": {
+        name: "SIGNAL//OS",
+        tag: "Système de signaux immersif pour l’IA et l’ingénierie.",
+        motion: "Carte spatiale des signaux en mode Immersif, lecture recruteur instantanée en mode Recruteur.",
+        profile: "Un portfolio technique immersif pour ingénieurs IA, ML, vision par ordinateur et cybersécurité.",
+      },
+      monograph: {
+        name: "MONOGRAPH",
+        tag: "Portfolio créatif et commercial éditorial.",
+        motion: "Révélations en masque image, découpe typographique et parallaxe mesuré entre les folios.",
+        profile: "Un portfolio éditorial pour designers produit, marque et créatifs.",
+      },
     },
     templateUi: {
       nav: {
@@ -1999,6 +2393,12 @@ export const copy = {
         portrait: "Portrait",
         chronology: "Chronologie",
         chapters: "Chapitres",
+        experience: "Expérience",
+        education: "Formation",
+        architecture: "Architecture",
+        featured: "À la une",
+        services: "Services",
+        about: "À propos",
       },
       minimal: {
         selectedWork: "Travaux sélectionnés",

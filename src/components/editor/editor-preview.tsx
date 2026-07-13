@@ -21,7 +21,7 @@ export function EditorPreview({
   t: Copy;
 }) {
   const { designSettings, profileSettings } = portfolio;
-  const lightTemplate = ["minimal-executive", "creative-grid", "recruiter-focus", "career-chronicle"].includes(
+  const lightTemplate = ["minimal-executive", "creative-grid", "recruiter-focus", "career-chronicle", "monograph"].includes(
     portfolio.selectedTemplateId,
   );
   const approvedEvidence = evidenceItems.filter((item) => item.approvedForPortfolio);

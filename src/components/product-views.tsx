@@ -28,16 +28,21 @@ import {
 } from "lucide-react";
 import { signOutAction } from "@/app/auth/actions";
 import { LivingTemplatePage } from "@/components/living-templates";
+import { Logo } from "@/components/brand/logo";
 import { useLocale } from "@/components/locale-provider";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { PricingSection } from "@/components/pricing-section";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
   icons,
   localeMeta,
   locales,
+  newTemplateIds,
+  templateCategories,
   templateIds,
   templateMeta,
   type Copy,
+  type TemplateCategory,
   type TemplateId,
 } from "@/lib/content";
 
@@ -51,7 +56,7 @@ export type MarketingUser = { displayName: string; email: string } | null;
 
 export function AppShell({ children, user = null }: { children: React.ReactNode; user?: MarketingUser }) {
   return (
-    <div className="min-h-screen overflow-hidden bg-[#05070d] text-white">
+    <div className="min-h-screen overflow-hidden bg-[var(--pf-bg)] text-[var(--pf-text)] transition-colors duration-200">
       <Navigation user={user} />
       {children}
       <Footer />
@@ -113,33 +118,26 @@ function Navigation({ user }: { user: MarketingUser }) {
       <a href="#main-content" className="pf-focus sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-black focus:text-[#071021]">
         {t.nav.skip}
       </a>
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#05070d]/82 backdrop-blur-xl">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--line)] bg-[var(--pf-bg)]/82 backdrop-blur-xl transition-colors duration-200">
         <div className="pf-container flex min-h-16 items-center justify-between gap-2 py-3 sm:gap-3">
-          <Link href="/" className="pf-focus flex min-w-0 items-center gap-2 sm:gap-3" aria-label="ProofFolio AI">
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-[#4da3ff]/45 bg-[#08142a] text-sm font-black text-[#9ed0ff]">
-              PF
-            </span>
-            <span className="min-w-0">
-              <span className="block truncate text-sm font-black tracking-tight sm:tracking-[0.18em]">ProofFolio AI</span>
-              <span className="hidden text-[11px] uppercase tracking-[0.24em] text-white/45 sm:block">
-                {t.footer.product}
-              </span>
-            </span>
+          <Link href="/" className="pf-focus flex min-w-0 items-center gap-2 sm:gap-3">
+            <Logo variant="wordmark" size={15} className="text-[var(--pf-text)]" />
           </Link>
           <nav className="hidden items-center gap-1 lg:flex" aria-label={t.nav.primary}>
             {links.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="pf-focus rounded-md px-3 py-2 text-sm font-semibold text-white/72 transition hover:bg-white/8 hover:text-white"
+                className="pf-focus rounded-md px-3 py-2 text-sm font-semibold text-[var(--pf-muted)] transition hover:bg-[var(--pf-text)]/8 hover:text-[var(--pf-text)]"
               >
                 {link.label}
               </Link>
             ))}
           </nav>
           <div className="flex items-center gap-1.5 sm:gap-2">
+            <ThemeToggle className="hidden sm:inline-flex" />
             <div
-              className="flex shrink-0 rounded-md border border-white/12 bg-white/6 p-1"
+              className="flex shrink-0 rounded-md border border-[var(--line)] bg-[var(--pf-text)]/6 p-1"
               aria-label={t.nav.language}
             >
               {locales.map((item) => (
@@ -151,8 +149,8 @@ function Navigation({ user }: { user: MarketingUser }) {
                   className={cn(
                     "pf-focus rounded-md px-1.5 py-1.5 text-[11px] font-black transition sm:px-2.5 sm:text-xs",
                     locale === item
-                      ? "bg-white text-[#071021]"
-                      : "text-white/62 hover:bg-white/8 hover:text-white",
+                      ? "bg-[var(--pf-text)] text-[var(--pf-bg)]"
+                      : "text-[var(--pf-muted)] hover:bg-[var(--pf-text)]/8 hover:text-[var(--pf-text)]",
                   )}
                 >
                   {localeMeta[item].label}
@@ -163,9 +161,9 @@ function Navigation({ user }: { user: MarketingUser }) {
               <>
                 <Link
                   href="/dashboard"
-                  className="pf-focus hidden shrink-0 items-center gap-2 rounded-full border border-white/12 bg-white/6 py-1 pl-1 pr-3 text-sm font-black text-white transition hover:bg-white/10 lg:inline-flex"
+                  className="pf-focus hidden shrink-0 items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--pf-text)]/6 py-1 pl-1 pr-3 text-sm font-black text-[var(--pf-text)] transition hover:bg-[var(--pf-text)]/10 lg:inline-flex"
                 >
-                  <span className="grid h-6 w-6 place-items-center rounded-full bg-[#4da3ff]/22 text-[11px] font-black text-[#9ed0ff]">
+                  <span className="grid h-6 w-6 place-items-center rounded-full bg-[var(--pf-blue)]/22 text-[11px] font-black text-[var(--pf-blue)]">
                     {initialsFromName(user.displayName || user.email)}
                   </span>
                   <span className="max-w-[120px] truncate">{user.displayName || user.email}</span>
@@ -173,7 +171,7 @@ function Navigation({ user }: { user: MarketingUser }) {
                 <form action={signOutAction} className="hidden lg:block">
                   <button
                     type="submit"
-                    className="pf-focus inline-flex shrink-0 items-center gap-1.5 rounded-md border border-white/12 bg-white/6 px-3 py-2 text-xs font-black text-white/70 transition hover:bg-white/10 hover:text-white"
+                    className="pf-focus inline-flex shrink-0 items-center gap-1.5 rounded-md border border-[var(--line)] bg-[var(--pf-text)]/6 px-3 py-2 text-xs font-black text-[var(--pf-muted)] transition hover:bg-[var(--pf-text)]/10 hover:text-[var(--pf-text)]"
                   >
                     <LogOut size={14} />
                     {t.auth.signOut}
@@ -182,9 +180,9 @@ function Navigation({ user }: { user: MarketingUser }) {
                 <Link
                   href="/dashboard"
                   aria-label={t.nav.dashboard}
-                  className="pf-focus inline-flex shrink-0 items-center justify-center rounded-md border border-white/12 bg-white/6 px-2.5 py-2 lg:hidden"
+                  className="pf-focus inline-flex shrink-0 items-center justify-center rounded-md border border-[var(--line)] bg-[var(--pf-text)]/6 px-2.5 py-2 lg:hidden"
                 >
-                  <span className="grid h-6 w-6 place-items-center rounded-full bg-[#4da3ff]/22 text-[11px] font-black text-[#9ed0ff]">
+                  <span className="grid h-6 w-6 place-items-center rounded-full bg-[var(--pf-blue)]/22 text-[11px] font-black text-[var(--pf-blue)]">
                     {initialsFromName(user.displayName || user.email)}
                   </span>
                 </Link>
@@ -193,14 +191,14 @@ function Navigation({ user }: { user: MarketingUser }) {
               <>
                 <Link
                   href="/auth/sign-in?next=/dashboard"
-                  className="pf-focus hidden shrink-0 rounded-md px-3 py-2 text-sm font-black text-white/76 transition hover:bg-white/8 hover:text-white lg:inline-flex lg:items-center"
+                  className="pf-focus hidden shrink-0 rounded-md px-3 py-2 text-sm font-black text-[var(--pf-muted)] transition hover:bg-[var(--pf-text)]/8 hover:text-[var(--pf-text)] lg:inline-flex lg:items-center"
                 >
                   {t.nav.signIn}
                 </Link>
                 <Link
                   href="/auth/sign-up?next=/onboarding"
                   aria-label={t.nav.createAccount}
-                  className="pf-focus inline-flex shrink-0 rounded-md bg-[#f7fbff] px-2.5 py-2 text-sm font-black text-[#071021] transition hover:bg-[#9ed0ff] sm:px-4"
+                  className="pf-focus inline-flex shrink-0 rounded-md bg-[var(--pf-text)] px-2.5 py-2 text-sm font-black text-[var(--pf-bg)] transition hover:opacity-85 sm:px-4"
                 >
                   <span className="hidden sm:inline">{t.nav.createAccount}</span>
                   <span className="sm:hidden">{t.nav.startShort}</span>
@@ -211,7 +209,7 @@ function Navigation({ user }: { user: MarketingUser }) {
               ref={menuButtonRef}
               type="button"
               onClick={() => setMobileOpen((current) => !current)}
-              className="pf-focus inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-white/12 bg-white/6 text-white lg:hidden"
+              className="pf-focus inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-[var(--line)] bg-[var(--pf-text)]/6 text-[var(--pf-text)] lg:hidden"
               aria-label={mobileOpen ? t.nav.closeMenu : t.nav.openMenu}
               aria-expanded={mobileOpen}
               aria-controls="mobile-navigation"
@@ -228,27 +226,31 @@ function Navigation({ user }: { user: MarketingUser }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.16 }}
-              className="border-t border-white/10 bg-[#05070d]/96 px-4 pb-4 pt-2 shadow-[0_22px_80px_rgba(0,0,0,.34)] lg:hidden"
+              className="border-t border-[var(--line)] bg-[var(--pf-bg)]/96 px-4 pb-4 pt-2 shadow-[0_22px_80px_rgba(0,0,0,.34)] lg:hidden"
               aria-label={t.nav.menu}
             >
               <div className="mx-auto grid max-w-[1180px] gap-2">
+                <div className="flex items-center justify-between rounded-lg border border-[var(--line)] bg-[var(--pf-text)]/[0.045] px-4 py-3">
+                  <span className="text-sm font-black text-[var(--pf-muted)]">{t.theme.label}</span>
+                  <ThemeToggle />
+                </div>
                 {mobileLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
-                    className="pf-focus rounded-lg border border-white/10 bg-white/[0.045] px-4 py-3 text-sm font-black text-white/78 hover:bg-white/8 hover:text-white"
+                    className="pf-focus rounded-lg border border-[var(--line)] bg-[var(--pf-text)]/[0.045] px-4 py-3 text-sm font-black text-[var(--pf-text)]/78 hover:bg-[var(--pf-text)]/8 hover:text-[var(--pf-text)]"
                   >
                     {link.label}
                   </Link>
                 ))}
-                <div className="mt-2 grid gap-2 border-t border-white/10 pt-3">
+                <div className="mt-2 grid gap-2 border-t border-[var(--line)] pt-3">
                   {user ? (
                     <>
                       <Link
                         href="/dashboard"
                         onClick={() => setMobileOpen(false)}
-                        className="pf-focus rounded-lg border border-white/10 bg-white/[0.045] px-4 py-3 text-sm font-black text-white/78 hover:bg-white/8 hover:text-white"
+                        className="pf-focus rounded-lg border border-[var(--line)] bg-[var(--pf-text)]/[0.045] px-4 py-3 text-sm font-black text-[var(--pf-text)]/78 hover:bg-[var(--pf-text)]/8 hover:text-[var(--pf-text)]"
                       >
                         {t.nav.dashboard}
                       </Link>
@@ -256,7 +258,7 @@ function Navigation({ user }: { user: MarketingUser }) {
                         <button
                           type="submit"
                           onClick={() => setMobileOpen(false)}
-                          className="pf-focus w-full rounded-lg border border-white/10 bg-white/[0.045] px-4 py-3 text-left text-sm font-black text-white/78 hover:bg-white/8 hover:text-white"
+                          className="pf-focus w-full rounded-lg border border-[var(--line)] bg-[var(--pf-text)]/[0.045] px-4 py-3 text-left text-sm font-black text-[var(--pf-text)]/78 hover:bg-[var(--pf-text)]/8 hover:text-[var(--pf-text)]"
                         >
                           {t.auth.signOut}
                         </button>
@@ -267,14 +269,14 @@ function Navigation({ user }: { user: MarketingUser }) {
                       <Link
                         href="/auth/sign-in?next=/dashboard"
                         onClick={() => setMobileOpen(false)}
-                        className="pf-focus rounded-lg border border-white/10 bg-white/[0.045] px-4 py-3 text-sm font-black text-white/78 hover:bg-white/8 hover:text-white"
+                        className="pf-focus rounded-lg border border-[var(--line)] bg-[var(--pf-text)]/[0.045] px-4 py-3 text-sm font-black text-[var(--pf-text)]/78 hover:bg-[var(--pf-text)]/8 hover:text-[var(--pf-text)]"
                       >
                         {t.nav.signIn}
                       </Link>
                       <Link
                         href="/auth/sign-up?next=/onboarding"
                         onClick={() => setMobileOpen(false)}
-                        className="pf-focus rounded-lg bg-[#f7fbff] px-4 py-3 text-center text-sm font-black text-[#071021] hover:bg-[#9ed0ff]"
+                        className="pf-focus rounded-lg bg-[var(--pf-text)] px-4 py-3 text-center text-sm font-black text-[var(--pf-bg)] hover:opacity-85"
                       >
                         {t.nav.createAccount}
                       </Link>
@@ -294,11 +296,11 @@ function Footer() {
   const { t } = useLocale();
 
   return (
-    <footer className="border-t border-white/10 bg-[#05070d]">
+    <footer className="border-t border-[var(--line)] bg-[var(--pf-bg)] transition-colors duration-200">
       <div className="pf-container grid gap-8 py-10 md:grid-cols-[1fr_1.4fr_.8fr]">
         <div>
-          <div className="text-lg font-black">ProofFolio AI</div>
-          <p className="mt-3 max-w-sm text-sm leading-6 text-white/58">{t.footer.note}</p>
+          <Logo variant="wordmark" size={15} className="text-[var(--pf-text)]" />
+          <p className="mt-3 max-w-sm text-sm leading-6 text-[var(--pf-muted)]">{t.footer.note}</p>
         </div>
         <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
           {[
@@ -307,12 +309,12 @@ function Footer() {
             [t.footer.templates, "/templates"],
             [t.nav.editor, "/editor"],
           ].map(([label, href]) => (
-            <Link key={href} href={href} className="pf-focus rounded-md py-1 font-semibold text-white/66 hover:text-white">
+            <Link key={href} href={href} className="pf-focus rounded-md py-1 font-semibold text-[var(--pf-muted)] hover:text-[var(--pf-text)]">
               {label}
             </Link>
           ))}
         </div>
-        <div className="text-sm text-white/52">Next.js · TypeScript · Tailwind</div>
+        <div className="text-sm text-[var(--pf-muted)]">Next.js · TypeScript · Tailwind</div>
       </div>
     </footer>
   );
@@ -1158,25 +1160,67 @@ export function DemoPage({ user = null }: { user?: MarketingUser }) {
 
 export function TemplatesPage({ user = null }: { user?: MarketingUser }) {
   const { t } = useLocale();
+  const [category, setCategory] = useState<TemplateCategory | "All">("All");
+  const visibleIds = templateIds.filter((id) => category === "All" || templateMeta[id].category === category);
 
   return (
     <AppShell user={user}>
       <main id="main-content" className="bg-[#05070d] pt-28">
         <section className="pf-container py-14">
           <SectionIntro {...t.templateShowcase} />
-          <div className="mt-14 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {templateIds.map((id) => {
+          <div role="radiogroup" aria-label={t.common.section} className="mt-8 flex flex-wrap justify-center gap-2">
+            <button
+              type="button"
+              role="radio"
+              aria-checked={category === "All"}
+              onClick={() => setCategory("All")}
+              className={cn(
+                "pf-focus rounded-full border px-4 py-2 text-xs font-black uppercase tracking-[0.12em] transition",
+                category === "All" ? "border-white bg-white text-[#071021]" : "border-white/14 text-white/62 hover:text-white",
+              )}
+            >
+              {t.common.all}
+            </button>
+            {templateCategories.map((item) => (
+              <button
+                key={item}
+                type="button"
+                role="radio"
+                aria-checked={category === item}
+                onClick={() => setCategory(item)}
+                className={cn(
+                  "pf-focus rounded-full border px-4 py-2 text-xs font-black uppercase tracking-[0.12em] transition",
+                  category === item ? "border-white bg-white text-[#071021]" : "border-white/14 text-white/62 hover:text-white",
+                )}
+              >
+                {t.templateShowcase.categories[item]}
+              </button>
+            ))}
+          </div>
+          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {visibleIds.map((id) => {
               const template = t.templates[id];
               const Icon = templateMeta[id].icon;
+              const isNew = newTemplateIds.includes(id);
               return (
-                <article key={id} className="tilt-card rounded-lg border border-white/12 bg-white/[0.055] p-4">
+                <article key={id} className="tilt-card relative rounded-lg border border-white/12 bg-white/[0.055] p-4">
+                  {isNew ? (
+                    <span className="absolute right-3 top-3 z-10 rounded-full bg-[#2dd4bf] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-[#04141a]">
+                      {t.common.new}
+                    </span>
+                  ) : null}
                   <div className={cn("min-h-64 rounded-lg p-5", templateMeta[id].className)}>
                     <TemplatePreview templateId={id} compact />
                   </div>
                   <div className="mt-5 flex items-start gap-3">
                     <Icon size={21} className="mt-1 text-[#9ed0ff]" />
                     <div>
-                      <h2 className="text-xl font-black text-white">{template.name}</h2>
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-xl font-black text-white">{template.name}</h2>
+                        <span className="rounded-md border border-white/14 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-[0.1em] text-white/50">
+                          {t.templateShowcase.categories[templateMeta[id].category]}
+                        </span>
+                      </div>
                       <p className="mt-2 text-sm leading-6 text-white/58">{template.profile}</p>
                     </div>
                   </div>
@@ -1233,7 +1277,70 @@ function TemplatePreview({ templateId, compact }: { templateId: TemplateId; comp
     return <DeveloperSignaturePreview t={t} compact={compact} />;
   }
 
-  return <CareerChroniclePreview t={t} compact={compact} />;
+  if (templateId === "career-chronicle") {
+    return <CareerChroniclePreview t={t} compact={compact} />;
+  }
+
+  if (templateId === "signal-os") {
+    return <SignalOsPreview t={t} compact={compact} />;
+  }
+
+  return <MonographPreview t={t} compact={compact} />;
+}
+
+function SignalOsPreview({ t, compact }: { t: Copy; compact: boolean }) {
+  const s = t.signalOs;
+  return (
+    <div className={cn("mx-auto w-full max-w-4xl text-white", compact ? "text-xs" : "text-sm")}>
+      <div className="grid gap-5 md:grid-cols-[.95fr_1.05fr]">
+        <div>
+          <p className="font-black uppercase tracking-[0.22em] text-[#8ff0f7]">{s.role}</p>
+          <h3 className={cn("mt-3 font-black tracking-tight", compact ? "text-3xl" : "text-5xl")}>{s.name}</h3>
+          <p className="mt-3 leading-7 text-white/62">{s.headline}</p>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {s.metrics.slice(0, 4).map(([value, label]) => (
+            <div key={label} className="rounded-md border border-[#22d3ee]/25 bg-[#06101f]/82 p-3">
+              <div className="text-2xl font-black">{value}</div>
+              <div className="mt-1 text-[10px] font-black uppercase tracking-[0.14em] text-white/55">{label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="mt-6 grid gap-2 md:grid-cols-3">
+        {s.projects.slice(0, compact ? 2 : 3).map((project) => (
+          <div key={project.name} className="rounded-md border border-white/10 bg-white/[0.055] p-4">
+            <div className="font-black">{project.name}</div>
+            <p className="mt-2 leading-6 text-white/58">{project.signal}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MonographPreview({ t, compact }: { t: Copy; compact: boolean }) {
+  const m = t.monograph;
+  return (
+    <div className={cn("mx-auto w-full max-w-4xl text-[#1c1a17]", compact ? "text-xs" : "text-sm")}>
+      <div className="grid gap-5 md:grid-cols-[1.05fr_.95fr]">
+        <div>
+          <p className="font-black uppercase tracking-[0.22em] text-[#9a4b36]">{m.role}</p>
+          <h3 className={cn("mt-3 font-serif font-black leading-none tracking-tight", compact ? "text-3xl" : "text-5xl")}>{m.name}</h3>
+          <p className="mt-4 max-w-xl font-semibold leading-7 text-[#1c1a17]/64">{m.featured.tag}</p>
+        </div>
+        <div className="aspect-[4/3] rounded-md bg-gradient-to-br from-[#e7d9c5] via-[#efe4d4] to-[#dbcab0]" aria-hidden="true" />
+      </div>
+      <div className="mt-6 grid gap-2 md:grid-cols-3">
+        {m.projects.slice(0, compact ? 2 : 3).map((project) => (
+          <div key={project.name} className="rounded-md border border-[#1c1a17]/10 bg-white p-4">
+            <div className="font-serif font-black">{project.name}</div>
+            <p className="mt-2 leading-6 text-[#1c1a17]/60">{project.tag}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function MinimalPreview({ t, compact }: { t: Copy; compact: boolean }) {

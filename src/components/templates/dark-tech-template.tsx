@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Code2, FolderGit, ShieldCheck } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Code2, Cpu, FolderGit, ShieldCheck } from "lucide-react";
 import { useLocale } from "@/components/locale-provider";
 import { TemplateShell, cn } from "@/components/templates/template-shell";
+import { cardSelect, panelEnter, springSelected } from "@/lib/motion";
 
 const sections = ["intro", "proof", "signals", "skills", "contact"] as const;
 
@@ -13,6 +15,7 @@ export function DarkTechTemplate() {
   const [roleIndex, setRoleIndex] = useState(0);
   const [selectedProject, setSelectedProject] = useState(0);
   const [heat, setHeat] = useState<number | null>(null);
+  const activeProject = t.portfolio.projects[selectedProject] ?? t.portfolio.projects[0];
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -21,6 +24,22 @@ export function DarkTechTemplate() {
 
     return () => window.clearInterval(timer);
   }, [roles.length]);
+
+  const signalValues = useMemo(() => {
+    const findMetric = (needle: string) =>
+      t.portfolio.metrics.find(([, label]) => label.toLowerCase().includes(needle))?.[0];
+    const commitSignal = t.portfolio.projects.reduce((total, project) => total + project.detail.length, 0);
+
+    return [
+      findMetric("repo") ?? String(t.portfolio.projects.length),
+      String(t.portfolio.projects.length),
+      String(commitSignal),
+      String(t.portfolio.certificates.length),
+      findMetric("readi") ?? String(t.portfolio.skills.length),
+    ];
+  }, [t.portfolio.certificates.length, t.portfolio.metrics, t.portfolio.projects, t.portfolio.skills.length]);
+
+  const heatSkill = heat === null ? null : t.portfolio.skills[heat % t.portfolio.skills.length];
 
   return (
     <TemplateShell templateId="dark-tech" sections={sections}>
@@ -51,13 +70,14 @@ export function DarkTechTemplate() {
             <span className="text-xs font-black uppercase tracking-[0.2em] text-[#9ed0ff]">{t.templateUi.dark.activity}</span>
             <Code2 size={18} className="text-white/44" />
           </div>
-          <div className="grid grid-cols-12 gap-1">
+          <div className="grid grid-cols-12 gap-1" onMouseLeave={() => setHeat(null)}>
             {Array.from({ length: 84 }, (_, index) => (
               <button
                 key={index}
                 type="button"
                 onMouseEnter={() => setHeat(index)}
                 onFocus={() => setHeat(index)}
+                onBlur={() => setHeat(null)}
                 className={cn(
                   "pf-focus h-4 rounded-[3px] border border-white/5 transition hover:scale-125",
                   index % 7 === 0 ? "bg-[#67e8a5]" : index % 5 === 0 ? "bg-[#4da3ff]/80" : index % 3 === 0 ? "bg-[#315dff]/55" : "bg-white/8",
@@ -66,6 +86,9 @@ export function DarkTechTemplate() {
                 aria-label={`activity-${index}`}
               />
             ))}
+          </div>
+          <div className="mt-2 min-h-5 font-mono text-[11px] font-bold text-[#9ed0ff]/80">
+            {heatSkill ? `signal · ${heatSkill[0]} · ${heatSkill[1]}%` : "hover a cell for a live signal read"}
           </div>
           <div className="mt-5 grid grid-cols-2 gap-3">
             {t.portfolio.metrics.map(([value, label]) => (
@@ -86,43 +109,67 @@ export function DarkTechTemplate() {
           <aside className="rounded-3xl border border-white/12 bg-white/[0.055] p-4">
             <div className="mb-4 text-xs font-black uppercase tracking-[0.2em] text-[#9ed0ff]">{t.common.proof}</div>
             <div className="space-y-2">
-              {t.portfolio.projects.map((project, index) => (
-                <button
-                  key={project.name}
-                  type="button"
-                  onClick={() => setSelectedProject(index)}
-                  className={cn(
-                    "pf-focus w-full rounded-2xl border p-4 text-left transition",
-                    selectedProject === index ? "border-[#4da3ff]/55 bg-[#4da3ff]/14" : "border-white/10 bg-white/[0.035] hover:border-white/24",
-                  )}
-                >
-                  <div className="font-black text-white">{project.name}</div>
-                  <div className="mt-1 text-xs font-bold text-white/48">{project.category}</div>
-                </button>
-              ))}
+              {t.portfolio.projects.map((project, index) => {
+                const isModel = project.category.toLowerCase().includes("ai") || project.category.toLowerCase().includes("data");
+                const SignalIcon = isModel ? Cpu : FolderGit;
+                const selected = selectedProject === index;
+                return (
+                  <motion.button
+                    key={project.name}
+                    type="button"
+                    onClick={() => setSelectedProject(index)}
+                    aria-pressed={selected}
+                    variants={cardSelect}
+                    animate={selected ? "selected" : "rest"}
+                    transition={springSelected}
+                    className={cn(
+                      "pf-focus w-full rounded-2xl border p-4 text-left transition-colors",
+                      selected ? "border-[#4da3ff]/55 bg-[#4da3ff]/14" : "border-white/10 bg-white/[0.035] hover:border-white/24",
+                    )}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="font-black text-white">{project.name}</div>
+                      <SignalIcon size={15} className={selected ? "text-[#67e8a5]" : "text-white/40"} aria-hidden="true" />
+                    </div>
+                    <div className="mt-1 text-xs font-bold text-white/48">{project.category}</div>
+                  </motion.button>
+                );
+              })}
             </div>
           </aside>
-          <article className="dark-tech-project-deck rounded-3xl border border-[#4da3ff]/22 bg-[#071021]/88 p-6 shadow-[0_35px_130px_rgba(0,0,0,.3)]">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.22em] text-[#67e8a5]">{t.portfolio.projects[selectedProject]?.category}</p>
-                <h2 className="mt-3 text-4xl font-black text-white">{t.portfolio.projects[selectedProject]?.name}</h2>
-              </div>
-              <FolderGit className="text-[#9ed0ff]" size={28} />
-            </div>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-white/62">{t.portfolio.projects[selectedProject]?.detail}</p>
-            <div className="mt-6 grid gap-3 md:grid-cols-3">
-              {[
-                t.portfolio.projects[selectedProject]?.impact,
-                t.portfolio.projects[selectedProject]?.signal,
-                t.portfolio.projects[selectedProject]?.proof,
-              ].map((item) => (
-                <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.055] p-4 text-sm font-bold leading-6 text-white/72">
-                  {item}
+          <div className="dark-tech-project-deck relative overflow-hidden rounded-3xl border border-[#4da3ff]/22 bg-[#071021]/88 p-6 shadow-[0_35px_130px_rgba(0,0,0,.3)]">
+            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/38">{t.templateUi.nav.architecture}</p>
+            <AnimatePresence mode="wait">
+              <motion.article
+                key={activeProject?.name}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                variants={panelEnter}
+              >
+                <div className="mt-3 flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.22em] text-[#67e8a5]">{activeProject?.category}</p>
+                    <h2 className="mt-3 text-4xl font-black text-white">{activeProject?.name}</h2>
+                  </div>
+                  <FolderGit className="text-[#9ed0ff]" size={28} aria-hidden="true" />
                 </div>
-              ))}
-            </div>
-          </article>
+                <p className="mt-5 max-w-2xl text-lg leading-8 text-white/62">{activeProject?.detail}</p>
+                <div className="mt-6 grid gap-3 md:grid-cols-3">
+                  {[
+                    { label: "Impact", value: activeProject?.impact },
+                    { label: "Signal", value: activeProject?.signal },
+                    { label: t.common.viewProof, value: activeProject?.proof },
+                  ].map((item) => (
+                    <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.055] p-4">
+                      <div className="text-[10px] font-black uppercase tracking-[0.16em] text-[#9ed0ff]/70">{item.label}</div>
+                      <div className="mt-2 text-sm font-bold leading-6 text-white/72">{item.value}</div>
+                    </div>
+                  ))}
+                </div>
+              </motion.article>
+            </AnimatePresence>
+          </div>
         </div>
       </section>
 
@@ -130,7 +177,7 @@ export function DarkTechTemplate() {
         <div className="pf-container grid gap-5 md:grid-cols-5">
           {t.templateUi.dark.signals.map((label, index) => (
             <div key={label} className="rounded-2xl border border-[#4da3ff]/18 bg-[#4da3ff]/8 p-5">
-              <div className="text-3xl font-black text-white">{[38, 12, 214, 6, 91][index]}</div>
+              <div className="text-3xl font-black text-white">{signalValues[index]}</div>
               <div className="mt-2 text-sm font-bold text-[#9ed0ff]">{label}</div>
             </div>
           ))}

@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { ArrowLeft, Sparkles } from "lucide-react";
 import { useLocale } from "@/components/locale-provider";
 import { templateMeta, type TemplateId } from "@/lib/content";
+import { springSelected } from "@/lib/motion";
 
 export function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -74,6 +76,20 @@ export function TemplateShell({
   const active = useActiveSection(sections);
   const progress = useScrollProgress();
   const navLabels = t.templateUi.nav as Record<string, string>;
+  const navRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
+  const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null);
+
+  useEffect(() => {
+    const container = navRef.current;
+    const activeEl = itemRefs.current[active];
+    if (!container || !activeEl) {
+      return;
+    }
+    const containerRect = container.getBoundingClientRect();
+    const activeRect = activeEl.getBoundingClientRect();
+    setIndicator({ left: activeRect.left - containerRect.left, width: activeRect.width });
+  }, [active]);
 
   return (
     <main id="main-content" className={cn("template-route min-h-screen pt-20", templateMeta[templateId].className)} data-template={templateId}>
@@ -86,17 +102,27 @@ export function TemplateShell({
 
       <div className="pf-container sticky top-20 z-30 pt-4">
         <div
+          ref={navRef}
           className={cn(
-            "template-nav flex items-center gap-2 overflow-x-auto rounded-2xl border p-2 backdrop-blur",
+            "template-nav relative flex items-center gap-2 overflow-x-auto rounded-2xl border p-2 backdrop-blur",
             tone === "light"
               ? "border-[#172033]/12 bg-white/86 text-[#172033] shadow-[0_18px_60px_rgba(15,23,42,.08)]"
               : "border-white/12 bg-[#05070d]/78 text-white shadow-[0_18px_70px_rgba(0,0,0,.28)]",
           )}
           data-testid="template-nav"
         >
+          {indicator ? (
+            <motion.div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-2 z-0 rounded-xl"
+              style={{ background: tone === "light" ? "#172033" : "#f7fbff" }}
+              animate={{ x: indicator.left, width: indicator.width }}
+              transition={springSelected}
+            />
+          ) : null}
           <Link
             href="/templates"
-            className="pf-focus inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-current/12"
+            className="pf-focus relative z-10 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-current/12"
             aria-label={t.nav.templates}
             title={t.nav.templates}
           >
@@ -105,13 +131,16 @@ export function TemplateShell({
           {sections.map((id) => (
             <a
               key={id}
+              ref={(el) => {
+                itemRefs.current[id] = el;
+              }}
               href={`#${id}`}
               className={cn(
-                "pf-focus shrink-0 rounded-xl px-3 py-2 text-xs font-black uppercase tracking-[0.14em] transition",
+                "pf-focus relative z-10 shrink-0 rounded-xl px-3 py-2 text-xs font-black uppercase tracking-[0.14em] transition-opacity",
                 active === id
                   ? tone === "light"
-                    ? "bg-[#172033] text-white"
-                    : "bg-[#f7fbff] text-[#071021]"
+                    ? "text-white"
+                    : "text-[#071021]"
                   : "opacity-60 hover:opacity-100",
               )}
               aria-current={active === id ? "true" : undefined}

@@ -374,8 +374,6 @@ function EditorWorkspace({ initialState, hideHeader }: { initialState: EditorIni
     setRecovery(null);
   }
 
-<<<<<<< HEAD
-=======
   const publishState =
     portfolio.status === "published"
       ? "published"
@@ -462,7 +460,6 @@ function EditorWorkspace({ initialState, hideHeader }: { initialState: EditorIni
     setSaveState("saved");
   }
 
->>>>>>> origin/main
   // hideHeader means an ancestor AppShell already owns the page's <main> landmark.
   const MainTag = hideHeader ? "div" : "main";
 

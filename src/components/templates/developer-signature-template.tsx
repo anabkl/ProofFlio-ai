@@ -101,6 +101,21 @@ export function DeveloperSignatureTemplate() {
     setDrawerOpen(true);
   }
 
+  useEffect(() => {
+    if (!drawerOpen) {
+      return;
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setDrawerOpen(false);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [drawerOpen]);
+
   return (
     <TemplateShell templateId="developer-signature" sections={sections}>
       <section id="home" className="developer-signature-hero-v3 pf-container grid min-h-[calc(100svh-80px)] gap-10 py-16 lg:grid-cols-[.94fr_1.06fr] lg:items-center">

@@ -15,7 +15,7 @@ export function AppSidebar({ items, activeNav }: { items: AppNavItem[]; activeNa
   return (
     <nav
       aria-label="Product navigation"
-      className="sticky top-16 hidden h-[calc(100svh-64px)] w-60 shrink-0 flex-col gap-1 overflow-y-auto border-r border-white/10 bg-[#070B14]/50 p-4 lg:flex"
+      className="sticky top-16 hidden h-[calc(100svh-64px)] w-60 shrink-0 flex-col gap-1 overflow-y-auto border-r border-[var(--line)] bg-[var(--pf-bg)]/50 p-4 transition-colors duration-200 lg:flex"
     >
       {items.map((item) => {
         const Icon = appNavIcons[item.key];
@@ -28,7 +28,9 @@ export function AppSidebar({ items, activeNav }: { items: AppNavItem[]; activeNa
             aria-current={isActive ? "page" : undefined}
             className={[
               "pf-focus flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold transition",
-              isActive ? "bg-white/10 text-white" : "text-white/62 hover:bg-white/6 hover:text-white",
+              isActive
+                ? "bg-[var(--pf-text)]/10 text-[var(--pf-text)]"
+                : "text-[var(--pf-muted)] hover:bg-[var(--pf-text)]/6 hover:text-[var(--pf-text)]",
             ].join(" ")}
           >
             <Icon size={18} aria-hidden="true" />

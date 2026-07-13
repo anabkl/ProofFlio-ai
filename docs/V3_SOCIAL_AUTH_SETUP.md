@@ -9,17 +9,12 @@ environment, never in source control.
 
 LinkedIn (and the other providers) are **authentication only** in this
 sprint. Signing in with LinkedIn does not import a LinkedIn profile, posts,
-<<<<<<< HEAD
 or connections. GitHub sign-in is likewise identity-only: it does not read or
-import any repository data. A separate GitHub repository evidence import
-feature is out of scope for this sprint and is not implemented.
-=======
-or connections. GitHub sign-in is also unrelated to the separate GitHub
+import any repository data on its own. It is unrelated to the separate GitHub
 *evidence import* feature (`/auth/github`), which reads public repositories
-after a user explicitly connects it from the onboarding flow. Do not conflate
-the two GitHub integrations — they use different OAuth apps, different
-scopes and different callback routes.
->>>>>>> origin/main
+only after a user explicitly connects it from the onboarding flow. Do not
+conflate the two GitHub integrations — they use different OAuth apps,
+different scopes and different callback routes.
 
 ## How the flow works
 
@@ -73,15 +68,12 @@ production both need an entry.
 3. Copy the Client ID / Client Secret into Supabase's GitHub provider config.
 4. Set `NEXT_PUBLIC_AUTH_GITHUB_ENABLED=true`.
 
-<<<<<<< HEAD
 Request only the default identity scopes (`read:user user:email`). This
-integration must not request repository read access.
-=======
-This is a separate OAuth App registration from the one used by
-`GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` in `.env.example`, which powers
-the unrelated evidence-import connection and requests different scopes
-(read access to public repositories, not sign-in identity).
->>>>>>> origin/main
+integration must not request repository read access. It is a separate OAuth
+App registration from the one used by `GITHUB_CLIENT_ID` /
+`GITHUB_CLIENT_SECRET` in `.env.example`, which powers the unrelated
+evidence-import connection and requests different scopes (read access to
+public repositories, not sign-in identity).
 
 ### LinkedIn (OIDC)
 
@@ -94,15 +86,9 @@ the unrelated evidence-import connection and requests different scopes
 
 Only request the default `openid profile email` scopes. Do not request
 posting, connections, or profile-data scopes — this integration is sign-in
-<<<<<<< HEAD
-only, and the product must not claim to import a LinkedIn profile (see
-Account settings, which explicitly separates "authentication providers" from
-"product data integrations").
-=======
-only, and the product must not claim otherwise (see Account settings, which
-explicitly separates "authentication providers" from "product data
-integrations").
->>>>>>> origin/main
+only, and the product must not claim to import a LinkedIn profile or claim
+otherwise (see Account settings, which explicitly separates "authentication
+providers" from "product data integrations").
 
 ## 4. Feature flags
 
