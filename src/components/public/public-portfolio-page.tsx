@@ -13,7 +13,7 @@ export function PublicPortfolioPage({ portfolio }: { portfolio: PublicPortfolioD
     ? portfolio.selectedTemplateId
     : "developer-signature") as TemplateId;
   const template = templateMeta[selectedTemplateId];
-  const lightTemplate = ["minimal-executive", "creative-grid", "recruiter-focus", "career-chronicle"].includes(
+  const lightTemplate = ["minimal-executive", "creative-grid", "recruiter-focus", "career-chronicle", "monograph"].includes(
     selectedTemplateId,
   );
   const accent = portfolio.designSettings.accent;

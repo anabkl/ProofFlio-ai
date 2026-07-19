@@ -5,7 +5,9 @@ import { CreativeGridTemplate } from "@/components/templates/creative-grid-templ
 import { DarkTechTemplate } from "@/components/templates/dark-tech-template";
 import { DeveloperSignatureTemplate } from "@/components/templates/developer-signature-template";
 import { MinimalExecutiveTemplate } from "@/components/templates/minimal-executive-template";
+import { MonographTemplate } from "@/components/templates/monograph-template";
 import { RecruiterFocusTemplate } from "@/components/templates/recruiter-focus-template";
+import { SignalOsTemplate } from "@/components/templates/signal-os-template";
 import { StoryJourneyTemplate } from "@/components/templates/story-journey-template";
 import type { TemplateId } from "@/lib/content";
 
@@ -36,6 +38,14 @@ export function LivingTemplatePage({ templateId }: { templateId: TemplateId }) {
 
   if (templateId === "career-chronicle") {
     return <CareerChronicleTemplate />;
+  }
+
+  if (templateId === "signal-os") {
+    return <SignalOsTemplate />;
+  }
+
+  if (templateId === "monograph") {
+    return <MonographTemplate />;
   }
 
   return <RecruiterFocusTemplate />;

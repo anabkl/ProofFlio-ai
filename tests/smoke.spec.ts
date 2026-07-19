@@ -13,6 +13,8 @@ const routes = [
   "/templates/recruiter-focus",
   "/templates/developer-signature",
   "/templates/career-chronicle",
+  "/templates/signal-os",
+  "/templates/monograph",
   "/editor",
 ];
 
@@ -52,14 +54,14 @@ test.describe("ProofFolio AI UI demo", () => {
   test("switches between English and French copy", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await page.waitForLoadState("load");
-    await expect(page.getByText("Turn your projects into proof").first()).toBeVisible();
+    await expect(page.getByText("Turn your work into").first()).toBeVisible();
 
     await page.getByRole("button", { name: "FR", exact: true }).click();
-    await expect(page.getByText("Transformez vos projets en preuves").first()).toBeVisible();
+    await expect(page.getByText("Transformez votre travail").first()).toBeVisible();
     await expect(page.getByText("Choisir Student").first()).toBeVisible();
 
     await page.getByRole("button", { name: "EN", exact: true }).click();
-    await expect(page.getByText("Turn your projects into proof").first()).toBeVisible();
+    await expect(page.getByText("Turn your work into").first()).toBeVisible();
     await expect(page.getByText("Choose Student").first()).toBeVisible();
   });
 
@@ -451,6 +453,83 @@ test.describe("ProofFolio AI UI demo", () => {
     await expect(page.getByText("Career Chronicle").first()).toBeVisible();
     await page.getByRole("button", { name: /Open project detail/i }).first().click();
     await expect(page.getByRole("dialog")).toBeVisible();
+  });
+
+  test("template gallery lists all nine templates with category filters", async ({ page }) => {
+    await page.goto("/templates", { waitUntil: "domcontentloaded" });
+    await expect(page.getByText("Nine templates, nine different professional stories.")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "SIGNAL//OS" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "MONOGRAPH" })).toBeVisible();
+    await expect(page.getByText("New", { exact: true })).toHaveCount(2);
+
+    await page.getByRole("radio", { name: "Technical" }).click();
+    await expect(page.getByRole("heading", { name: "SIGNAL//OS" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "MONOGRAPH" })).toHaveCount(0);
+  });
+
+  test("SIGNAL//OS switches between Immersive and Recruiter mode without requiring WebGL", async ({ page }) => {
+    const consoleErrors: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") {
+        consoleErrors.push(message.text());
+      }
+    });
+
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/templates/signal-os", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("radio", { name: "Recruiter mode" })).toHaveAttribute("aria-checked", "true");
+
+    await page.getByRole("radio", { name: "Immersive mode" }).click();
+    await expect(page.getByRole("radio", { name: "Immersive mode" })).toHaveAttribute("aria-checked", "true");
+    // Reduced motion means the optional WebGL scene must not mount; the static SVG map still renders.
+    await expect(page.locator("canvas")).toHaveCount(0);
+    await expect(page.locator("svg[role='img']").first()).toBeVisible();
+
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("radio", { name: "Immersive mode" })).toHaveAttribute("aria-checked", "true");
+    expect(consoleErrors).toEqual([]);
+  });
+
+  test("MONOGRAPH switches between visual, text and chronological project index modes", async ({ page }) => {
+    await page.goto("/templates/monograph", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "Aurora Skincare" })).toBeVisible();
+
+    await page.getByRole("radio", { name: "Text index" }).click();
+    await expect(page.getByText("Mobility app redesign")).toBeVisible();
+
+    await page.getByRole("radio", { name: "Chronological archive" }).click();
+    await expect(page.getByText("Nightshade").first()).toBeVisible();
+
+    await page.getByRole("radio", { name: "Visual edition" }).click();
+    await expect(page.getByRole("radio", { name: "Visual edition" })).toHaveAttribute("aria-checked", "true");
+  });
+
+  test("editor template selector reaches SIGNAL//OS and MONOGRAPH in English and French", async ({ page }) => {
+    await page.goto("/editor?template=signal-os", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("editor-live-preview")).toHaveAttribute("data-template", "signal-os");
+
+    await page.goto("/editor?template=monograph", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("editor-live-preview")).toHaveAttribute("data-template", "monograph");
+    await page.getByRole("button", { name: "FR" }).click();
+    await openEditorPanel(page, "editor-appearance-panel");
+    await expect(page.getByTestId("editor-template-monograph")).toBeVisible();
+  });
+
+  test("theme toggle switches light/dark/system and persists across reload", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const toggle = page.getByRole("radiogroup", { name: "Theme" });
+    await expect(toggle.getByRole("radio", { name: "Light", exact: true })).toBeVisible();
+
+    await toggle.getByRole("radio", { name: "Dark", exact: true }).click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+
+    // Keyboard reachability: the toggle's radio buttons are real, focusable, labeled controls.
+    await page.getByRole("radiogroup", { name: "Theme" }).getByRole("radio", { name: "Light", exact: true }).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   });
 });
 

@@ -16,7 +16,7 @@ export function MobileAppNavigation({
   return (
     <nav
       aria-label={label}
-      className="fixed inset-x-0 bottom-0 z-40 flex border-t border-white/10 bg-[#05070d]/96 backdrop-blur-xl lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 flex border-t border-[var(--line)] bg-[var(--pf-bg)]/96 backdrop-blur-xl transition-colors duration-200 lg:hidden"
     >
       {visibleItems.map((item) => {
         const Icon = appNavIcons[item.key];
@@ -29,7 +29,7 @@ export function MobileAppNavigation({
             aria-current={isActive ? "page" : undefined}
             className={[
               "pf-focus flex min-h-[52px] flex-1 flex-col items-center justify-center gap-1 px-1 py-2 text-[10px] font-bold",
-              isActive ? "text-white" : "text-white/52",
+              isActive ? "text-[var(--pf-text)]" : "text-[var(--pf-muted)]",
             ].join(" ")}
           >
             <Icon size={18} aria-hidden="true" />

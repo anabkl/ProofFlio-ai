@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="1200" height="300" role="img" aria-label="ProofFolio AI">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#070b14" />
+      <stop offset="55%" stop-color="#0b1424" />
+      <stop offset="100%" stop-color="#0a1a1e" />
+    </linearGradient>
+    <linearGradient id="grid" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4e8cff" stop-opacity="0.16" />
+      <stop offset="100%" stop-color="#2dd4bf" stop-opacity="0.08" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="300" fill="url(#bg)" />
+  <rect width="1200" height="300" fill="url(#grid)" />
+  <g transform="translate(64,78)">
+    <rect x="1" y="1" width="72" height="72" rx="20" fill="#070b14" stroke="#233150" stroke-width="3" />
+    <path
+      d="M27 21.5V54.5M27 21.5H41C48.5 21.5 54.5 27 54.5 33.75C54.5 40.5 48.5 45.5 41 45.5H27"
+      fill="none"
+      stroke="#f8fafc"
+      stroke-width="6"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <circle cx="56.5" cy="56.5" r="15" fill="#2dd4bf" />
+    <path
+      d="M49 56.7L54.5 62.2L64.5 51.5"
+      stroke="#04101f"
+      stroke-width="5"
+      fill="none"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </g>
+  <text x="160" y="120" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="900" fill="#f8fafc">
+    ProofFolio<tspan fill="#8ff0f7" font-size="30" dx="10">AI</tspan>
+  </text>
+  <text x="160" y="160" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#9fb0c9">
+    AI proposes. You validate. Recruiters trust the proof.
+  </text>
+  <text x="160" y="200" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="600" fill="#5b6478">
+    Evidence-first portfolios · Next.js · TypeScript · Supabase
+  </text>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="800" letter-spacing="2">
+    <rect x="64" y="228" width="150" height="32" rx="16" fill="#0d1422" stroke="#233150" />
+    <text x="90" y="249" fill="#8ff0f7">VERIFIED</text>
+    <rect x="226" y="228" width="150" height="32" rx="16" fill="#0d1422" stroke="#233150" />
+    <text x="252" y="249" fill="#fcd34d">USER APPROVED</text>
+    <rect x="388" y="228" width="150" height="32" rx="16" fill="#0d1422" stroke="#233150" />
+    <text x="414" y="249" fill="#a5b4fc">RECRUITER-READY</text>
+  </g>
+</svg>
